@@ -4,6 +4,8 @@ sqlalchemy
 psycopg[binary]
 pandas
 numpy
+matplotlib
+seaborn
 scikit-learn
 joblib
 pytest
