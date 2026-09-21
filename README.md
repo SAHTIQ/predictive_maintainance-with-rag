@@ -73,6 +73,6 @@ Copy `.env.example` to `.env` and provide local values when needed. Never commit
 
 ## Current Development Stage
 
-Stage 8: Context-Aware RAG Knowledge Base Complete.
-The repository contains the complete Context-Aware RAG Knowledge Base indexing machine manuals, specifications, failure modes, corrective procedures, and historical case studies. Features a modular vector store (TF-IDF + Cosine Similarity, swappable to ChromaDB/PGVector), context-aware query formulation from Stage 7 risk outputs, metadata filtering, and structured evidence assembly with source traceability. Fully verified with 46/46 passing backend tests. REST API endpoint available at `/api/v1/machines/{machine_id}/rag-context`. Ready for Stage 9 Context-Aware Maintenance Recommendation Engine.
+Stage 9: Maintenance Recommendation Engine & Decision Explanation Complete.
+The repository contains the grounded Maintenance Recommendation Engine integrating Stage 6 Health Condition, Stage 7 Operational Risk, and Stage 8 Context-Aware RAG evidence. Implements strict 4-tier evidence segregation (Measured, Calculated, Retrieved, Generated), grounded SOP action mapping, pluggable LLM client interface, and a deterministic expert fallback engine. Fully verified with 62/62 passing backend tests. REST API endpoints available at `/api/v1/machines/{machine_id}/recommendation` and `/api/v1/fleet-recommendations`. Ready for Stage 10 System Integration, Database Persistence & Frontend Dashboard.
 

@@ -62,3 +62,22 @@ def get_machine_rag_context(machine_id: str) -> Dict[str, Any]:
     retriever = ContextAwareRetriever()
     return retriever.retrieve_evidence_for_machine(risk_summary)
 
+@app.get("/api/v1/machines/{machine_id}/recommendation")
+def get_machine_recommendation(machine_id: str) -> Dict[str, Any]:
+    """Returns the grounded 4-tier maintenance recommendation decision for a specific machine."""
+    machine_data = dataset_df[dataset_df["machine_id"] == machine_id]
+    if machine_data.empty:
+        raise HTTPException(status_code=404, detail=f"Machine {machine_id} not found.")
+    
+    from backend.app.services.recommendation.engine import MaintenanceRecommendationEngine
+    rec_engine = MaintenanceRecommendationEngine()
+    return rec_engine.evaluate_machine_recommendation(machine_data)
+
+@app.get("/api/v1/fleet-recommendations")
+def get_fleet_recommendations() -> List[Dict[str, Any]]:
+    """Returns grounded maintenance recommendation decisions for the entire fleet ranked by priority."""
+    from backend.app.services.recommendation.engine import MaintenanceRecommendationEngine
+    rec_engine = MaintenanceRecommendationEngine()
+    return rec_engine.evaluate_fleet_recommendations(dataset_df)
+
+
