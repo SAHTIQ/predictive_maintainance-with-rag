@@ -73,6 +73,6 @@ Copy `.env.example` to `.env` and provide local values when needed. Never commit
 
 ## Current Development Stage
 
-Stage 9: Maintenance Recommendation Engine & Decision Explanation Complete.
-The repository contains the grounded Maintenance Recommendation Engine integrating Stage 6 Health Condition, Stage 7 Operational Risk, and Stage 8 Context-Aware RAG evidence. Implements strict 4-tier evidence segregation (Measured, Calculated, Retrieved, Generated), grounded SOP action mapping, pluggable LLM client interface, and a deterministic expert fallback engine. Fully verified with 62/62 passing backend tests. REST API endpoints available at `/api/v1/machines/{machine_id}/recommendation` and `/api/v1/fleet-recommendations`. Ready for Stage 10 System Integration, Database Persistence & Frontend Dashboard.
+Stage 10: PostgreSQL Persistence & Backend Integration Complete.
+The repository contains the complete PostgreSQL database persistence layer with SQLAlchemy ORM entities for machines, sensor readings, health records, risk records, maintenance logs, and 4-tier explainable recommendations. Includes an idempotent Dataset V3 ingestion script (`scripts/ingest_dataset_v3.py`), a chronological DB-to-Engine pipeline orchestrator (`DatabasePipelineService`), and REST API endpoints (`/api/v1/machines`, `/sensor-history`, `/health-history`, `/risk-history`, `/maintenance-history`, `/latest`, `/fleet/overview`). Fully verified with 75/75 passing backend tests. Ready for Stage 11 Frontend Development & Dashboard Integration.
 
