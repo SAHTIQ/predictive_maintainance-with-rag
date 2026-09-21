@@ -159,3 +159,43 @@ export interface RecommendationDecision {
     };
   };
 }
+
+export interface RagDocumentHit {
+  title: string;
+  source_document: string;
+  document_type: string;
+  section: string;
+  content: string;
+  relevance_score: number;
+  component?: string | null;
+  failure_type?: string | null;
+}
+
+export interface RagChatRequest {
+  query: string;
+  machine_id?: string | null;
+  top_k?: number;
+}
+
+export interface RagChatResponse {
+  query: string;
+  response: string;
+  machine_id?: string | null;
+  machine_context?: {
+    machine_id: string;
+    machine_type: string;
+    machine_name?: string | null;
+    health_score?: number | null;
+    health_state?: string | null;
+    rul_hours?: number | null;
+    risk_level?: string | null;
+    priority?: string | null;
+    temperature?: number | null;
+    vibration_magnitude?: number | null;
+  } | null;
+  cited_documents: RagDocumentHit[];
+  suggested_actions: string[];
+  confidence: number;
+  source: string;
+}
+

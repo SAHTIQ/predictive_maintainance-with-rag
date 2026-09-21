@@ -36,9 +36,9 @@ React + TypeScript Dashboard (Interactive Industrial Operational UI)
 
 ## 2. Technology Stack
 
-- **Frontend**: React 19, TypeScript 5.6, Vite 6, Custom Responsive SVG Time-Series Engine.
+- **Frontend**: React 19, TypeScript 5.6, Vite 6, Custom Responsive SVG Time-Series Engine, Industrial AI Copilot (RAG Chatbot), Light/Dark theme engine.
 - **Backend**: Python 3.14 / 3.11+, FastAPI, SQLAlchemy, PostgreSQL (with SQLite fallback).
-- **Machine Learning**: Scikit-Learn, Random Forest, Isolation Forest, Joblib, NumPy, Pandas.
+- **Machine Learning & RAG**: Scikit-Learn, Random Forest, Isolation Forest, TF-IDF + Cosine Similarity Vector Store (`rag_index.joblib`), Factory SOPs & ISO 10816 Knowledge Base.
 - **Testing**: Pytest, TestClient.
 
 ---
@@ -48,11 +48,11 @@ React + TypeScript Dashboard (Interactive Industrial Operational UI)
 ```text
 frontend/                 React + TypeScript + Vite application
   src/
-    components/          FleetDashboard, MachineDetail, TimeSeriesChart, MetricCard
+    components/          FleetDashboard, MachineDetail, TimeSeriesChart, CopilotView (RAG Chat)
     services/            Typed API service layer (api.ts)
     types/               TypeScript schema models (index.ts)
-    main.tsx             Navigation sidebar, breadcrumbs, view routing
-    styles.css           Industrial design system & responsive layout
+    main.tsx             Navigation sidebar, topbar with Theme Switcher, Auto-Sync
+    styles.css           Industrial design system, Dark/Light modes & Copilot styles
 backend/
   app/
     database/            Session & engine configuration (PostgreSQL / SQLite)

@@ -78,4 +78,11 @@ export const api = {
   getRagContext: (machineId: string): Promise<any> => {
     return fetchJson<any>(`/api/v1/machines/${encodeURIComponent(machineId)}/rag-context`);
   },
+
+  sendRagChat: (query: string, machineId?: string | null): Promise<import('../types').RagChatResponse> => {
+    return fetchJson<import('../types').RagChatResponse>('/api/v1/rag/chat', {
+      method: 'POST',
+      body: JSON.stringify({ query, machine_id: machineId, top_k: 4 }),
+    });
+  },
 };

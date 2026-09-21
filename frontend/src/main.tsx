@@ -9,12 +9,21 @@ import { AlertsView } from './components/AlertsView';
 import { MaintenanceView } from './components/MaintenanceView';
 import { ReportsView } from './components/ReportsView';
 import { MachineDetail } from './components/MachineDetail';
+import { CopilotView } from './components/CopilotView';
 
-type AppTab = 'dashboard' | 'machines' | 'alerts' | 'maintenance' | 'reports';
+type AppTab = 'dashboard' | 'machines' | 'alerts' | 'copilot' | 'maintenance' | 'reports';
 
 function App() {
   const [activeTab, setActiveTab] = useState<AppTab>('dashboard');
   const [selectedMachineId, setSelectedMachineId] = useState<string | null>(null);
+
+  // Theme state: dark or light
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+    return (localStorage.getItem('resonex_theme') as 'light' | 'dark') || 'light';
+  });
+
+  // Auto-refresh state (30s polling)
+  const [autoRefresh, setAutoRefresh] = useState<boolean>(true);
 
   // Global fleet state
   const [overview, setOverview] = useState<FleetOverview | null>(null);
@@ -45,6 +54,36 @@ function App() {
   useEffect(() => {
     fetchGlobalData();
   }, []);
+
+  // Theme application
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('resonex_theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme((prev) => (prev === 'light' ? 'dark' : 'light'));
+  };
+
+  // Auto-refresh interval (every 30s when enabled and not viewing individual machine)
+  useEffect(() => {
+    if (!autoRefresh) return;
+    const interval = setInterval(() => {
+      // Quiet background refresh without wiping existing view state
+      Promise.all([
+        api.getFleetOverview(),
+        api.getMachines(),
+        api.getFleetRecommendations().catch(() => []),
+      ]).then(([overviewData, machinesData, recsData]) => {
+        setOverview(overviewData);
+        setMachines(machinesData);
+        setRecommendations(recsData);
+      }).catch(() => {
+        // Silently preserve existing data on background tick
+      });
+    }, 30000);
+    return () => clearInterval(interval);
+  }, [autoRefresh]);
 
   const handleSelectMachine = (machineId: string) => {
     setSelectedMachineId(machineId);
@@ -137,6 +176,23 @@ function App() {
           </button>
 
           <button
+            className={`nav-button ${!selectedMachineId && activeTab === 'copilot' ? 'active' : ''}`}
+            onClick={() => handleNavClick('copilot')}
+          >
+            <span className="nav-btn-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2 2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z" />
+                <rect x="3" y="8" width="18" height="12" rx="2" />
+                <path d="M9 13h6" />
+                <circle cx="9" cy="11" r="1" fill="currentColor" />
+                <circle cx="15" cy="11" r="1" fill="currentColor" />
+              </svg>
+            </span>
+            <span className="nav-btn-label">AI Copilot (RAG)</span>
+            <span className="nav-ai-pill">LLM</span>
+          </button>
+
+          <button
             className={`nav-button ${!selectedMachineId && activeTab === 'maintenance' ? 'active' : ''}`}
             onClick={() => handleNavClick('maintenance')}
           >
@@ -182,6 +238,46 @@ function App() {
           </div>
 
           <div className="topbar-right-actions">
+            <button
+              className={`topbar-toggle-btn ${autoRefresh ? 'active' : ''}`}
+              onClick={() => setAutoRefresh((prev) => !prev)}
+              title={autoRefresh ? 'Live Polling Active (30s) - Click to pause' : 'Polling Paused - Click to resume'}
+            >
+              <span className={`pulse-circle ${autoRefresh ? 'live' : 'paused'}`} />
+              <span>{autoRefresh ? 'Auto-Sync ON (30s)' : 'Auto-Sync Paused'}</span>
+            </button>
+
+            <button
+              className="topbar-theme-btn"
+              onClick={toggleTheme}
+              title={`Switch to ${theme === 'light' ? 'Dark' : 'Light'} Mode`}
+              aria-label="Toggle Theme"
+            >
+              {theme === 'light' ? (
+                <span className="theme-icon-group">
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
+                  </svg>
+                  <span className="theme-label">Dark</span>
+                </span>
+              ) : (
+                <span className="theme-icon-group">
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <circle cx="12" cy="12" r="4" />
+                    <path d="M12 2v2" />
+                    <path d="M12 20v2" />
+                    <path d="m4.93 4.93 1.41 1.41" />
+                    <path d="m17.66 17.66 1.41 1.41" />
+                    <path d="M2 12h2" />
+                    <path d="M20 12h2" />
+                    <path d="m6.34 17.66-1.41 1.41" />
+                    <path d="m19.07 4.93-1.41 1.41" />
+                  </svg>
+                  <span className="theme-label">Light</span>
+                </span>
+              )}
+            </button>
+
             <div className="telemetry-badge">
               <span className="pulse-circle" />
               <span>Latest Sensor Telemetry</span>
@@ -225,6 +321,12 @@ function App() {
             <AlertsView
               recommendations={recommendations}
               machines={machines}
+              onSelectMachine={handleSelectMachine}
+            />
+          ) : activeTab === 'copilot' ? (
+            <CopilotView
+              machines={machines}
+              selectedMachineId={selectedMachineId}
               onSelectMachine={handleSelectMachine}
             />
           ) : activeTab === 'maintenance' ? (

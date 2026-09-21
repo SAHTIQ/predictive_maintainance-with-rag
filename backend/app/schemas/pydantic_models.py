@@ -83,3 +83,28 @@ class FleetOverviewResponse(BaseModel):
     average_health_score: float
     average_rul_hours: float
     machines_requiring_maintenance_count: int
+
+class RagChatRequest(BaseModel):
+    query: str
+    machine_id: Optional[str] = None
+    top_k: int = 4
+
+class RagDocumentHit(BaseModel):
+    title: str
+    source_document: str
+    document_type: str
+    section: str
+    content: str
+    relevance_score: float
+    component: Optional[str] = None
+    failure_type: Optional[str] = None
+
+class RagChatResponse(BaseModel):
+    query: str
+    response: str
+    machine_id: Optional[str] = None
+    machine_context: Optional[Dict[str, Any]] = None
+    cited_documents: List[RagDocumentHit]
+    suggested_actions: List[str]
+    confidence: float
+    source: str
