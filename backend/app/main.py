@@ -1,6 +1,8 @@
+import os
 from typing import Any, Dict, List, Optional
 from datetime import datetime
 from fastapi import FastAPI, HTTPException, Depends, Query
+
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 import pandas as pd
@@ -34,17 +36,22 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Configure strict CORS for frontend integration
+# Configure CORS: local development defaults with configurable production origins
+default_origins = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+]
+custom_origins = os.getenv("CORS_ORIGINS", "")
+allowed_origins = [o.strip() for o in custom_origins.split(",") if o.strip()] if custom_origins else default_origins
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-    ],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 # Initialize database tables on startup
 @app.on_event("startup")

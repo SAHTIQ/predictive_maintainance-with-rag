@@ -1,11 +1,46 @@
+# Environment files (preserve examples)
 .env
-.venv/
+.env.*
+!.env.example
+*.env
+
+# Python artifacts
 __pycache__/
-*.pyc
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+.venv/
+
+# Node / Frontend
 node_modules/
-frontend/dist/
 frontend/node_modules/
-backend/.pytest_cache/
+frontend/dist/
+dist/
+.npm
+.eslintcache
+
+# Testing & Coverage
 .pytest_cache/
+backend/.pytest_cache/
+.coverage
+htmlcov/
+coverage/
+
+# Local databases
+*.db
+*.sqlite
+*.sqlite3
+
+# IDE and OS
 .vscode/
+.idea/
+.DS_Store
+Thumbs.db
 *.log
+
