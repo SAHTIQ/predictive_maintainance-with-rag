@@ -73,6 +73,6 @@ Copy `.env.example` to `.env` and provide local values when needed. Never commit
 
 ## Current Development Stage
 
-Stage 7: Maintenance Risk Engine Complete.
-The repository contains the complete explainable Maintenance Risk Engine, computing multi-factor risk scores (0-100), categorical risk levels (CRITICAL, HIGH, MEDIUM, LOW, VERY_LOW), maintenance priorities (P1 to P5), and operating time windows. Fully verified with 37/37 passing backend tests. REST API endpoints available at `/api/v1/risk-summary` and `/api/v1/machines/{machine_id}/risk`. Outputs are structured and ready for the Stage 8 RAG / LLM Recommendation layer.
+Stage 8: Context-Aware RAG Knowledge Base Complete.
+The repository contains the complete Context-Aware RAG Knowledge Base indexing machine manuals, specifications, failure modes, corrective procedures, and historical case studies. Features a modular vector store (TF-IDF + Cosine Similarity, swappable to ChromaDB/PGVector), context-aware query formulation from Stage 7 risk outputs, metadata filtering, and structured evidence assembly with source traceability. Fully verified with 46/46 passing backend tests. REST API endpoint available at `/api/v1/machines/{machine_id}/rag-context`. Ready for Stage 9 Context-Aware Maintenance Recommendation Engine.
 

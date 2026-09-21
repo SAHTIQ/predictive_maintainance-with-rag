@@ -48,3 +48,17 @@ def get_machine_risk(machine_id: str) -> Dict[str, Any]:
         raise HTTPException(status_code=404, detail=f"Machine {machine_id} not found.")
     health_summary = health_engine.evaluate_machine(machine_data)
     return risk_engine.calculate_risk(health_summary)
+
+@app.get("/api/v1/machines/{machine_id}/rag-context")
+def get_machine_rag_context(machine_id: str) -> Dict[str, Any]:
+    """Returns structured, traceable documentary and sensor evidence for a machine."""
+    machine_data = dataset_df[dataset_df["machine_id"] == machine_id]
+    if machine_data.empty:
+        raise HTTPException(status_code=404, detail=f"Machine {machine_id} not found.")
+    health_summary = health_engine.evaluate_machine(machine_data)
+    risk_summary = risk_engine.calculate_risk(health_summary)
+    
+    from backend.app.services.rag.retriever import ContextAwareRetriever
+    retriever = ContextAwareRetriever()
+    return retriever.retrieve_evidence_for_machine(risk_summary)
+
