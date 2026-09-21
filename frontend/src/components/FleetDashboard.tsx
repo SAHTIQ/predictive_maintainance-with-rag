@@ -1,380 +1,272 @@
-import React, { useState, useEffect } from 'react';
-import { FleetOverview, Machine, RecommendationDecision } from '../types';
-import { api } from '../services/api';
+import React from 'react';
+import { FleetOverview, RecommendationDecision, Machine } from '../types';
 import { MetricCard } from './MetricCard';
+import { StatusBadge } from './StatusBadge';
 
 interface FleetDashboardProps {
+  overview: FleetOverview | null;
+  machines: Machine[];
+  recommendations: RecommendationDecision[];
   onSelectMachine: (machineId: string) => void;
+  onNavigateTab: (tab: string) => void;
 }
 
-export const FleetDashboard: React.FC<FleetDashboardProps> = ({ onSelectMachine }) => {
-  const [overview, setOverview] = useState<FleetOverview | null>(null);
-  const [machines, setMachines] = useState<Machine[]>([]);
-  const [recommendations, setRecommendations] = useState<RecommendationDecision[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-
-  // Filters
-  const [searchTerm, setSearchTerm] = useState<string>('');
-  const [statusFilter, setStatusFilter] = useState<string>('ALL');
-
-  const loadDashboardData = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const [overviewData, machinesData, recsData] = await Promise.all([
-        api.getFleetOverview(),
-        api.getMachines(),
-        api.getFleetRecommendations().catch(() => []),
-      ]);
-      setOverview(overviewData);
-      setMachines(machinesData);
-      setRecommendations(recsData);
-    } catch (err: any) {
-      setError(err.message || 'Failed to connect to backend service.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadDashboardData();
-  }, []);
-
-  // Map recommendation data by machine_id for quick table lookup
+export const FleetDashboard: React.FC<FleetDashboardProps> = ({
+  overview,
+  machines,
+  recommendations,
+  onSelectMachine,
+  onNavigateTab,
+}) => {
   const recsByMachine = recommendations.reduce<Record<string, RecommendationDecision>>((acc, rec) => {
     acc[rec.machine_id] = rec;
     return acc;
   }, {});
 
-  // Filtered machines
-  const filteredMachines = machines.filter((m) => {
-    const matchesSearch =
-      m.machine_id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (m.machine_name && m.machine_name.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      m.machine_type.toLowerCase().includes(searchTerm.toLowerCase());
+  const attentionList = machines
+    .map((m) => {
+      const rec = recsByMachine[m.machine_id];
+      const riskLevel = rec?.risk_assessment?.risk_level || 'LOW';
+      const healthLabel = rec?.current_condition?.health_state_label || 'Good';
+      const healthScore = rec?.current_condition?.health_score ?? 100;
+      const rul = rec?.current_condition?.rul_hours ?? 999;
+      const priority = rec?.risk_assessment?.maintenance_priority || 'P3';
+      const isAttention = riskLevel === 'CRITICAL' || riskLevel === 'HIGH' || healthLabel === 'Critical' || healthLabel === 'Warning';
+      return {
+        machine: m,
+        rec,
+        riskLevel,
+        healthLabel,
+        healthScore,
+        rul,
+        priority,
+        isAttention,
+      };
+    })
+    .filter((item) => item.isAttention)
+    .sort((a, b) => {
+      const rank: Record<string, number> = { CRITICAL: 3, HIGH: 2, MEDIUM: 1, LOW: 0 };
+      const rA = rank[a.riskLevel] || 0;
+      const rB = rank[b.riskLevel] || 0;
+      if (rB !== rA) return rB - rA;
+      return a.healthScore - b.healthScore;
+    });
 
-    if (!matchesSearch) return false;
-
-    if (statusFilter === 'ALL') return true;
-
-    const rec = recsByMachine[m.machine_id];
-    if (statusFilter === 'CRITICAL' && rec?.risk_assessment?.risk_level === 'CRITICAL') return true;
-    if (statusFilter === 'HIGH' && rec?.risk_assessment?.risk_level === 'HIGH') return true;
-    if (statusFilter === 'WARNING' && rec?.current_condition?.health_state_label === 'Warning') return true;
-    if (statusFilter === 'GOOD' && rec?.current_condition?.health_state_label === 'Good') return true;
-
-    return false;
-  });
-
-  if (loading) {
-    return (
-      <div className="state-container">
-        <div className="spinner"></div>
-        <p className="state-text">Loading fleet telemetry and diagnostics from FastAPI backend...</p>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="state-container error">
-        <div className="error-icon">⚠️</div>
-        <h3>Backend Communication Failure</h3>
-        <p className="error-message">{error}</p>
-        <button className="btn-primary" onClick={loadDashboardData}>
-          Retry Connection
-        </button>
-      </div>
-    );
-  }
+  const total = overview?.total_machines || machines.length;
+  const good = overview?.health_states?.Good || 0;
+  const warning = overview?.health_states?.Warning || 0;
+  const critical = overview?.health_states?.Critical || 0;
+  const needAttention = overview?.machines_requiring_maintenance_count ?? attentionList.length;
 
   return (
-    <div className="fleet-dashboard">
-      {/* Fleet KPIs Overview */}
-      <section className="dashboard-section">
-        <div className="section-header">
-          <h2>Fleet Operational Overview</h2>
-          <span className="section-badge">Live PostgreSQL Persisted</span>
+    <div className="view-content">
+      <div className="fleet-greeting-header">
+        <div>
+          <h1 className="greeting-title">Good morning</h1>
+          <p className="greeting-subtitle">
+            Here's the current operational condition of your textile machine fleet.
+          </p>
         </div>
-
-        <div className="metrics-grid">
-          <MetricCard
-            title="Total Machines"
-            value={overview?.total_machines ?? 0}
-            subtitle="Monitored in system"
-            status="info"
-          />
-          <MetricCard
-            title="Good Condition"
-            value={overview?.health_states?.Good ?? 0}
-            subtitle="Operating normally"
-            status="normal"
-          />
-          <MetricCard
-            title="Warning Condition"
-            value={overview?.health_states?.Warning ?? 0}
-            subtitle="Moderate degradation"
-            status="warning"
-          />
-          <MetricCard
-            title="Critical Condition"
-            value={overview?.health_states?.Critical ?? 0}
-            subtitle="Immediate review required"
-            status="critical"
-          />
-          <MetricCard
-            title="High-Risk Alerts"
-            value={overview?.machines_requiring_maintenance_count ?? 0}
-            subtitle="P0 & P1 operational risks"
-            status="critical"
-          />
-          <MetricCard
-            title="Avg Health Score"
-            value={overview?.average_health_score !== undefined ? overview.average_health_score.toFixed(1) : '--'}
-            unit="/100"
-            subtitle="Fleet composite average"
-            status="info"
-          />
-          <MetricCard
-            title="Avg Remaining Life"
-            value={overview?.average_rul_hours !== undefined ? overview.average_rul_hours.toFixed(1) : '--'}
-            unit="h"
-            subtitle="Estimated RUL average"
-            status="info"
-          />
+        <div className="system-pill-status">
+          <span className="live-status-dot" />
+          <span className="live-status-text">Fleet Telemetry Active</span>
         </div>
-      </section>
+      </div>
 
-      {/* Fleet Distribution Visualizations */}
-      <section className="dashboard-section">
-        <div className="section-header">
-          <h2>Risk & Health Distribution</h2>
-        </div>
+      <div className="overview-kpi-grid">
+        <MetricCard
+          title="Total Machines"
+          value={total}
+          subtitle="Monitored in system"
+          icon={<span className="metric-icon-svg">🏭</span>}
+        />
+        <MetricCard
+          title="Average Health"
+          value={overview?.average_health_score !== undefined ? overview.average_health_score.toFixed(0) : '--'}
+          unit="/100"
+          subtitle="Fleet-wide composite index"
+          trend={{ text: 'Stable operation', isPositive: true }}
+          icon={<span className="metric-icon-svg">❤️</span>}
+        />
+        <MetricCard
+          title="Avg Remaining Life"
+          value={overview?.average_rul_hours !== undefined ? overview.average_rul_hours.toFixed(0) : '--'}
+          unit="hours"
+          subtitle="Fleet average horizon"
+          icon={<span className="metric-icon-svg">⏳</span>}
+        />
+        <MetricCard
+          title="Needs Attention"
+          value={needAttention}
+          subtitle={needAttention > 0 ? 'Requires technician review' : 'All nominal'}
+          trend={needAttention > 0 ? { text: `${needAttention} machine alerts`, isWarning: true } : undefined}
+          icon={<span className="metric-icon-svg">⚠️</span>}
+        />
+      </div>
 
-        <div className="distribution-grid">
-          {/* Health Distribution Card */}
-          <div className="distribution-card">
-            <h3>Health State Breakdown</h3>
-            <div className="distribution-bars">
-              <div className="dist-row">
-                <span className="dist-label">Good</span>
-                <div className="dist-track">
-                  <div
-                    className="dist-fill good"
-                    style={{
-                      width: `${((overview?.health_states?.Good || 0) / (overview?.total_machines || 1)) * 100}%`,
-                    }}
-                  />
-                </div>
-                <span className="dist-count">{overview?.health_states?.Good || 0}</span>
-              </div>
-              <div className="dist-row">
-                <span className="dist-label">Warning</span>
-                <div className="dist-track">
-                  <div
-                    className="dist-fill warning"
-                    style={{
-                      width: `${((overview?.health_states?.Warning || 0) / (overview?.total_machines || 1)) * 100}%`,
-                    }}
-                  />
-                </div>
-                <span className="dist-count">{overview?.health_states?.Warning || 0}</span>
-              </div>
-              <div className="dist-row">
-                <span className="dist-label">Critical</span>
-                <div className="dist-track">
-                  <div
-                    className="dist-fill critical"
-                    style={{
-                      width: `${((overview?.health_states?.Critical || 0) / (overview?.total_machines || 1)) * 100}%`,
-                    }}
-                  />
-                </div>
-                <span className="dist-count">{overview?.health_states?.Critical || 0}</span>
-              </div>
+      <div className="dashboard-columns-grid">
+        <div className="saas-card priority-table-card">
+          <div className="card-header-clean">
+            <div>
+              <h3>Machines Needing Attention</h3>
+              <p className="card-subtitle-sm">
+                Prioritized by maintenance risk engine and degradation severity.
+              </p>
             </div>
+            {attentionList.length > 5 && (
+              <button
+                className="saas-btn-text"
+                onClick={() => onNavigateTab('alerts')}
+              >
+                View all ({attentionList.length}) →
+              </button>
+            )}
           </div>
 
-          {/* Risk Level Card */}
-          <div className="distribution-card">
-            <h3>Maintenance Risk Levels</h3>
-            <div className="distribution-bars">
-              <div className="dist-row">
-                <span className="dist-label">Low Risk</span>
-                <div className="dist-track">
-                  <div
-                    className="dist-fill low"
-                    style={{
-                      width: `${((overview?.risk_levels?.LOW || 0) / (overview?.total_machines || 1)) * 100}%`,
-                    }}
-                  />
-                </div>
-                <span className="dist-count">{overview?.risk_levels?.LOW || 0}</span>
-              </div>
-              <div className="dist-row">
-                <span className="dist-label">Medium Risk</span>
-                <div className="dist-track">
-                  <div
-                    className="dist-fill medium"
-                    style={{
-                      width: `${((overview?.risk_levels?.MEDIUM || 0) / (overview?.total_machines || 1)) * 100}%`,
-                    }}
-                  />
-                </div>
-                <span className="dist-count">{overview?.risk_levels?.MEDIUM || 0}</span>
-              </div>
-              <div className="dist-row">
-                <span className="dist-label">High Risk</span>
-                <div className="dist-track">
-                  <div
-                    className="dist-fill high"
-                    style={{
-                      width: `${((overview?.risk_levels?.HIGH || 0) / (overview?.total_machines || 1)) * 100}%`,
-                    }}
-                  />
-                </div>
-                <span className="dist-count">{overview?.risk_levels?.HIGH || 0}</span>
-              </div>
-              <div className="dist-row">
-                <span className="dist-label">Critical Risk</span>
-                <div className="dist-track">
-                  <div
-                    className="dist-fill critical-risk"
-                    style={{
-                      width: `${((overview?.risk_levels?.CRITICAL || 0) / (overview?.total_machines || 1)) * 100}%`,
-                    }}
-                  />
-                </div>
-                <span className="dist-count">{overview?.risk_levels?.CRITICAL || 0}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Machine Table Section */}
-      <section className="dashboard-section">
-        <div className="section-header">
-          <h2>Monitored Assets ({filteredMachines.length})</h2>
-          <div className="table-controls">
-            <input
-              type="text"
-              placeholder="Search by Machine ID or Type..."
-              className="search-input"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-            <select
-              className="filter-select"
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-            >
-              <option value="ALL">All Statuses</option>
-              <option value="CRITICAL">Critical Risk</option>
-              <option value="HIGH">High Risk</option>
-              <option value="WARNING">Warning Condition</option>
-              <option value="GOOD">Good Condition</option>
-            </select>
-          </div>
-        </div>
-
-        <div className="table-wrapper">
-          <table className="machine-table">
-            <thead>
-              <tr>
-                <th>Machine ID</th>
-                <th>Type</th>
-                <th>Health Score</th>
-                <th>Health State</th>
-                <th>Est. RUL</th>
-                <th>Risk Score</th>
-                <th>Risk Level</th>
-                <th>Priority</th>
-                <th>Maintenance Window</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredMachines.length === 0 ? (
+          <div className="table-responsive">
+            <table className="saas-table">
+              <thead>
                 <tr>
-                  <td colSpan={10} className="empty-table-cell">
-                    No matching machines found.
-                  </td>
+                  <th>Machine</th>
+                  <th>Type</th>
+                  <th>Status</th>
+                  <th>Health</th>
+                  <th>Est. RUL</th>
+                  <th>Priority</th>
+                  <th className="text-right">Action</th>
                 </tr>
-              ) : (
-                filteredMachines.map((m) => {
-                  const rec = recsByMachine[m.machine_id];
-                  const healthScore = rec?.current_condition?.health_score;
-                  const healthLabel = rec?.current_condition?.health_state_label || 'Good';
-                  const rul = rec?.current_condition?.rul_hours;
-                  const riskScore = rec?.risk_assessment?.risk_score;
-                  const riskLevel = rec?.risk_assessment?.risk_level || 'LOW';
-                  const priority = rec?.risk_assessment?.maintenance_priority || 'P3 - ROUTINE';
-                  const windowText = rec?.risk_assessment?.maintenance_time_window || 'Normal Operations';
-
-                  return (
+              </thead>
+              <tbody>
+                {attentionList.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="empty-table-state">
+                      ✨ Great news! No machines currently require urgent attention.
+                    </td>
+                  </tr>
+                ) : (
+                  attentionList.slice(0, 6).map((item) => (
                     <tr
-                      key={m.machine_id}
-                      onClick={() => onSelectMachine(m.machine_id)}
-                      className="clickable-row"
+                      key={item.machine.machine_id}
+                      className="table-row-hover"
+                      onClick={() => onSelectMachine(item.machine.machine_id)}
                     >
-                      <td className="font-mono font-semibold">{m.machine_id}</td>
-                      <td>{m.machine_type}</td>
                       <td>
-                        {healthScore !== undefined ? (
-                          <span className={`score-badge ${healthScore < 50 ? 'bad' : healthScore < 75 ? 'med' : 'good'}`}>
-                            {healthScore.toFixed(1)}
-                          </span>
-                        ) : (
-                          '--'
-                        )}
+                        <div className="machine-cell">
+                          <span className="machine-id-text">{item.machine.machine_id}</span>
+                          {item.machine.machine_name && (
+                            <span className="machine-subname">{item.machine.machine_name}</span>
+                          )}
+                        </div>
                       </td>
                       <td>
-                        <span className={`status-pill ${healthLabel.toLowerCase()}`}>
-                          {healthLabel}
-                        </span>
-                      </td>
-                      <td className="font-mono">
-                        {rul !== null && rul !== undefined ? `${rul.toFixed(1)} h` : '--'}
+                        <span className="type-tag">{item.machine.machine_type}</span>
                       </td>
                       <td>
-                        {riskScore !== undefined ? (
-                          <span className={`score-badge ${riskScore > 70 ? 'bad' : riskScore > 40 ? 'med' : 'good'}`}>
-                            {riskScore.toFixed(1)}
-                          </span>
-                        ) : (
-                          '--'
-                        )}
+                        <StatusBadge status={item.healthLabel} size="sm" />
                       </td>
                       <td>
-                        <span className={`risk-pill ${riskLevel.toLowerCase()}`}>
-                          {riskLevel}
+                        <span className="font-numeric font-semibold">
+                          {item.healthScore.toFixed(0)}%
                         </span>
                       </td>
                       <td>
-                        <span className="priority-tag">{priority}</span>
+                        <span className="font-numeric text-muted">
+                          {item.rul < 900 ? `${item.rul.toFixed(1)} h` : '--'}
+                        </span>
                       </td>
-                      <td className="text-sm text-muted">{windowText}</td>
                       <td>
+                        <StatusBadge status={item.priority} size="sm" />
+                      </td>
+                      <td className="text-right">
                         <button
-                          className="btn-select"
+                          className="saas-btn-secondary btn-sm"
                           onClick={(e) => {
                             e.stopPropagation();
-                            onSelectMachine(m.machine_id);
+                            onSelectMachine(item.machine.machine_id);
                           }}
                         >
-                          Diagnostics →
+                          View →
                         </button>
                       </td>
                     </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </section>
+
+        <div className="dashboard-side-col">
+          <div className="saas-card side-distribution-card">
+            <div className="card-header-clean">
+              <h3>Fleet Health Condition</h3>
+            </div>
+
+            <div className="dist-bar-group">
+              <div className="dist-item-row">
+                <div className="dist-label-col">
+                  <span className="status-dot dot-green" />
+                  <span className="dist-name">Good Condition</span>
+                </div>
+                <div className="dist-progress-wrap">
+                  <div
+                    className="dist-progress-bar bg-green"
+                    style={{ width: `${(good / total) * 100}%` }}
+                  />
+                </div>
+                <span className="dist-val">{good}</span>
+              </div>
+
+              <div className="dist-item-row">
+                <div className="dist-label-col">
+                  <span className="status-dot dot-amber" />
+                  <span className="dist-name">Warning Condition</span>
+                </div>
+                <div className="dist-progress-wrap">
+                  <div
+                    className="dist-progress-bar bg-amber"
+                    style={{ width: `${(warning / total) * 100}%` }}
+                  />
+                </div>
+                <span className="dist-val">{warning}</span>
+              </div>
+
+              <div className="dist-item-row">
+                <div className="dist-label-col">
+                  <span className="status-dot dot-red" />
+                  <span className="dist-name">Critical Condition</span>
+                </div>
+                <div className="dist-progress-wrap">
+                  <div
+                    className="dist-progress-bar bg-red"
+                    style={{ width: `${(critical / total) * 100}%` }}
+                  />
+                </div>
+                <span className="dist-val">{critical}</span>
+              </div>
+            </div>
+
+            <div className="quick-action-strip">
+              <button
+                className="saas-btn-secondary btn-full"
+                onClick={() => onNavigateTab('machines')}
+              >
+                Browse All {total} Machines →
+              </button>
+            </div>
+          </div>
+
+          <div className="saas-card insight-callout-card">
+            <div className="insight-icon">💡</div>
+            <div className="insight-body">
+              <h4>Predictive Maintenance Intelligence</h4>
+              <p>
+                Telemetry is continuously analyzed using adaptive health scoring, remaining useful life regression, and context-aware RAG documentation retrieval.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

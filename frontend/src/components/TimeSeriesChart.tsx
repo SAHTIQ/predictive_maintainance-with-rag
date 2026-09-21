@@ -6,9 +6,19 @@ export interface DataSeries {
   data: { timestamp: string; value: number }[];
 }
 
-interface TimeSeriesChartProps {
-  title: string;
+export interface ChartTab {
+  id: string;
+  label: string;
   series: DataSeries[];
+  unit: string;
+  threshold?: number;
+  thresholdLabel?: string;
+}
+
+interface TimeSeriesChartProps {
+  title?: string;
+  tabs?: ChartTab[];
+  series?: DataSeries[];
   unit?: string;
   threshold?: number;
   thresholdLabel?: string;
@@ -17,12 +27,14 @@ interface TimeSeriesChartProps {
 
 export const TimeSeriesChart: React.FC<TimeSeriesChartProps> = ({
   title,
-  series,
-  unit = '',
-  threshold,
-  thresholdLabel = 'Threshold',
-  height = 220,
+  tabs,
+  series: defaultSeries,
+  unit: defaultUnit = '',
+  threshold: defaultThreshold,
+  thresholdLabel: defaultThresholdLabel = 'Threshold',
+  height = 240,
 }) => {
+  const [activeTabId, setActiveTabId] = useState<string>(tabs && tabs.length > 0 ? tabs[0].id : '');
   const [hoveredPoint, setHoveredPoint] = useState<{
     x: number;
     y: number;
@@ -32,14 +44,30 @@ export const TimeSeriesChart: React.FC<TimeSeriesChartProps> = ({
     color: string;
   } | null>(null);
 
+  const activeTab = tabs ? tabs.find((t) => t.id === activeTabId) || tabs[0] : null;
+  const series = activeTab ? activeTab.series : (defaultSeries || []);
+  const unit = activeTab ? activeTab.unit : defaultUnit;
+  const threshold = activeTab ? activeTab.threshold : defaultThreshold;
+  const thresholdLabel = activeTab ? activeTab.thresholdLabel : defaultThresholdLabel;
+
   // Filter series with non-empty data
   const validSeries = series.filter((s) => s.data && s.data.length > 0);
   if (validSeries.length === 0) {
     return (
       <div className="chart-card empty-chart" style={{ height }}>
-        <div className="chart-header">
-          <span className="chart-title">{title}</span>
-        </div>
+        {tabs && tabs.length > 1 && (
+          <div className="chart-tabs-header">
+            {tabs.map((t) => (
+              <button
+                key={t.id}
+                className={`chart-tab-pill ${activeTabId === t.id ? 'active' : ''}`}
+                onClick={() => setActiveTabId(t.id)}
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
+        )}
         <div className="empty-chart-message">No historical data available</div>
       </div>
     );
@@ -158,7 +186,22 @@ export const TimeSeriesChart: React.FC<TimeSeriesChartProps> = ({
   return (
     <div className="chart-card">
       <div className="chart-header">
-        <span className="chart-title">{title}</span>
+        <div className="chart-title-area">
+          {title && <span className="chart-title">{title}</span>}
+          {tabs && tabs.length > 1 && (
+            <div className="chart-tabs-header">
+              {tabs.map((t) => (
+                <button
+                  key={t.id}
+                  className={`chart-tab-pill ${activeTabId === t.id ? 'active' : ''}`}
+                  onClick={() => setActiveTabId(t.id)}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
         <div className="chart-legend">
           {validSeries.map((s) => (
             <span key={s.name} className="legend-item">
