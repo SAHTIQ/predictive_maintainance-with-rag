@@ -73,5 +73,6 @@ Copy `.env.example` to `.env` and provide local values when needed. Never commit
 
 ## Current Development Stage
 
-Stage 6: Adaptive Health Engine + Machine Health Scoring Complete.
-The repository contains the complete Adaptive Health Engine, degradation analysis, continuous health score calculation (0-100), health state classification (Good/Warning/Critical), RUL estimation, and Isolation Forest anomaly tracking. Evaluated across all 50 machines in Dataset V3 with REST API endpoints available at `/api/v1/health-summary` and `/api/v1/machines/{machine_id}/health`. Ready for Stage 7 Risk Engine.
+Stage 7: Maintenance Risk Engine Complete.
+The repository contains the complete explainable Maintenance Risk Engine, computing multi-factor risk scores (0-100), categorical risk levels (CRITICAL, HIGH, MEDIUM, LOW, VERY_LOW), maintenance priorities (P1 to P5), and operating time windows. Fully verified with 37/37 passing backend tests. REST API endpoints available at `/api/v1/risk-summary` and `/api/v1/machines/{machine_id}/risk`. Outputs are structured and ready for the Stage 8 RAG / LLM Recommendation layer.
+
