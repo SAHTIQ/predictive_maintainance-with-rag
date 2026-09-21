@@ -1,6 +1,7 @@
 from typing import Any, Dict, List, Optional
 from datetime import datetime
 from fastapi import FastAPI, HTTPException, Depends, Query
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 import pandas as pd
 
@@ -33,10 +34,23 @@ app = FastAPI(
     version="1.0.0"
 )
 
+# Configure strict CORS for frontend integration
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 # Initialize database tables on startup
 @app.on_event("startup")
 def on_startup():
     init_db()
+
 
 # Initialize dataset, health engine, and risk engine
 health_engine = AdaptiveHealthEngine()

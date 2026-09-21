@@ -52,27 +52,27 @@ python -m venv .venv
 pip install -r backend\requirements.txt
 ```
 
-Start the minimal API from the `backend/` directory:
+Start the FastAPI application from the project root:
 
 ```powershell
-cd backend
-uvicorn app.main:app --reload
+uvicorn backend.app.main:app --host 127.0.0.1 --port 8000 --reload
 ```
 
 The health endpoint is available at `http://127.0.0.1:8000/health`.
 
-Run the backend test from `backend/`:
+Run backend tests from the project root:
 
 ```powershell
-pytest
+pytest backend/tests/ -v
 ```
 
 ## Environment Configuration
 
-Copy `.env.example` to `.env` and provide local values when needed. Never commit real credentials or secrets. The database configuration currently establishes the connection structure only; application tables and migrations are intentionally not part of this stage.
+Copy `.env.example` to `.env` and provide local values when needed. Never commit real credentials or secrets.
 
 ## Current Development Stage
 
-Stage 10: PostgreSQL Persistence & Backend Integration Complete.
-The repository contains the complete PostgreSQL database persistence layer with SQLAlchemy ORM entities for machines, sensor readings, health records, risk records, maintenance logs, and 4-tier explainable recommendations. Includes an idempotent Dataset V3 ingestion script (`scripts/ingest_dataset_v3.py`), a chronological DB-to-Engine pipeline orchestrator (`DatabasePipelineService`), and REST API endpoints (`/api/v1/machines`, `/sensor-history`, `/health-history`, `/risk-history`, `/maintenance-history`, `/latest`, `/fleet/overview`). Fully verified with 75/75 passing backend tests. Ready for Stage 11 Frontend Development & Dashboard Integration.
+Stage 11: React Frontend & FastAPI Integration Complete.
+The repository contains the React + TypeScript frontend fully connected to the FastAPI + PostgreSQL backend. Features an industrial monitoring layout, fleet overview KPI cards, health and risk distribution charts, searchable & filterable machine table, individual machine diagnostics, latest sensor telemetry snapshot, interactive SVG time-series charts (Temperature, Vibration X/Y/Z, Adaptive Health Index, RUL, and Risk Score), operational risk factor diagnostics, strict 4-tier grounded RAG evidence display (Measured, Calculated, Retrieved Docs, and Generated SOP Recommendations), and maintenance service history. Fully verified with 75/75 passing backend tests and clean TypeScript/Vite production build.
+
 
