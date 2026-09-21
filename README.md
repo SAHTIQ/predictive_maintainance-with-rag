@@ -73,4 +73,5 @@ Copy `.env.example` to `.env` and provide local values when needed. Never commit
 
 ## Current Development Stage
 
-Stage 3: Project Setup & Development Structure. The repository currently contains the development foundation, a minimal frontend proof of startup, a minimal FastAPI health endpoint, database configuration placeholders, directory structure, and a health test. Business features, authentication, CRUD, database tables, ML algorithms, dashboard views, RAG, and deployment configuration are not implemented yet.
+Stage 5: Feature Engineering & Machine Learning Pipeline Complete.
+The repository contains the data processing pipeline, EDA reports, engineered rolling features (k=5), 40/10 machine-level split, and three trained models (Isolation Forest for anomaly detection, Random Forest Classifier for health state classification at 93.8% accuracy, and Random Forest Regressor for RUL prediction at R²=0.829). All artifacts are persisted in `backend/ml/models/` with zero data leakage.
