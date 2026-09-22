@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = {
+  darkMode: "class",
+  theme: {
+    extend: {
+      "colors": {
+        "on-secondary-fixed": "#131b2e",
+        "surface-bright": "#f8f9ff",
+        "surface-container-low": "#eff4ff",
+        "on-tertiary-container": "#bdffdc",
+        "tertiary-container": "#007d57",
+        "primary-container": "#2563eb",
+        "on-error-container": "#93000a",
+        "secondary-fixed-dim": "#bec6e0",
+        "surface-variant": "#d3e4fe",
+        "inverse-primary": "#b4c5ff",
+        "background": "#f8f9ff",
+        "secondary-container": "#dae2fd",
+        "on-surface": "#0b1c30",
+        "primary-fixed": "#dbe1ff",
+        "secondary": "#565e74",
+        "on-secondary": "#ffffff",
+        "primary-fixed-dim": "#b4c5ff",
+        "on-primary": "#ffffff",
+        "on-secondary-container": "#5c647a",
+        "on-error": "#ffffff",
+        "primary": "#004ac6",
+        "on-secondary-fixed-variant": "#3f465c",
+        "tertiary-fixed-dim": "#68dba9",
+        "outline": "#737686",
+        "secondary-fixed": "#dae2fd",
+        "surface-container-high": "#dce9ff",
+        "inverse-surface": "#213145",
+        "on-primary-fixed": "#00174b",
+        "tertiary": "#006243",
+        "on-primary-fixed-variant": "#003ea8",
+        "on-background": "#0b1c30",
+        "error": "#ba1a1a",
+        "on-tertiary": "#ffffff",
+        "surface": "#f8f9ff",
+        "surface-container": "#e5eeff",
+        "surface-container-highest": "#d3e4fe",
+        "surface-tint": "#0053db",
+        "outline-variant": "#c3c6d7",
+        "surface-dim": "#cbdbf5",
+        "inverse-on-surface": "#eaf1ff",
+        "on-tertiary-fixed": "#002114",
+        "tertiary-fixed": "#85f8c4",
+        "on-tertiary-fixed-variant": "#005137",
+        "on-surface-variant": "#434655",
+        "surface-container-lowest": "#ffffff",
+        "on-primary-container": "#eeefff",
+        "error-container": "#ffdad6"
+      },
+      "borderRadius": {
+        "DEFAULT": "0.125rem",
+        "lg": "0.25rem",
+        "xl": "0.5rem",
+        "full": "0.75rem"
+      },
+      "spacing": {
+        "margin-mobile": "1rem",
+        "space-2xl": "2rem",
+        "space-sm": "0.5rem",
+        "space-2xs": "0.125rem",
+        "gutter": "1rem",
+        "gutter-dense": "0.5rem",
+        "space-xs": "0.25rem",
+        "margin": "1.5rem",
+        "space-lg": "1.25rem",
+        "space-xl": "1.5rem",
+        "space-base": "1rem",
+        "space-md": "0.75rem"
+      },
+      "fontFamily": {
+        "title-md": ["Inter"],
+        "label-md": ["Inter"],
+        "label-caps": ["Inter"],
+        "telemetry-xl": ["Inter"],
+        "body-md": ["Inter"],
+        "telemetry-md": ["Inter"],
+        "headline-lg": ["Inter"],
+        "headline-md": ["Inter"],
+        "body-sm": ["Inter"],
+        "telemetry-sm": ["Inter"],
+        "body-lg": ["Inter"],
+        "headline-sm": ["Inter"],
+        "display-lg": ["Inter"]
+      },
+      "fontSize": {
+        "title-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "600"}],
+        "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.01em", "fontWeight": "500"}],
+        "label-caps": ["11px", {"lineHeight": "14px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+        "telemetry-xl": ["28px", {"lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+        "body-md": ["13px", {"lineHeight": "18px", "letterSpacing": "0em", "fontWeight": "400"}],
+        "telemetry-md": ["14px", {"lineHeight": "18px", "letterSpacing": "0em", "fontWeight": "600"}],
+        "headline-lg": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.015em", "fontWeight": "600"}],
+        "headline-md": ["20px", {"lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+        "body-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0em", "fontWeight": "400"}],
+        "telemetry-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0em", "fontWeight": "500"}],
+        "body-lg": ["15px", {"lineHeight": "22px", "letterSpacing": "0em", "fontWeight": "400"}],
+        "headline-sm": ["16px", {"lineHeight": "24px", "letterSpacing": "-0.005em", "fontWeight": "600"}],
+        "display-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600"}]
+      }
+    }
+  }
+}</script></head><body class="bg-background font-body-md text-on-surface antialiased"><aside class="fixed left-0 top-0 h-full w-64 bg-surface-container-lowest shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-50 flex flex-col justify-between"><div class="flex flex-col"><div class="h-16 px-space-base flex items-center gap-space-sm bg-surface-container-lowest"><img alt="Resonex Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1W5zwb0R-cINsk7JQGH4zLdjc9iWZtEtW0NVuoLaQFf88Yt5N4tSPo8clU2tnf0zwEzDSnoV9I4bYxAXd7wpO8zWvKZpM1_wHfYMBpBo8rVsI4ufNC6DK_lCe3UoI2ubpd-v3xaBqzwA7fcwZZK4SHPKgNywhEk3GEe6a0_f2rYmYUS9DmHMRrgz3IU86nIoVK_olscocOocDElj0LcwV2W-xkTNXlOB_mU2NcvnSE"/><div class="flex flex-col"><span class="font-headline-sm text-headline-sm tracking-tight text-on-surface font-bold leading-none">RESONEX</span><span class="font-label-caps text-label-caps uppercase text-secondary font-semibold">Telemetry Core</span></div></div><div class="px-space-base py-space-xs"><div class="flex items-center gap-space-xs px-space-sm py-space-2xs bg-surface-container-low rounded"><span class="w-2 h-2 rounded-full bg-tertiary"></span><span class="font-label-caps text-label-caps font-semibold text-secondary uppercase tracking-wider">50 Machines Connected</span></div></div><nav class="flex flex-col gap-space-2xs px-space-sm mt-space-sm" data-active-classes="bg-primary-container text-on-primary-container font-semibold"><a class="flex items-center justify-between px-space-base py-space-sm rounded text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-title-md text-title-md" data-path="overview" href="#"><span>Overview</span></a><a class="flex items-center justify-between px-space-base py-space-sm rounded text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-title-md text-title-md" data-path="machines" href="#"><span>Machines</span></a><a class="flex items-center justify-between px-space-base py-space-sm rounded text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-title-md text-title-md" data-path="alerts" href="#"><span>Alerts</span><span class="flex items-center gap-1"><span class="px-1.5 py-0.5 rounded-full bg-error text-on-error font-label-caps text-[10px] font-bold leading-none">28</span><span class="px-1.5 py-0.5 rounded-full bg-surface-container-highest/80 text-secondary font-label-caps text-[10px] font-medium leading-none">4 unack</span></span></a><a class="flex items-center justify-between px-space-base py-space-sm rounded text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-title-md text-title-md" data-path="maintenance-dispatch" href="#"><span>Maintenance</span></a><a class="flex items-center justify-between px-space-base py-space-sm rounded text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-title-md text-title-md" data-path="reports" href="#"><span>Reports</span></a><a class="flex items-center justify-between px-space-base py-space-sm rounded text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-title-md text-title-md" data-path="settings" href="#"><span>Settings</span></a></nav></div><div class="p-space-base bg-surface-container-low"><div class="flex items-center justify-between"><span class="font-label-caps text-label-caps uppercase text-secondary font-semibold">Vibration Telemetry</span><span class="font-telemetry-sm text-telemetry-sm text-tertiary font-bold">99.98%</span></div><div class="w-full bg-surface-container-highest h-1 rounded mt-space-2xs overflow-hidden"><div class="bg-tertiary h-full w-[99.98%]"></div></div></div></aside><div class="pl-64"><header class="fixed top-0 left-64 right-0 h-16 bg-surface-container-lowest shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-40"><div class="w-full h-16 px-space-xl flex items-center justify-between gap-space-base"><div class="flex items-center gap-space-lg"><div class="flex items-center gap-space-xs font-label-md text-label-md"><span class="text-secondary">Resonex</span><span class="text-outline-variant">/</span><span class="text-on-surface font-semibold">Settings &amp; System Preferences</span></div><div class="relative flex items-center w-72"><span class="material-symbols-outlined absolute left-2.5 text-secondary text-[18px]">search</span><input class="w-full h-8 pl-8 pr-3 bg-surface-container-low text-on-surface placeholder:text-secondary font-body-sm text-body-sm rounded outline-none focus:bg-surface-container-lowest" placeholder="Search machines... (press /)" type="text"/><kbd class="absolute right-2 font-label-caps text-label-caps text-secondary bg-surface-container-highest px-1 py-0.5 rounded">/</kbd></div></div><div class="flex items-center gap-space-base"><div class="flex items-center gap-space-xs px-space-sm py-space-2xs rounded-full bg-tertiary-fixed text-on-tertiary-fixed font-label-caps text-label-caps font-semibold"><span class="w-1.5 h-1.5 rounded-full bg-tertiary animate-pulse"></span>Monitoring Active · 50/50 Synced</div><div class="flex items-center gap-space-xs px-space-sm py-space-2xs rounded bg-surface-container-low text-secondary font-label-md text-label-md"><span class="material-symbols-outlined text-[16px]">schedule</span>Shift A · Line 1-4</div><div class="relative flex items-center justify-center p-space-xs rounded hover:bg-surface-container-low text-on-surface cursor-pointer"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="absolute top-1 right-1 w-4 h-4 bg-error text-on-error font-label-caps text-[9px] font-bold rounded-full flex items-center justify-center leading-none">4</span></div><div class="flex items-center gap-space-sm pl-space-sm"><img alt="Profile" class="w-8 h-8 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCP9dPLIQ9MqGqW_X9IiNcCJzWGEojJxkB4iZxdWId0l5tgDHUU_0sUfiN6XXsTXWbi4sEzFKqoU_yXi85jfvV3w3dtd4VU3Loj3Qb8WVxeQNEhsAvyG_QNhrGhgQjxuNG-WZ4hMnjBvh7mTjxltL2KDAm8ALPJCcFf_xAJO8JCJSW_if7tqjgSY5IeFKmhF7t3vYkYRmvg4Otzta7aYKR8ljJDUPOoyREU3j5r_g"/><div class="flex flex-col"><span class="font-title-md text-title-md text-on-surface leading-tight">Mark Jenkins</span><span class="font-label-caps text-label-caps text-secondary uppercase">Lead Monitorer</span></div></div></div></div></header><main class="relative w-full pt-16 bg-background px-space-xl py-space-lg min-h-screen"><div class="flex flex-col w-full gap-space-2xl">
+<!-- Header & Version Spec Bar -->
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-space-base pb-space-lg bg-surface-container-lowest p-space-xl rounded-xl shadow-sm">
+<div class="flex flex-col gap-space-2xs">
+<div class="flex items-center gap-space-sm flex-wrap">
+<span class="px-space-sm py-0.5 rounded bg-primary text-on-primary font-label-caps text-label-caps tracking-wider uppercase font-semibold">Resonex Design System</span>
+<span class="px-space-sm py-0.5 rounded bg-surface-container-high text-on-surface-variant font-label-caps text-label-caps">v2.4.2 Production Build</span>
+<span class="flex items-center gap-1 px-space-sm py-0.5 rounded bg-tertiary-fixed text-on-tertiary-fixed font-label-caps text-label-caps">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span> Core Telemetry Validated
+        </span>
+</div>
+<h1 class="font-display-lg text-display-lg text-on-surface tracking-tight font-bold">UI Design Principles &amp; System Specification</h1>
+<p class="font-body-md text-body-md text-secondary max-w-3xl">
+        The official technical standard and design framework for Resonex plant monitoring interfaces. Built for extreme information density, sub-second cognitive intake, and fail-safe industrial dispatching.
+      </p>
+</div>
+<div class="flex items-center gap-space-sm self-start md:self-auto">
+<button class="px-space-base py-space-sm bg-surface-container-low text-on-surface hover:bg-surface-container-high transition-colors font-title-md text-title-md rounded flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[18px]">terminal</span>
+<span>Token CLI</span>
+</button>
+<button class="px-space-base py-space-sm bg-primary text-on-primary hover:bg-primary-container transition-colors font-title-md text-title-md rounded flex items-center gap-space-xs shadow-sm">
+<span class="material-symbols-outlined text-[18px]">download</span>
+<span>Export Spec (.json)</span>
+</button>
+</div>
+</div>
+<!-- SECTION 1: Core Design Tenets & Philosophy -->
+<section class="flex flex-col gap-space-lg">
+<div class="flex flex-col gap-space-2xs">
+<span class="font-label-caps text-label-caps text-primary uppercase font-bold tracking-wider">Foundations</span>
+<h2 class="font-headline-lg text-headline-lg text-on-surface">1. Core Operational Tenets</h2>
+<p class="font-body-md text-body-md text-secondary">
+        Mechanical technicians and monitoring supervisors operate under continuous cognitive strain. Every layout choice must serve triage speed and precision.
+      </p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-space-base">
+<!-- Tenet 1 -->
+<div class="flex flex-col justify-between bg-surface-container-lowest p-space-xl rounded-xl shadow-sm relative overflow-hidden group hover:shadow-md transition-shadow">
+<div class="absolute top-0 left-0 right-0 h-1 bg-primary"></div>
+<div class="flex flex-col gap-space-md">
+<div class="w-10 h-10 rounded bg-surface-container-low flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[24px]">grid_view</span>
+</div>
+<div class="flex flex-col gap-space-2xs">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">High-Density Operational Clarity</h3>
+<p class="font-body-sm text-body-sm text-secondary">
+              Present live telemetry across 50+ concurrent turbine and pump trains without visual clutter. Employs micro-gutters, structured progressive disclosure, and tabular alignment to compress 100Hz vibration curves.
+            </p>
+</div>
+</div>
+<div class="pt-space-md mt-space-md bg-surface-container-low -mx-space-xl -mb-space-xl p-space-base">
+<span class="font-label-caps text-label-caps text-secondary uppercase font-semibold">Rule: Zero Ornamental Canvas</span>
+</div>
+</div>
+<!-- Tenet 2 -->
+<div class="flex flex-col justify-between bg-surface-container-lowest p-space-xl rounded-xl shadow-sm relative overflow-hidden group hover:shadow-md transition-shadow">
+<div class="absolute top-0 left-0 right-0 h-1 bg-error"></div>
+<div class="flex flex-col gap-space-md">
+<div class="w-10 h-10 rounded bg-error-container flex items-center justify-center text-error">
+<span class="material-symbols-outlined text-[24px]">notifications_paused</span>
+</div>
+<div class="flex flex-col gap-space-2xs">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Alert Fatigue Elimination</h3>
+<p class="font-body-sm text-body-sm text-secondary">
+              Strict color governance where crimson (<span class="font-bold">#ef4444</span>) is strictly locked for immediate P1 trip hazards (RUL &lt;12h). Sub-threshold anomalies must cluster automatically into unified single-machine units.
+            </p>
+</div>
+</div>
+<div class="pt-space-md mt-space-md bg-surface-container-low -mx-space-xl -mb-space-xl p-space-base">
+<span class="font-label-caps text-label-caps text-secondary uppercase font-semibold">Rule: Correlate Multi-Signal Alerts</span>
+</div>
+</div>
+<!-- Tenet 3 -->
+<div class="flex flex-col justify-between bg-surface-container-lowest p-space-xl rounded-xl shadow-sm relative overflow-hidden group hover:shadow-md transition-shadow">
+<div class="absolute top-0 left-0 right-0 h-1 bg-tertiary"></div>
+<div class="flex flex-col gap-space-md">
+<div class="w-10 h-10 rounded bg-surface-container-low flex items-center justify-center text-tertiary">
+<span class="material-symbols-outlined text-[24px]">fact_check</span>
+</div>
+<div class="flex flex-col gap-space-2xs">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Context-Bound Actionability</h3>
+<p class="font-body-sm text-body-sm text-secondary">
+              Never render naked sensor alerts without an immediately executable mitigation path: tied standard operating procedure (SOP), technician dispatch button, and Lock-Out Tag-Out (LOTO) protocols.
+            </p>
+</div>
+</div>
+<div class="pt-space-md mt-space-md bg-surface-container-low -mx-space-xl -mb-space-xl p-space-base">
+<span class="font-label-caps text-label-caps text-secondary uppercase font-semibold">Rule: Never Alert Without Next Step</span>
+</div>
+</div>
+<!-- Tenet 4 -->
+<div class="flex flex-col justify-between bg-surface-container-lowest p-space-xl rounded-xl shadow-sm relative overflow-hidden group hover:shadow-md transition-shadow">
+<div class="absolute top-0 left-0 right-0 h-1 bg-secondary"></div>
+<div class="flex flex-col gap-space-md">
+<div class="w-10 h-10 rounded bg-surface-container-low flex items-center justify-center text-on-surface">
+<span class="material-symbols-outlined text-[24px]">cognition</span>
+</div>
+<div class="flex flex-col gap-space-2xs">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Verified AI Transparency</h3>
+<p class="font-body-sm text-body-sm text-secondary">
+              AI diagnostics must rigorously isolate raw sensor telemetry, mathematical FFT calculations, OEM manuals, and generative predictions. Fabricated statistical certainties are strictly blocked.
+            </p>
+</div>
+</div>
+<div class="pt-space-md mt-space-md bg-surface-container-low -mx-space-xl -mb-space-xl p-space-base">
+<span class="font-label-caps text-label-caps text-secondary uppercase font-semibold">Rule: Explicit Attribution Layers</span>
+</div>
+</div>
+</div>
+</section>
+<!-- SECTION 2: Color Palette & Semantic Tokens -->
+<section class="flex flex-col gap-space-lg">
+<div class="flex flex-col gap-space-2xs">
+<span class="font-label-caps text-label-caps text-primary uppercase font-bold tracking-wider">Color Specification</span>
+<h2 class="font-headline-lg text-headline-lg text-on-surface">2. Semantic Color Architecture</h2>
+<p class="font-body-md text-body-md text-secondary">
+        Color in Resonex conveys physical machine state rather than visual flourish. Every hex code adheres to WCAG AA 4.5:1 minimum contrast.
+      </p>
+</div>
+<!-- Palette Bento Layout -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-base">
+<!-- Diagnostic & Severity Swatches (8 columns) -->
+<div class="lg:col-span-8 bg-surface-container-lowest p-space-xl rounded-xl shadow-sm flex flex-col gap-space-lg">
+<div class="flex items-center justify-between">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Machine Operational Severity Tokens</h3>
+<span class="font-label-caps text-label-caps text-secondary">ISO 10816-3 ALIGNED</span>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-space-base">
+<!-- Critical P1 -->
+<div class="p-space-base rounded-xl bg-error-container/30 flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="w-3 h-3 rounded-full bg-error animate-ping"></span>
+<span class="font-title-md text-title-md font-bold text-error">CRITICAL P1</span>
+</div>
+<span class="px-2 py-0.5 rounded bg-error text-on-error font-label-caps text-label-caps font-bold">#EF4444</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface">
+              Triggered when RUL is under 12 hours, cavitation spikes cross threshold, or automatic trip gates trip. Mandates technician dispatch.
+            </p>
+<div class="flex items-center justify-between pt-space-xs font-label-caps text-label-caps text-secondary">
+<span>Token: <code class="text-error font-bold">text-error / bg-error</code></span>
+<span>Min Contrast: 5.2:1</span>
+</div>
+</div>
+<!-- High Risk P2 -->
+<div class="p-space-base rounded-xl bg-surface-container-high/40 flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="w-3 h-3 rounded-full bg-secondary"></span>
+<span class="font-title-md text-title-md font-bold text-on-surface">HIGH RISK P2</span>
+</div>
+<span class="px-2 py-0.5 rounded bg-secondary text-on-secondary font-label-caps text-label-caps font-bold">#F59E0B</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface">
+              Significant degradation in bearing cage or stator temperature. Requires maintenance inspection during current operational shift.
+            </p>
+<div class="flex items-center justify-between pt-space-xs font-label-caps text-label-caps text-secondary">
+<span>Token: <code class="text-secondary font-bold">bg-secondary-container</code></span>
+<span>Min Contrast: 4.8:1</span>
+</div>
+</div>
+<!-- Nominal / Healthy -->
+<div class="p-space-base rounded-xl bg-tertiary-fixed/30 flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="w-3 h-3 rounded-full bg-tertiary"></span>
+<span class="font-title-md text-title-md font-bold text-tertiary">NOMINAL HEALTH</span>
+</div>
+<span class="px-2 py-0.5 rounded bg-tertiary text-on-tertiary font-label-caps text-label-caps font-bold">#007D57</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface">
+              Zero anomalous frequencies detected. Vibration RMS below 1.4 mm/s, bearing life prediction within standard lifecycle bounds.
+            </p>
+<div class="flex items-center justify-between pt-space-xs font-label-caps text-label-caps text-secondary">
+<span>Token: <code class="text-tertiary font-bold">text-tertiary / bg-tertiary</code></span>
+<span>Min Contrast: 5.6:1</span>
+</div>
+</div>
+<!-- Advisory P3 / Tracking -->
+<div class="p-space-base rounded-xl bg-surface-container-low flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="w-3 h-3 rounded-full bg-outline"></span>
+<span class="font-title-md text-title-md font-bold text-on-surface">WATCHLIST P3</span>
+</div>
+<span class="px-2 py-0.5 rounded bg-surface-container-highest text-on-surface font-label-caps text-label-caps font-bold">#737686</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface">
+              Micro-trend shift flagged by model. Zero manual intervention required; baseline telemetry logging frequency doubled to 200Hz.
+            </p>
+<div class="flex items-center justify-between pt-space-xs font-label-caps text-label-caps text-secondary">
+<span>Token: <code class="text-outline font-bold">text-outline / bg-surface-container</code></span>
+<span>Min Contrast: 4.6:1</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Surface & Interactive Accents (4 columns) -->
+<div class="lg:col-span-4 bg-surface-container-lowest p-space-xl rounded-xl shadow-sm flex flex-col gap-space-md">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Surface Tiers &amp; Brand Accent</h3>
+<div class="flex flex-col gap-space-xs">
+<!-- Primary Accent -->
+<div class="flex items-center justify-between p-space-sm rounded bg-primary-container text-on-primary-container">
+<div class="flex items-center gap-space-sm">
+<span class="w-4 h-4 rounded bg-primary-container"></span>
+<span class="font-title-md text-title-md font-semibold">Primary Accent</span>
+</div>
+<span class="font-label-caps text-label-caps">#2563EB</span>
+</div>
+<!-- Canvas Surface -->
+<div class="flex items-center justify-between p-space-sm rounded bg-surface-container-low text-on-surface">
+<div class="flex items-center gap-space-sm">
+<span class="w-4 h-4 rounded bg-surface-container-low shadow-sm"></span>
+<span class="font-title-md text-title-md">Surface Canvas</span>
+</div>
+<span class="font-label-caps text-label-caps text-secondary">#F8F9FF</span>
+</div>
+<!-- Surface Card Lowest -->
+<div class="flex items-center justify-between p-space-sm rounded bg-surface-container-lowest text-on-surface shadow-sm">
+<div class="flex items-center gap-space-sm">
+<span class="w-4 h-4 rounded bg-surface-container-lowest shadow-sm"></span>
+<span class="font-title-md text-title-md">Card Lowest Tier</span>
+</div>
+<span class="font-label-caps text-label-caps text-secondary">#FFFFFF</span>
+</div>
+<!-- Secondary Container -->
+<div class="flex items-center justify-between p-space-sm rounded bg-secondary-container text-on-secondary-fixed">
+<div class="flex items-center gap-space-sm">
+<span class="w-4 h-4 rounded bg-secondary-container"></span>
+<span class="font-title-md text-title-md">Secondary Container</span>
+</div>
+<span class="font-label-caps text-label-caps">#DAE2FD</span>
+</div>
+<!-- Surface Dim -->
+<div class="flex items-center justify-between p-space-sm rounded bg-surface-dim text-on-surface">
+<div class="flex items-center gap-space-sm">
+<span class="w-4 h-4 rounded bg-surface-dim"></span>
+<span class="font-title-md text-title-md">Surface Dim Hover</span>
+</div>
+<span class="font-label-caps text-label-caps text-secondary">#CBDBF5</span>
+</div>
+</div>
+<div class="p-space-sm rounded bg-surface-container-low flex items-start gap-space-sm text-secondary font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[18px] text-primary shrink-0 mt-0.5">info</span>
+<span>Never render colored text on unverified surface tiers. Verify contrast tokens via the Resonex Style Spec.</span>
+</div>
+</div>
+</div>
+</section>
+<!-- SECTION 3: Typography & Micro-Hierarchy Scale -->
+<section class="flex flex-col gap-space-lg">
+<div class="flex flex-col gap-space-2xs">
+<span class="font-label-caps text-label-caps text-primary uppercase font-bold tracking-wider">Typographic System</span>
+<h2 class="font-headline-lg text-headline-lg text-on-surface">3. Monospaced &amp; Proportional Telemetry Scale</h2>
+<p class="font-body-md text-body-md text-secondary">
+        Numeric telemetry requires strict tabular alignment to eliminate jitter when digits update at 60fps.
+      </p>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-base">
+<!-- Type Table (8 cols) -->
+<div class="lg:col-span-8 bg-surface-container-lowest p-space-xl rounded-xl shadow-sm flex flex-col gap-space-md">
+<div class="overflow-x-auto">
+<table class="w-full text-left">
+<thead>
+<tr class="bg-surface-container-low text-secondary font-label-caps text-label-caps uppercase">
+<th class="py-2.5 px-3">Token Role</th>
+<th class="py-2.5 px-3">Size / Leading</th>
+<th class="py-2.5 px-3">Weight</th>
+<th class="py-2.5 px-3">Sample Live Output</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-surface-container font-body-sm text-body-sm">
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="py-3 px-3 font-semibold text-primary">display-lg</td>
+<td class="py-3 px-3 font-mono text-secondary">32px / 40px</td>
+<td class="py-3 px-3">600 SemiBold</td>
+<td class="py-3 px-3 font-display-lg text-display-lg font-bold text-on-surface tracking-tight tabular-nums">0.824 mm/s</td>
+</tr>
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="py-3 px-3 font-semibold text-primary">telemetry-xl</td>
+<td class="py-3 px-3 font-mono text-secondary">28px / 32px</td>
+<td class="py-3 px-3">700 Bold</td>
+<td class="py-3 px-3 font-telemetry-xl text-telemetry-xl text-on-surface tabular-nums">84.2°C <span class="text-body-sm font-body-sm text-secondary font-normal">RMS</span></td>
+</tr>
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="py-3 px-3 font-semibold text-primary">headline-md</td>
+<td class="py-3 px-3 font-mono text-secondary">20px / 28px</td>
+<td class="py-3 px-3">600 SemiBold</td>
+<td class="py-3 px-3 font-headline-md text-headline-md text-on-surface">Centrifugal Train 04B</td>
+</tr>
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="py-3 px-3 font-semibold text-primary">title-md</td>
+<td class="py-3 px-3 font-mono text-secondary">14px / 20px</td>
+<td class="py-3 px-3">600 SemiBold</td>
+<td class="py-3 px-3 font-title-md text-title-md text-on-surface">Bearing Inner Race Defect</td>
+</tr>
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="py-3 px-3 font-semibold text-primary">label-caps</td>
+<td class="py-3 px-3 font-mono text-secondary">11px / 14px</td>
+<td class="py-3 px-3">600 Medium</td>
+<td class="py-3 px-3 font-label-caps text-label-caps uppercase tracking-wider text-secondary">SOP-MECH-04-V4 · BAY 02</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Specimen Card (4 cols) -->
+<div class="lg:col-span-4 bg-surface-container-lowest p-space-xl rounded-xl shadow-sm flex flex-col justify-between gap-space-md">
+<div class="flex flex-col gap-space-sm">
+<div class="flex items-center justify-between pb-space-xs">
+<span class="font-label-caps text-label-caps text-secondary font-semibold uppercase">Telemetry Specimen</span>
+<span class="px-2 py-0.5 rounded bg-tertiary-fixed text-on-tertiary-fixed font-label-caps text-label-caps font-bold">SYNC OK</span>
+</div>
+<div class="p-space-base bg-surface-container-low rounded-xl flex flex-col gap-space-sm">
+<span class="font-label-caps text-label-caps text-secondary font-mono">SENSOR-ID: ACCEL-Z-1048</span>
+<div class="flex items-baseline justify-between">
+<span class="font-display-lg text-display-lg font-bold text-on-surface tabular-nums">4.18</span>
+<span class="font-title-md text-title-md text-secondary font-bold">g Peak</span>
+</div>
+<!-- Inline Mini Sparkline (Under 2KB inline SVG) -->
+<div class="w-full h-12 flex items-end">
+<svg class="w-full h-full text-primary" fill="none" preserveaspectratio="none" stroke="currentColor" viewbox="0 0 100 30">
+<path d="M0,25 Q15,5 30,22 T60,10 T85,28 L100,8" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+<path d="M0,25 Q15,5 30,22 T60,10 T85,28 L100,8 L100,30 L0,30 Z" fill="currentColor" fill-opacity="0.1"></path>
+</svg>
+</div>
+<div class="flex items-center justify-between text-secondary font-mono text-body-sm pt-space-xs">
+<span>Timestamp: 14:02:08.411Z</span>
+<span class="text-tertiary font-bold">Δ 0.02ms</span>
+</div>
+</div>
+</div>
+<div class="flex flex-col gap-space-2xs text-secondary font-body-sm text-body-sm">
+<span class="font-bold text-on-surface">Typographic Enforcement:</span>
+<span>Numbers must always utilize <code>tabular-nums</code>. Never let font weights exceed 700 to ensure clarity on industrial low-contrast screens.</span>
+</div>
+</div>
+</div>
+</section>
+<!-- SECTION 4: Component Anatomy & Structural Patterns -->
+<section class="flex flex-col gap-space-lg">
+<div class="flex flex-col gap-space-2xs">
+<span class="font-label-caps text-label-caps text-primary uppercase font-bold tracking-wider">Architecture</span>
+<h2 class="font-headline-lg text-headline-lg text-on-surface">4. Component Anatomy: The Resonex Machine Health Card</h2>
+<p class="font-body-md text-body-md text-secondary">
+        The core organizational molecule of the monitoring dashboard. Every critical piece of telemetry is situated strictly in predictably indexed regions.
+      </p>
+</div>
+<!-- Annotated Machine Card Breakdown -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-base">
+<!-- Interactive Visual Blueprint (7 cols) -->
+<div class="lg:col-span-7 bg-surface-container-lowest p-space-xl rounded-xl shadow-sm flex flex-col gap-space-base relative">
+<div class="flex items-center justify-between">
+<span class="font-label-caps text-label-caps text-secondary font-bold uppercase">Anatomy Blueprint</span>
+<span class="font-mono text-body-sm text-secondary">Component ID: &lt;MachineHealthCard /&gt;</span>
+</div>
+<!-- The Target Component with Pointer Callouts -->
+<div class="p-space-xl rounded-xl bg-surface-container-low flex flex-col gap-space-md shadow-sm relative">
+<!-- Callout 1 & 2 Header Zone -->
+<div class="flex items-start justify-between gap-space-base">
+<div class="flex flex-col">
+<div class="flex items-center gap-space-xs">
+<span class="w-2 h-2 rounded-full bg-error"></span>
+<span class="font-label-caps text-label-caps text-secondary uppercase font-bold">Bay 04 · Line 2</span>
+<span class="px-1.5 py-0.5 rounded bg-surface-container-highest text-secondary font-label-caps text-[10px] font-mono">NODE-092</span>
+</div>
+<h4 class="font-headline-md text-headline-md text-on-surface font-bold">Feedwater Injection Pump #3</h4>
+</div>
+<!-- Marker 1: Status Chip -->
+<div class="relative">
+<span class="px-space-sm py-1 rounded bg-error text-on-error font-label-caps text-label-caps font-bold tracking-wider flex items-center gap-1.5 shadow-sm">
+<span class="w-2 h-2 rounded-full bg-on-error animate-ping"></span>
+                CRITICAL P1 (4.2h RUL)
+              </span>
+<div class="absolute -top-3 -right-3 w-6 h-6 rounded-full bg-primary text-on-primary font-bold text-xs flex items-center justify-center shadow">1</div>
+</div>
+</div>
+<!-- Marker 3: Anomaly Stream -->
+<div class="p-space-base rounded bg-surface-container-lowest flex flex-col gap-space-xs relative">
+<div class="absolute -top-3 -left-3 w-6 h-6 rounded-full bg-primary text-on-primary font-bold text-xs flex items-center justify-center shadow">2</div>
+<div class="flex items-center justify-between">
+<span class="font-title-md text-title-md text-on-surface font-semibold">2X Shaft Harmonics Peak Detected</span>
+<span class="font-mono font-bold text-error text-body-md">2.41 mm/s RMS</span>
+</div>
+<p class="font-body-sm text-body-sm text-secondary">Vibration FFT indicates premature angular misalignment in coupling sleeve.</p>
+</div>
+<!-- Marker 4: SOP Mitigation -->
+<div class="flex items-center justify-between p-space-sm rounded bg-surface-container-high relative">
+<div class="absolute -top-3 -left-3 w-6 h-6 rounded-full bg-primary text-on-primary font-bold text-xs flex items-center justify-center shadow">3</div>
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-primary text-[20px]">assignment_turned_in</span>
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps text-on-surface font-bold uppercase">Mandatory Procedure</span>
+<span class="font-body-sm text-body-sm text-secondary font-mono">SOP-MECH-481 (Coupling Replacement)</span>
+</div>
+</div>
+<span class="px-2 py-0.5 rounded bg-surface-container-lowest text-secondary font-label-caps text-label-caps font-bold">Est. 45m</span>
+</div>
+<!-- Marker 5: Direct Dispatch Action -->
+<div class="flex items-center justify-between pt-space-xs relative">
+<div class="absolute -bottom-2 -left-2 w-6 h-6 rounded-full bg-primary text-on-primary font-bold text-xs flex items-center justify-center shadow">4</div>
+<div class="flex items-center gap-space-xs text-secondary font-label-caps text-label-caps">
+<span class="material-symbols-outlined text-[16px]">verified_user</span>
+<span>LOTO Permit #209 Verified</span>
+</div>
+<div class="flex items-center gap-space-sm">
+<button class="px-space-base py-1.5 rounded bg-surface-container-highest text-on-surface font-title-md text-title-md hover:bg-surface-dim transition-colors">
+                Telemetry Log
+              </button>
+<button class="px-space-base py-1.5 rounded bg-error text-on-error font-title-md text-title-md hover:opacity-90 transition-opacity shadow-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-[18px]">build</span>
+<span>Dispatch Shift Tech</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Structural Breakdown Legend (5 cols) -->
+<div class="lg:col-span-5 bg-surface-container-lowest p-space-xl rounded-xl shadow-sm flex flex-col justify-between gap-space-base">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Card Zone Functional Guarantees</h3>
+<div class="flex flex-col gap-space-sm">
+<div class="flex items-start gap-space-sm">
+<div class="w-6 h-6 rounded-full bg-primary text-on-primary font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">1</div>
+<div class="flex flex-col">
+<span class="font-title-md text-title-md font-semibold text-on-surface">Status Chip &amp; RUL Clock</span>
+<span class="font-body-sm text-body-sm text-secondary">Immediate glance visibility of remaining useful life. Never truncate RUL calculations.</span>
+</div>
+</div>
+<div class="flex items-start gap-space-sm">
+<div class="w-6 h-6 rounded-full bg-primary text-on-primary font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">2</div>
+<div class="flex flex-col">
+<span class="font-title-md text-title-md font-semibold text-on-surface">Harmonic Diagnosis Summary</span>
+<span class="font-body-sm text-body-sm text-secondary">Eliminates raw spectral graphs during triage. Converts 1X, 2X, 3X frequencies into physical defect labels.</span>
+</div>
+</div>
+<div class="flex items-start gap-space-sm">
+<div class="w-6 h-6 rounded-full bg-primary text-on-primary font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">3</div>
+<div class="flex flex-col">
+<span class="font-title-md text-title-md font-semibold text-on-surface">Prescribed SOP Binding</span>
+<span class="font-body-sm text-body-sm text-secondary">Direct association with plant safety manuals prevents ad-hoc, unapproved mechanical interventions.</span>
+</div>
+</div>
+<div class="flex items-start gap-space-sm">
+<div class="w-6 h-6 rounded-full bg-primary text-on-primary font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">4</div>
+<div class="flex flex-col">
+<span class="font-title-md text-title-md font-semibold text-on-surface">Single-Click Dispatch</span>
+<span class="font-body-sm text-body-sm text-secondary">Zero modal labyrinth. Directly triggers worker telemetry notification with attached calibration guide.</span>
+</div>
+</div>
+</div>
+<div class="p-space-sm rounded bg-surface-container-low flex items-center gap-space-sm text-secondary font-label-caps text-label-caps uppercase">
+<span class="material-symbols-outlined text-[18px]">rule</span>
+<span>Zero layout shift allowed under asynchronous data re-renders</span>
+</div>
+</div>
+</div>
+</section>
+<!-- SECTION 5: Keyboard Ergonomics & Implementation Tokens -->
+<section class="flex flex-col gap-space-lg">
+<div class="flex flex-col gap-space-2xs">
+<span class="font-label-caps text-label-caps text-primary uppercase font-bold tracking-wider">Ergonomics &amp; Code</span>
+<h2 class="font-headline-lg text-headline-lg text-on-surface">5. Implementation Reference &amp; Plant Floor Ergonomics</h2>
+<p class="font-body-md text-body-md text-secondary">
+        Technicians frequently navigate using ruggedized hardware terminals and gloved hands. Keyboard traversal is a first-class requirement.
+      </p>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-base">
+<!-- Keyboard Shortcuts Matrix (5 cols) -->
+<div class="lg:col-span-5 bg-surface-container-lowest p-space-xl rounded-xl shadow-sm flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Keyboard-First Telemetry Traversal</h3>
+<span class="material-symbols-outlined text-secondary text-[20px]">keyboard</span>
+</div>
+<div class="flex flex-col divide-y divide-surface-container font-body-sm text-body-sm">
+<div class="flex items-center justify-between py-space-sm">
+<span class="text-on-surface">Global Asset Search</span>
+<kbd class="px-2 py-1 rounded bg-surface-container-highest font-mono text-xs font-bold text-secondary">/</kbd>
+</div>
+<div class="flex items-center justify-between py-space-sm">
+<span class="text-on-surface">Acknowledge Active Alarm</span>
+<kbd class="px-2 py-1 rounded bg-surface-container-highest font-mono text-xs font-bold text-secondary">A</kbd>
+</div>
+<div class="flex items-center justify-between py-space-sm">
+<span class="text-on-surface">Instant Dispatch Modal</span>
+<kbd class="px-2 py-1 rounded bg-surface-container-highest font-mono text-xs font-bold text-secondary">D</kbd>
+</div>
+<div class="flex items-center justify-between py-space-sm">
+<span class="text-on-surface">Toggle AI Diagnostics Panel</span>
+<kbd class="px-2 py-1 rounded bg-surface-container-highest font-mono text-xs font-bold text-secondary">CMD + K</kbd>
+</div>
+<div class="flex items-center justify-between py-space-sm">
+<span class="text-on-surface">Close Drawer / Escape Triage</span>
+<kbd class="px-2 py-1 rounded bg-surface-container-highest font-mono text-xs font-bold text-secondary">ESC</kbd>
+</div>
+</div>
+<div class="p-space-sm rounded bg-surface-container-low font-body-sm text-body-sm text-secondary">
+<strong class="text-on-surface">Guideline:</strong> All interactive cards must support <code>:focus-visible</code> with a high-contrast focus ring.
+        </div>
+</div>
+<!-- CSS Implementation Block (7 cols) -->
+<div class="lg:col-span-7 bg-surface-container-lowest p-space-xl rounded-xl shadow-sm flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Design Tokens CSS Variables (:root)</h3>
+<button class="px-space-sm py-1 rounded bg-surface-container-low hover:bg-surface-container-high text-primary font-label-caps text-label-caps font-bold transition-colors flex items-center gap-1" onclick="navigator.clipboard.writeText(document.getElementById('token-css-block').innerText)">
+<span class="material-symbols-outlined text-[14px]">content_copy</span> Copy
+          </button>
+</div>
+<div class="p-space-base rounded-xl bg-surface-container text-on-surface font-mono text-body-sm overflow-x-auto">
+<pre id="token-css-block"><code>:root {
+  /* Resonex Industrial Tokens v2.4 */
+  --color-primary: #004ac6;
+  --color-primary-container: #2563eb;
+  --color-critical-p1: #ef4444;
+  --color-warning-p2: #f59e0b;
+  --color-nominal-ok: #007d57;
+  --color-surface-canvas: #f8f9ff;
+  --color-surface-card: #ffffff;
+  
+  /* Telemetry Typography Rules */
+  --font-telemetry-mono: 'Inter', monospace;
+  --font-feature-tnum: 'tnum' 1;
+}
+
+/* Enforced Telemetry Rule */
+.telemetry-cell {
+  font-feature-settings: var(--font-feature-tnum);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}</code></pre>
+</div>
+<div class="flex flex-col gap-space-2xs text-secondary font-body-sm text-body-sm">
+<span class="font-bold text-on-surface">Developer Non-Negotiables:</span>
+<ul class="list-disc list-inside space-y-1">
+<li>Never inject arbitrary hex values in pull requests.</li>
+<li>All telemetry timestamps must render in UTC ISO-8601 with millisecond precision on hover.</li>
+<li>Every machine status alarm must include bay location and OEM part number metadata.</li>
+</ul>
+</div>
+</div>
+</div>
+</section>
+<!-- Floating Resonex AI Assistant Context Notification Widget -->
+<div class="fixed bottom-20 right-6 z-40 max-w-xs animate-bounce" id="ai-design-helper">
+<div class="p-space-base rounded-xl bg-surface-container-lowest shadow-xl flex items-start gap-space-sm">
+<span class="material-symbols-outlined text-primary text-[24px]">smart_toy</span>
+<div class="flex flex-col gap-0.5">
+<span class="font-title-md text-title-md text-on-surface font-bold">Resonex Design Assistant</span>
+<span class="font-body-sm text-body-sm text-secondary">Ask for code snippets, Tailwind classes, or ISO vibration thresholds.</span>
+</div>
+<button class="text-secondary hover:text-on-surface" onclick="document.getElementById('ai-design-helper').style.display='none'">
+<span class="material-symbols-outlined text-[16px]">close</span>
+</button>
+</div>
+</div>
+</div>
+<script>
+  // Simple interactive helper for token copying notification
+  const copyBtn = document.querySelector('button[onclick*="clipboard"]');
+  if (copyBtn) {
+    copyBtn.addEventListener('click', () => {
+      const orig = copyBtn.innerHTML;
+      copyBtn.innerHTML = '<span class="material-symbols-outlined text-[14px]">check</span> Copied!';
+      setTimeout(() => { copyBtn.innerHTML = orig; }, 2000);
+    });
+  }
+</script></main></div><div class="fixed bottom-6 right-6 z-50"><button class="flex items-center gap-space-xs px-space-base py-space-sm bg-primary text-on-primary rounded-full shadow-lg hover:bg-primary-container transition-all cursor-pointer font-title-md text-title-md"><span class="material-symbols-outlined text-[20px]">smart_toy</span><span>Resonex AI Assistant</span></button></div></body></html>

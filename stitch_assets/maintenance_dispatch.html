@@ -1,0 +1,762 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><meta content="web_dashboard" name="shell-type"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = {
+  darkMode: "class",
+  theme: {
+    extend: {
+      "colors": {
+        "on-secondary-fixed": "#131b2e",
+        "surface-bright": "#f8f9ff",
+        "surface-container-low": "#eff4ff",
+        "on-tertiary-container": "#bdffdc",
+        "tertiary-container": "#007d57",
+        "primary-container": "#2563eb",
+        "on-error-container": "#93000a",
+        "secondary-fixed-dim": "#bec6e0",
+        "surface-variant": "#d3e4fe",
+        "inverse-primary": "#b4c5ff",
+        "background": "#f8f9ff",
+        "secondary-container": "#dae2fd",
+        "on-surface": "#0b1c30",
+        "primary-fixed": "#dbe1ff",
+        "secondary": "#565e74",
+        "on-secondary": "#ffffff",
+        "primary-fixed-dim": "#b4c5ff",
+        "on-primary": "#ffffff",
+        "on-secondary-container": "#5c647a",
+        "on-error": "#ffffff",
+        "primary": "#004ac6",
+        "on-secondary-fixed-variant": "#3f465c",
+        "tertiary-fixed-dim": "#68dba9",
+        "outline": "#737686",
+        "secondary-fixed": "#dae2fd",
+        "surface-container-high": "#dce9ff",
+        "inverse-surface": "#213145",
+        "on-primary-fixed": "#00174b",
+        "tertiary": "#006243",
+        "on-primary-fixed-variant": "#003ea8",
+        "on-background": "#0b1c30",
+        "error": "#ba1a1a",
+        "on-tertiary": "#ffffff",
+        "surface": "#f8f9ff",
+        "surface-container": "#e5eeff",
+        "surface-container-highest": "#d3e4fe",
+        "surface-tint": "#0053db",
+        "outline-variant": "#c3c6d7",
+        "surface-dim": "#cbdbf5",
+        "inverse-on-surface": "#eaf1ff",
+        "on-tertiary-fixed": "#002114",
+        "tertiary-fixed": "#85f8c4",
+        "on-tertiary-fixed-variant": "#005137",
+        "on-surface-variant": "#434655",
+        "surface-container-lowest": "#ffffff",
+        "on-primary-container": "#eeefff",
+        "error-container": "#ffdad6"
+      },
+      "borderRadius": {
+        "DEFAULT": "0.125rem",
+        "lg": "0.25rem",
+        "xl": "0.5rem",
+        "full": "0.75rem"
+      },
+      "spacing": {
+        "margin-mobile": "1rem",
+        "space-2xl": "2rem",
+        "space-sm": "0.5rem",
+        "space-2xs": "0.125rem",
+        "gutter": "1rem",
+        "gutter-dense": "0.5rem",
+        "space-xs": "0.25rem",
+        "margin": "1.5rem",
+        "space-lg": "1.25rem",
+        "space-xl": "1.5rem",
+        "space-base": "1rem",
+        "space-md": "0.75rem"
+      },
+      "fontFamily": {
+        "title-md": ["Inter"],
+        "label-md": ["Inter"],
+        "label-caps": ["Inter"],
+        "telemetry-xl": ["Inter"],
+        "body-md": ["Inter"],
+        "telemetry-md": ["Inter"],
+        "headline-lg": ["Inter"],
+        "headline-md": ["Inter"],
+        "body-sm": ["Inter"],
+        "telemetry-sm": ["Inter"],
+        "body-lg": ["Inter"],
+        "headline-sm": ["Inter"],
+        "display-lg": ["Inter"]
+      },
+      "fontSize": {
+        "title-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "600"}],
+        "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.01em", "fontWeight": "500"}],
+        "label-caps": ["11px", {"lineHeight": "14px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+        "telemetry-xl": ["28px", {"lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+        "body-md": ["13px", {"lineHeight": "18px", "letterSpacing": "0em", "fontWeight": "400"}],
+        "telemetry-md": ["14px", {"lineHeight": "18px", "letterSpacing": "0em", "fontWeight": "600"}],
+        "headline-lg": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.015em", "fontWeight": "600"}],
+        "headline-md": ["20px", {"lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+        "body-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0em", "fontWeight": "400"}],
+        "telemetry-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0em", "fontWeight": "500"}],
+        "body-lg": ["15px", {"lineHeight": "22px", "letterSpacing": "0em", "fontWeight": "400"}],
+        "headline-sm": ["16px", {"lineHeight": "24px", "letterSpacing": "-0.005em", "fontWeight": "600"}],
+        "display-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600"}]
+      }
+    }
+  }
+}</script></head><body class="bg-background font-body-md text-on-surface antialiased"><aside class="fixed left-0 top-0 h-full w-64 bg-surface-container-lowest shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-50 flex flex-col justify-between"><div class="flex flex-col"><div class="h-16 px-space-base flex items-center gap-space-sm bg-surface-container-lowest"><img alt="Resonex Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1W5zwb0R-cINsk7JQGH4zLdjc9iWZtEtW0NVuoLaQFf88Yt5N4tSPo8clU2tnf0zwEzDSnoV9I4bYxAXd7wpO8zWvKZpM1_wHfYMBpBo8rVsI4ufNC6DK_lCe3UoI2ubpd-v3xaBqzwA7fcwZZK4SHPKgNywhEk3GEe6a0_f2rYmYUS9DmHMRrgz3IU86nIoVK_olscocOocDElj0LcwV2W-xkTNXlOB_mU2NcvnSE"><div class="flex flex-col"><span class="font-headline-sm text-headline-sm tracking-tight text-on-surface font-bold leading-none">RESONEX</span><span class="font-label-caps text-label-caps uppercase text-secondary font-semibold">Telemetry Core</span></div></div><div class="px-space-base py-space-xs"><div class="flex items-center gap-space-xs px-space-sm py-space-2xs bg-surface-container-low rounded"><span class="w-2 h-2 rounded-full bg-tertiary"></span><span class="font-label-caps text-label-caps font-semibold text-secondary uppercase tracking-wider">50 Machines Connected</span></div></div><nav class="flex flex-col gap-space-2xs px-space-sm mt-space-sm" data-active-classes="bg-primary-container text-on-primary-container font-semibold"><a class="flex items-center justify-between px-space-base py-space-sm rounded text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-title-md text-title-md" data-path="overview" href="#"><span>Overview</span></a><a class="flex items-center justify-between px-space-base py-space-sm rounded text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-title-md text-title-md" data-path="machines" href="#"><span>Machines</span></a><a class="flex items-center justify-between px-space-base py-space-sm rounded text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-title-md text-title-md" data-path="alerts" href="#"><span>Alerts</span><span class="flex items-center gap-1"><span class="px-1.5 py-0.5 rounded-full bg-error text-on-error font-label-caps text-[10px] font-bold leading-none">28</span><span class="px-1.5 py-0.5 rounded-full bg-surface-container-highest/80 text-secondary font-label-caps text-[10px] font-medium leading-none">4 unack</span></span></a><a aria-current="page" class="flex items-center justify-between px-space-base py-space-sm rounded transition-colors bg-primary-container text-on-primary-container font-semibold" data-path="maintenance-dispatch" href="#"><span>Maintenance</span></a><a class="flex items-center justify-between px-space-base py-space-sm rounded text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-title-md text-title-md" data-path="reports" href="#"><span>Reports</span></a><a class="flex items-center justify-between px-space-base py-space-sm rounded text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-title-md text-title-md" data-path="settings" href="#"><span>Settings</span></a></nav></div><div class="p-space-base bg-surface-container-low"><div class="flex items-center justify-between"><span class="font-label-caps text-label-caps uppercase text-secondary font-semibold">Vibration Telemetry</span><span class="font-telemetry-sm text-telemetry-sm text-tertiary font-bold">99.98%</span></div><div class="w-full bg-surface-container-highest h-1 rounded mt-space-2xs overflow-hidden"><div class="bg-tertiary h-full w-[99.98%]"></div></div></div></aside><div class="pl-64"><header class="fixed top-0 left-64 right-0 h-16 bg-surface-container-lowest shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-40"><div class="w-full h-16 px-space-xl flex items-center justify-between gap-space-base"><div class="flex items-center gap-space-lg"><div class="flex items-center gap-space-xs font-label-md text-label-md"><span class="text-secondary">Resonex</span><span class="text-outline-variant">/</span><span class="text-on-surface font-semibold">Maintenance Dispatch</span></div><div class="relative flex items-center w-72"><span class="material-symbols-outlined absolute left-2.5 text-secondary text-[18px]">search</span><input class="w-full h-8 pl-8 pr-3 bg-surface-container-low text-on-surface placeholder:text-secondary font-body-sm text-body-sm rounded outline-none focus:bg-surface-container-lowest" placeholder="Search machines... (press /)" type="text"><kbd class="absolute right-2 font-label-caps text-label-caps text-secondary bg-surface-container-highest px-1 py-0.5 rounded">/</kbd></div></div><div class="flex items-center gap-space-base"><div class="flex items-center gap-space-xs px-space-sm py-space-2xs rounded-full bg-tertiary-fixed text-on-tertiary-fixed font-label-caps text-label-caps font-semibold"><span class="w-1.5 h-1.5 rounded-full bg-tertiary animate-pulse"></span>Monitoring Active · 50/50 Synced</div><div class="flex items-center gap-space-xs px-space-sm py-space-2xs rounded bg-surface-container-low text-secondary font-label-md text-label-md"><span class="material-symbols-outlined text-[16px]">schedule</span>Shift A · Line 1-4</div><div class="relative flex items-center justify-center p-space-xs rounded hover:bg-surface-container-low text-on-surface cursor-pointer"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="absolute top-1 right-1 w-4 h-4 bg-error text-on-error font-label-caps text-[9px] font-bold rounded-full flex items-center justify-center leading-none">4</span></div><div class="flex items-center gap-space-sm pl-space-sm"><img alt="Profile" class="w-8 h-8 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCP9dPLIQ9MqGqW_X9IiNcCJzWGEojJxkB4iZxdWId0l5tgDHUU_0sUfiN6XXsTXWbi4sEzFKqoU_yXi85jfvV3w3dtd4VU3Loj3Qb8WVxeQNEhsAvyG_QNhrGhgQjxuNG-WZ4hMnjBvh7mTjxltL2KDAm8ALPJCcFf_xAJO8JCJSW_if7tqjgSY5IeFKmhF7t3vYkYRmvg4Otzta7aYKR8ljJDUPOoyREU3j5r_g"><div class="flex flex-col"><span class="font-title-md text-title-md text-on-surface leading-tight">Mark Jenkins</span><span class="font-label-caps text-label-caps text-secondary uppercase">Lead Monitorer</span></div></div></div></div></header><main class="relative w-full pt-16 bg-background px-space-xl py-space-lg min-h-screen"><div class="flex flex-col w-full">
+<!-- Top Command & Header Block -->
+<div class="flex flex-col md:flex-row md:items-end justify-between pb-space-lg gap-space-base">
+<div class="flex flex-col">
+<div class="flex items-center gap-space-xs">
+<span class="font-headline-lg text-headline-lg tracking-tight font-bold text-on-surface">Maintenance Dispatch &amp; Work Orders</span>
+<span class="px-2 py-0.5 rounded bg-surface-container-high text-primary font-label-caps text-label-caps uppercase">Shift A Live</span>
+</div>
+<p class="font-body-md text-body-md text-secondary mt-space-2xs max-w-3xl">
+        Coordinate predictive mitigation, track technician teams, and verify standard operating procedures (SOPs) across all active machine alerts.
+      </p>
+</div>
+<!-- Header Action Toolbar -->
+<div class="flex items-center flex-wrap gap-space-sm">
+<button class="h-9 px-space-base bg-surface-container-lowest text-on-surface hover:bg-surface-container-low shadow-sm rounded flex items-center gap-space-xs font-title-md text-title-md transition-colors">
+<span class="material-symbols-outlined text-[18px] text-secondary">add_circle</span>
+<span>Create Ad-Hoc Work Order</span>
+</button>
+<button class="h-9 px-space-base bg-surface-container-lowest text-on-surface hover:bg-surface-container-low shadow-sm rounded flex items-center gap-space-xs font-title-md text-title-md transition-colors">
+<span class="material-symbols-outlined text-[18px] text-secondary">file_download</span>
+<span>Export Dispatch Manifest</span>
+</button>
+<button class="h-9 px-space-base bg-primary hover:bg-primary-container text-on-primary shadow-sm rounded flex items-center gap-space-xs font-title-md text-title-md transition-colors shadow-blue-500/20">
+<span class="material-symbols-outlined text-[18px]">bolt</span>
+<span>Emergency Dispatch (2 Due Now)</span>
+</button>
+</div>
+</div>
+<!-- Top KPI Metric Row (4 Bento Metrics) -->
+<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-space-base mb-space-xl">
+<!-- Card 1: Critical Immediate -->
+<div class="bg-surface-container-lowest p-space-base rounded shadow-sm relative overflow-hidden flex flex-col justify-between">
+<div class="absolute -right-6 -top-6 w-24 h-24 bg-error/5 rounded-full blur-xl pointer-events-none"></div>
+<div class="flex items-center justify-between">
+<span class="font-label-caps text-label-caps uppercase tracking-wider text-secondary">DUE IMMEDIATELY (&lt;8h RUL)</span>
+<span class="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-error-container text-on-error-container font-label-caps text-label-caps font-bold uppercase tracking-wider">
+<span class="w-1.5 h-1.5 rounded-full bg-error animate-pulse"></span>
+          CRITICAL ACTION
+        </span>
+</div>
+<div class="my-space-sm flex items-baseline gap-space-xs">
+<span class="font-telemetry-xl text-telemetry-xl text-error font-extrabold">2</span>
+<span class="font-label-md text-label-md text-secondary font-medium">Assets on Failure Curve</span>
+</div>
+<div class="pt-space-xs flex flex-col gap-0.5">
+<div class="font-body-sm text-body-sm font-medium text-on-surface truncate">TXM-014 (Bay 04) &amp; TXM-027 (Bay 01)</div>
+<div class="flex items-center gap-1 text-secondary font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[14px] text-tertiary">check_circle</span>
+<span>Mitigation crews assigned</span>
+</div>
+</div>
+</div>
+<!-- Card 2: Active Work Orders -->
+<div class="bg-surface-container-lowest p-space-base rounded shadow-sm relative overflow-hidden flex flex-col justify-between">
+<div class="flex items-center justify-between">
+<span class="font-label-caps text-label-caps uppercase tracking-wider text-secondary">ACTIVE WORK ORDERS</span>
+<span class="px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-label-caps text-label-caps font-semibold uppercase">
+          4 CREWS DEPLOYED
+        </span>
+</div>
+<div class="my-space-sm flex items-baseline gap-space-xs">
+<span class="font-telemetry-xl text-telemetry-xl text-on-surface font-extrabold">8</span>
+<span class="font-label-md text-label-md text-secondary font-medium">Active in Cycle</span>
+</div>
+<div class="pt-space-xs flex flex-col gap-0.5">
+<div class="font-body-sm text-body-sm font-medium text-on-surface">5 in-progress · 3 awaiting parts</div>
+<div class="font-body-sm text-body-sm text-secondary">Average cycle time: 1.4h</div>
+</div>
+</div>
+<!-- Card 3: SOP Compliance -->
+<div class="bg-surface-container-lowest p-space-base rounded shadow-sm relative overflow-hidden flex flex-col justify-between">
+<div class="flex items-center justify-between">
+<span class="font-label-caps text-label-caps uppercase tracking-wider text-secondary">SOP COMPLIANCE</span>
+<span class="flex items-center gap-1 px-2 py-0.5 rounded-full bg-tertiary-container text-on-tertiary-container font-label-caps text-label-caps font-semibold uppercase">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span>
+          LOTO VERIFIED
+        </span>
+</div>
+<div class="my-space-sm flex items-baseline gap-space-xs">
+<span class="font-telemetry-xl text-telemetry-xl text-tertiary font-extrabold">99.2%</span>
+<span class="font-label-md text-label-md text-tertiary font-semibold">+1.8% vs last shift</span>
+</div>
+<div class="pt-space-xs flex flex-col gap-0.5">
+<div class="font-body-sm text-body-sm font-medium text-on-surface">Zero safety infractions</div>
+<div class="font-body-sm text-body-sm text-secondary">Digital signatures recorded</div>
+</div>
+</div>
+<!-- Card 4: Parts Inventory -->
+<div class="bg-surface-container-lowest p-space-base rounded shadow-sm relative overflow-hidden flex flex-col justify-between">
+<div class="flex items-center justify-between">
+<span class="font-label-caps text-label-caps uppercase tracking-wider text-secondary">PARTS &amp; LUBE INVENTORY</span>
+<span class="px-2 py-0.5 rounded-full bg-tertiary-container text-on-tertiary-container font-label-caps text-label-caps font-semibold uppercase">
+          STAGED AT BAYS
+        </span>
+</div>
+<div class="my-space-sm flex items-baseline gap-space-xs">
+<span class="font-telemetry-xl text-telemetry-xl text-on-surface font-extrabold">100%</span>
+<span class="font-label-md text-label-md text-secondary font-medium">All staging bins ready</span>
+</div>
+<div class="pt-space-xs flex flex-col gap-0.5">
+<div class="font-body-sm text-body-sm font-medium text-on-surface truncate">SKF 6208 ball sets &amp; ISO VG 220</div>
+<div class="font-body-sm text-body-sm text-secondary">Depot lockers unlocked</div>
+</div>
+</div>
+</div>
+<!-- Filter Tabs & Controls Header Bar -->
+<div class="bg-surface-container-lowest p-space-sm rounded shadow-sm mb-space-base flex flex-col lg:flex-row items-center justify-between gap-space-sm">
+<!-- Left Filter Tabs -->
+<div class="flex items-center gap-space-2xs overflow-x-auto w-full lg:w-auto pb-1 lg:pb-0">
+<button class="px-space-md py-1.5 rounded font-label-md text-label-md text-secondary hover:text-on-surface hover:bg-surface-container-low transition-colors whitespace-nowrap">
+        All Work Orders (14)
+      </button>
+<button class="px-space-md py-1.5 rounded font-label-md text-label-md bg-primary-container text-on-primary-container font-semibold whitespace-nowrap flex items-center gap-1.5">
+<span>Due Now (&lt;8h)</span>
+<span class="w-4 h-4 rounded-full bg-error text-on-error flex items-center justify-center font-label-caps text-[10px] font-bold">2</span>
+</button>
+<button class="px-space-md py-1.5 rounded font-label-md text-label-md text-secondary hover:text-on-surface hover:bg-surface-container-low transition-colors whitespace-nowrap">
+        Upcoming (8h–24h) [4]
+      </button>
+<button class="px-space-md py-1.5 rounded font-label-md text-label-md text-secondary hover:text-on-surface hover:bg-surface-container-low transition-colors whitespace-nowrap">
+        Scheduled (24h–7d) [5]
+      </button>
+<button class="px-space-md py-1.5 rounded font-label-md text-label-md text-secondary hover:text-on-surface hover:bg-surface-container-low transition-colors whitespace-nowrap">
+        Completed Today [3]
+      </button>
+</div>
+<!-- Right Dropdown Selectors -->
+<div class="flex items-center gap-space-sm w-full lg:w-auto justify-end">
+<div class="flex items-center gap-1 px-space-sm py-1 rounded bg-surface-container-low text-on-surface font-label-md text-label-md cursor-pointer hover:bg-surface-container-high transition-colors">
+<span class="text-secondary">Crew:</span>
+<span class="font-medium">All Tech Teams (A-D)</span>
+<span class="material-symbols-outlined text-[16px] text-secondary">expand_more</span>
+</div>
+<div class="flex items-center gap-1 px-space-sm py-1 rounded bg-surface-container-low text-on-surface font-label-md text-label-md cursor-pointer hover:bg-surface-container-high transition-colors">
+<span class="text-secondary">Line:</span>
+<span class="font-medium">All Lines (1-4)</span>
+<span class="material-symbols-outlined text-[16px] text-secondary">expand_more</span>
+</div>
+<div class="flex items-center gap-1 px-space-sm py-1 rounded bg-surface-container-low text-on-surface font-label-md text-label-md cursor-pointer hover:bg-surface-container-high transition-colors">
+<span class="text-secondary">Sort:</span>
+<span class="font-medium">Urgency / SLA Remaining</span>
+<span class="material-symbols-outlined text-[16px] text-secondary">expand_more</span>
+</div>
+</div>
+</div>
+<!-- Main Dual Column Workspace Layout -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-base">
+<!-- LEFT COLUMN: Priority Dispatch Queue (8 cols) -->
+<div class="lg:col-span-8 flex flex-col gap-space-base">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="w-2 h-2 rounded-full bg-error animate-pulse"></span>
+<h2 class="font-headline-sm text-headline-sm font-bold text-on-surface">Priority Dispatch Queue — Action-Driven Maintenance</h2>
+</div>
+<span class="font-label-caps text-label-caps text-secondary uppercase">2 Critical SLA Thresholds Active</span>
+</div>
+<!-- WORK ORDER CARD 1 (CRITICAL P1 - IN PROGRESS) -->
+<div class="bg-surface-container-lowest rounded shadow-sm p-space-base flex flex-col gap-space-md transition-shadow hover:shadow-md relative overflow-hidden">
+<div class="absolute left-0 top-0 bottom-0 w-1.5 bg-error"></div>
+<!-- Header Strip -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-xs pl-2">
+<div class="flex items-center gap-space-sm flex-wrap">
+<span class="px-2 py-0.5 rounded-full bg-error text-on-error font-label-caps text-label-caps font-bold uppercase tracking-wider flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-surface-container-lowest animate-ping"></span>
+              CRITICAL P1
+            </span>
+<span class="px-2 py-0.5 rounded-full bg-error-container text-on-error-container font-label-caps text-label-caps font-semibold uppercase">
+              WINDOW: 7.8h REMAINING
+            </span>
+<span class="px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-label-caps text-label-caps font-semibold uppercase">
+              IN PROGRESS
+            </span>
+</div>
+<span class="font-label-caps text-label-caps font-mono text-secondary bg-surface-container-low px-2 py-0.5 rounded">
+            SOP-MECH-04
+          </span>
+</div>
+<!-- Asset & Work Order Title -->
+<div class="pl-2">
+<div class="flex items-center gap-2">
+<span class="font-title-md text-title-md text-primary font-bold">TXM-014</span>
+<span class="text-outline-variant">·</span>
+<span class="font-title-md text-title-md text-on-surface font-semibold">Spindle Drive (Bay 04 · Line 1)</span>
+</div>
+<div class="font-headline-sm text-headline-sm text-on-surface font-semibold mt-0.5">
+            WO-8941 · Drive-End Bearing Replacement &amp; Flush
+          </div>
+</div>
+<!-- Technician & Bay Metadata Pill -->
+<div class="pl-2 flex items-center justify-between bg-surface-container-low p-space-sm rounded">
+<div class="flex items-center gap-space-sm">
+<img class="w-8 h-8 rounded-full object-cover shadow-sm" data-alt="Close up industrial portrait of senior mechanical technician Marcus Vance wearing safety glasses, rugged blue work uniform and high-visibility trim inside clean manufacturing plant" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDlCRlgNvq3qIFFcJgG26W2QovH-cIaLail7m2uXvoGCszyAj3LXXdEG9YOLKEHffOj31Fpu-XnM5J9hy239XnDKBk2-SrfJ3ysqwp6WtiDZj4f7Re9_ZyffIzVQD-y_JDm1vudUK-oP9zKgvgSGOcQGct7eF1oFZ8K2GDR1BkAgVZHI0beX4N1jg7I4wCEBc4ou2OunxsKzcdlocjjR_FU5JAGweOvUg23ZJJMlLl_honJpD8ZDuI">
+<div class="flex flex-col">
+<span class="font-title-md text-title-md text-on-surface font-medium leading-tight">Team B — Lead: Marcus Vance</span>
+<span class="font-label-caps text-label-caps text-tertiary flex items-center gap-1 font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span> On-site at Bay 04
+              </span>
+</div>
+</div>
+<div class="flex items-center gap-space-sm text-right">
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps text-secondary uppercase">Dispatched Time</span>
+<span class="font-telemetry-sm text-telemetry-sm font-semibold text-on-surface">09:42 UTC (48m ago)</span>
+</div>
+</div>
+</div>
+<!-- Interactive SOP Checklist / Progress Stepper -->
+<div class="pl-2 flex flex-col gap-space-xs">
+<div class="flex items-center justify-between font-label-md text-label-md">
+<span class="text-on-surface font-semibold">SOP Execution Checkpoints (Step 2 of 5 Complete)</span>
+<span class="font-telemetry-sm text-telemetry-sm text-primary font-bold">40% Complete</span>
+</div>
+<!-- Progress bar -->
+<div class="w-full bg-surface-container-high h-2 rounded overflow-hidden">
+<div class="bg-primary h-full w-2/5 rounded transition-all"></div>
+</div>
+<!-- Checkpoint Cards Grid -->
+<div class="grid grid-cols-1 sm:grid-cols-5 gap-1.5 mt-space-xs text-left">
+<div class="bg-surface-container-low p-2 rounded flex flex-col justify-between">
+<div class="flex items-center justify-between">
+<span class="font-label-caps text-[10px] font-bold text-tertiary">STEP 1</span>
+<span class="material-symbols-outlined text-tertiary text-[14px]">check_circle</span>
+</div>
+<div class="font-body-sm text-body-sm font-medium text-on-surface mt-1 leading-tight">LOTO verification</div>
+<span class="font-label-caps text-[9px] text-secondary mt-1">09:55 UTC</span>
+</div>
+<div class="bg-primary-fixed/30 p-2 rounded flex flex-col justify-between">
+<div class="flex items-center justify-between">
+<span class="font-label-caps text-[10px] font-bold text-primary">STEP 2</span>
+<span class="material-symbols-outlined text-primary text-[14px] animate-spin">autorenew</span>
+</div>
+<div class="font-body-sm text-body-sm font-semibold text-on-surface mt-1 leading-tight">Outer housing removal &amp; bearing inspection</div>
+<span class="font-label-caps text-[9px] text-primary font-semibold mt-1">Active Now</span>
+</div>
+<div class="bg-surface-container-low p-2 rounded flex flex-col justify-between opacity-70">
+<span class="font-label-caps text-[10px] font-bold text-secondary">STEP 3</span>
+<div class="font-body-sm text-body-sm text-secondary mt-1 leading-tight">Flush lubrication circuit (SKF grease purge)</div>
+<span class="font-label-caps text-[9px] text-secondary mt-1">Pending Step 2</span>
+</div>
+<div class="bg-surface-container-low p-2 rounded flex flex-col justify-between opacity-70">
+<span class="font-label-caps text-[10px] font-bold text-secondary">STEP 4</span>
+<div class="font-body-sm text-body-sm text-secondary mt-1 leading-tight">Validate spindle runout (&lt;0.005 mm)</div>
+<span class="font-label-caps text-[9px] text-secondary mt-1">Dial indicator</span>
+</div>
+<div class="bg-surface-container-low p-2 rounded flex flex-col justify-between opacity-70">
+<span class="font-label-caps text-[10px] font-bold text-secondary">STEP 5</span>
+<div class="font-body-sm text-body-sm text-secondary mt-1 leading-tight">Recalibrate accelerometer sensor B4-RAD</div>
+<span class="font-label-caps text-[9px] text-secondary mt-1">Final Telemetry</span>
+</div>
+</div>
+</div>
+<!-- Parts Staged Context -->
+<div class="pl-2 py-space-xs px-space-sm bg-surface-container-low rounded flex items-center justify-between text-body-sm font-body-sm">
+<div class="flex items-center gap-space-xs text-on-surface">
+<span class="material-symbols-outlined text-secondary text-[16px]">inventory_2</span>
+<span class="text-secondary">Required Staging:</span>
+<span class="font-medium text-on-surface">1x SKF 6208 Deep Groove Ball Bearing (Staged at Bay 04 locker #2B), 400ml Mobil Polyrex EM</span>
+</div>
+<span class="font-label-caps text-label-caps text-tertiary font-bold whitespace-nowrap">STAGED &amp; SCANNED</span>
+</div>
+<!-- Footer Actions -->
+<div class="pl-2 pt-space-xs flex flex-wrap items-center justify-between gap-space-sm">
+<div class="flex items-center gap-space-xs">
+<button class="h-8 px-space-sm bg-primary hover:bg-primary-container text-on-primary rounded font-label-md text-label-md font-semibold flex items-center gap-1 transition-colors">
+<span>View Live Work Order Details</span>
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</button>
+<button class="h-8 px-space-sm bg-surface-container-low hover:bg-surface-container-high text-on-surface rounded font-label-md text-label-md font-medium flex items-center gap-1 transition-colors">
+<span class="material-symbols-outlined text-[16px] text-secondary">radio</span>
+<span>Call Radio (Channel 3)</span>
+</button>
+</div>
+<button class="h-8 px-space-sm bg-surface-container-lowest text-primary hover:bg-surface-container-low rounded font-label-md text-label-md font-semibold flex items-center gap-1 transition-colors">
+<span class="material-symbols-outlined text-[16px]">fact_check</span>
+<span>Update Checkpoints</span>
+</button>
+</div>
+</div>
+<!-- WORK ORDER CARD 2 (CRITICAL P1 - DISPATCHED) -->
+<div class="bg-surface-container-lowest rounded shadow-sm p-space-base flex flex-col gap-space-md transition-shadow hover:shadow-md relative overflow-hidden">
+<div class="absolute left-0 top-0 bottom-0 w-1.5 bg-error"></div>
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-xs pl-2">
+<div class="flex items-center gap-space-sm flex-wrap">
+<span class="px-2 py-0.5 rounded-full bg-error text-on-error font-label-caps text-label-caps font-bold uppercase tracking-wider">
+              CRITICAL P1
+            </span>
+<span class="px-2 py-0.5 rounded-full bg-error-container text-on-error-container font-label-caps text-label-caps font-semibold uppercase">
+              WINDOW: 10.4h REMAINING
+            </span>
+<span class="px-2 py-0.5 rounded-full bg-primary-fixed text-on-primary-fixed font-label-caps text-label-caps font-semibold uppercase flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+              DISPATCHED
+            </span>
+</div>
+<span class="font-label-caps text-label-caps font-mono text-secondary bg-surface-container-low px-2 py-0.5 rounded">
+            SOP-LUB-02
+          </span>
+</div>
+<div class="pl-2">
+<div class="flex items-center gap-2">
+<span class="font-title-md text-title-md text-primary font-bold">TXM-027</span>
+<span class="text-outline-variant">·</span>
+<span class="font-title-md text-title-md text-on-surface font-semibold">High-Torque Extruder (Bay 01 · Line 2)</span>
+</div>
+<div class="font-headline-sm text-headline-sm text-on-surface font-semibold mt-0.5">
+            WO-8942 · Planetary Gearbox Flush &amp; Filter Swap
+          </div>
+</div>
+<div class="pl-2 flex items-center justify-between bg-surface-container-low p-space-sm rounded">
+<div class="flex items-center gap-space-sm">
+<img class="w-8 h-8 rounded-full object-cover shadow-sm" data-alt="Headshot of industrial technician Dave Chen wearing a clean safety vest and protective equipment ready for mechanical maintenance" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAC1_e3SsvEG117oqmoGyudhXxsBozyO7YCwntfR7LiwbqrwtZlIKIEzqmdTYJN2VwQKvq0MO--yw00qeTIu6T5whzTH0lMTIExnzrcqbfg8FyQKW0rUtn1-L6OgmEd8GZta3Ra6j_zLPuNDLfyZ8FojEJFd60XwYyprXq6qYgc1wrnoXj9mcuGRmMrdSdKhqUBnM_80fdkuz9PnBvHKFPX17Op7jlAc3pwg56l2HojryfcKvjuOsw">
+<div class="flex flex-col">
+<span class="font-title-md text-title-md text-on-surface font-medium leading-tight">Team A — Lead: Dave Chen</span>
+<span class="font-label-caps text-label-caps text-primary flex items-center gap-1 font-semibold">
+<span class="material-symbols-outlined text-[12px]">directions_walk</span> En route · ETA 10m
+              </span>
+</div>
+</div>
+<div class="text-right">
+<span class="font-label-caps text-label-caps text-secondary uppercase block">Lockout Status</span>
+<span class="font-label-md text-label-md text-on-surface font-medium">Awaiting Arrival</span>
+</div>
+</div>
+<div class="pl-2 py-space-xs px-space-sm bg-surface-container-low rounded flex items-center justify-between text-body-sm font-body-sm">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-secondary text-[16px]">inventory_2</span>
+<span class="text-secondary">Staged Parts:</span>
+<span class="font-medium text-on-surface">20L Shell Omala S2 G 220, 1x High-Efficiency Spin-on Filter Cartridge (FC-440)</span>
+</div>
+<span class="font-label-caps text-label-caps text-tertiary font-bold whitespace-nowrap">BIN VERIFIED</span>
+</div>
+<div class="pl-2 pt-space-xs flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<button class="h-8 px-space-sm bg-primary hover:bg-primary-container text-on-primary rounded font-label-md text-label-md font-semibold flex items-center gap-1 transition-colors">
+<span class="material-symbols-outlined text-[16px]">pin_drop</span>
+<span>Acknowledge Tech Arrival</span>
+</button>
+<button class="h-8 px-space-sm bg-surface-container-low hover:bg-surface-container-high text-on-surface rounded font-label-md text-label-md font-medium flex items-center gap-1 transition-colors">
+<span class="material-symbols-outlined text-[16px] text-secondary">print</span>
+<span>Print Bay Hazard Sheet</span>
+</button>
+</div>
+<span class="font-body-sm text-body-sm text-secondary">Step 0 of 4 Completed</span>
+</div>
+</div>
+<!-- WORK ORDER CARD 3 (HIGH P2 - UPCOMING 8h-24h) -->
+<div class="bg-surface-container-lowest rounded shadow-sm p-space-base flex flex-col gap-space-md transition-shadow hover:shadow-md relative overflow-hidden">
+<div class="absolute left-0 top-0 bottom-0 w-1.5 bg-amber-500"></div>
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-xs pl-2">
+<div class="flex items-center gap-space-sm flex-wrap">
+<span class="px-2 py-0.5 rounded-full bg-amber-500 text-surface-container-lowest font-label-caps text-label-caps font-bold uppercase tracking-wider">
+              HIGH P2
+            </span>
+<span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 font-label-caps text-label-caps font-semibold uppercase">
+              WINDOW: 18.2h REMAINING
+            </span>
+<span class="px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant font-label-caps text-label-caps font-semibold uppercase">
+              SCHEDULED (SHIFT B)
+            </span>
+</div>
+<span class="font-label-caps text-label-caps font-mono text-secondary bg-surface-container-low px-2 py-0.5 rounded">
+            SOP-ALGN-01
+          </span>
+</div>
+<div class="pl-2">
+<div class="flex items-center gap-2">
+<span class="font-title-md text-title-md text-primary font-bold">TXM-041</span>
+<span class="text-outline-variant">·</span>
+<span class="font-title-md text-title-md text-on-surface font-semibold">Precision Weaving Loom (Bay 07 · Line 3)</span>
+</div>
+<div class="font-headline-sm text-headline-sm text-on-surface font-semibold mt-0.5">
+            WO-8945 · Intermediate Coupling Laser Alignment
+          </div>
+</div>
+<div class="pl-2 flex items-center justify-between bg-surface-container-low p-space-sm rounded">
+<div class="flex items-center gap-space-sm">
+<img class="w-8 h-8 rounded-full object-cover shadow-sm" data-alt="Portrait of industrial robotics and alignment engineer Elena Rostova with safety headgear in an electronics manufacturing laboratory" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDd2db_Y2bY1i3kSg4-U0tedF643ImvEXs7EqjLZl2tcHEP2GHIh2LGPzZurU9NzXHTS8xzDERHOnLo6LMfjuJqboBx4aTdqtkXa7QHgQwdZyqofkL38Q_rNZbxGYSbwIr8orei-fqO7du_V4e10aC95q7jTvt7fWE5WmJ2yTnW1RHzzK5H7FbXiRtLnyS-wkJxs7MjDTj78qOKDLHnLWFCx_KsWqI3K9ECGplmaRDtRNpEB77R4xA">
+<div class="flex flex-col">
+<span class="font-title-md text-title-md text-on-surface font-medium leading-tight">Team C — Lead: Elena Rostova</span>
+<span class="font-label-caps text-label-caps text-secondary">Shift B Handover at 16:00 UTC</span>
+</div>
+</div>
+<span class="font-body-sm text-body-sm text-secondary font-medium">Laser alignment kit #L-04 reserved in calibration depot.</span>
+</div>
+<div class="pl-2 flex items-center justify-between pt-space-xs">
+<div class="flex items-center gap-space-xs">
+<button class="h-8 px-space-sm bg-surface-container-low hover:bg-surface-container-high text-on-surface rounded font-label-md text-label-md font-medium transition-colors">
+              Reschedule Window
+            </button>
+<button class="h-8 px-space-sm bg-surface-container-low hover:bg-surface-container-high text-on-surface rounded font-label-md text-label-md font-medium transition-colors">
+              View SOP Guide
+            </button>
+</div>
+<span class="font-label-caps text-label-caps text-secondary uppercase">Estimated duration: 2.5h</span>
+</div>
+</div>
+<!-- WORK ORDER CARD 4 (HIGH P2 - Centrifugal Pump) -->
+<div class="bg-surface-container-lowest rounded shadow-sm p-space-base flex flex-col gap-space-md transition-shadow hover:shadow-md relative overflow-hidden">
+<div class="absolute left-0 top-0 bottom-0 w-1.5 bg-amber-500"></div>
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-xs pl-2">
+<div class="flex items-center gap-space-sm flex-wrap">
+<span class="px-2 py-0.5 rounded-full bg-amber-500 text-surface-container-lowest font-label-caps text-label-caps font-bold uppercase tracking-wider">
+              HIGH P2
+            </span>
+<span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 font-label-caps text-label-caps font-semibold uppercase">
+              WINDOW: 21.0h REMAINING
+            </span>
+<span class="px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-label-caps text-label-caps font-semibold uppercase">
+              PARTS RESERVED
+            </span>
+</div>
+<span class="font-label-caps text-label-caps font-mono text-secondary bg-surface-container-low px-2 py-0.5 rounded">
+            SOP-HYD-07
+          </span>
+</div>
+<div class="pl-2">
+<div class="flex items-center gap-2">
+<span class="font-title-md text-title-md text-primary font-bold">TXM-009</span>
+<span class="text-outline-variant">·</span>
+<span class="font-title-md text-title-md text-on-surface font-semibold">Centrifugal Pump (Bay 02 · Line 1)</span>
+</div>
+<div class="font-headline-sm text-headline-sm text-on-surface font-semibold mt-0.5">
+            WO-8946 · Coolant Auxiliary Heat Exchanger Basket Clean
+          </div>
+</div>
+<div class="pl-2 flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="font-body-sm text-body-sm text-secondary">Assigned:</span>
+<span class="font-body-sm text-body-sm text-on-surface font-medium">Team B — Support Tech: Liam O'Connor</span>
+</div>
+<div class="flex items-center gap-space-xs">
+<button class="h-8 px-space-sm bg-surface-container-low hover:bg-surface-container-high text-primary rounded font-label-md text-label-md font-semibold transition-colors">
+              Dispatch Early
+            </button>
+<button class="h-8 px-space-sm bg-surface-container-lowest hover:bg-surface-container-low text-secondary rounded font-label-md text-label-md font-medium transition-colors">
+              Details
+            </button>
+</div>
+</div>
+</div>
+</div>
+<!-- RIGHT COLUMN: Operations & Dispatch Command Deck (4 cols) -->
+<div class="lg:col-span-4 flex flex-col gap-space-base">
+<!-- CARD A: Field Tech Deployment Matrix -->
+<div class="bg-surface-container-lowest rounded shadow-sm p-space-base flex flex-col gap-space-base">
+<div class="flex items-center justify-between pb-space-xs">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[18px] text-primary">engineering</span>
+<h3 class="font-headline-sm text-headline-sm font-bold text-on-surface">Field Tech Deployment Matrix</h3>
+</div>
+<span class="font-label-caps text-label-caps text-secondary font-semibold">4 TEAMS</span>
+</div>
+<div class="flex flex-col gap-space-sm">
+<!-- Team A -->
+<div class="p-space-sm rounded bg-surface-container-low flex flex-col gap-space-2xs">
+<div class="flex items-center justify-between">
+<span class="font-title-md text-title-md font-bold text-on-surface">Team A (Extrusion &amp; Lube)</span>
+<span class="px-1.5 py-0.5 rounded font-label-caps text-[10px] font-bold bg-primary text-on-primary uppercase">En route</span>
+</div>
+<div class="font-body-sm text-body-sm text-secondary">Dave Chen, R. Gomez</div>
+<div class="mt-1 flex items-center justify-between font-label-md text-label-md pt-1">
+<span class="text-on-surface font-medium">Bay 01 (TXM-027)</span>
+<span class="text-primary font-mono font-semibold">WO-8942</span>
+</div>
+</div>
+<!-- Team B -->
+<div class="p-space-sm rounded bg-surface-container-low flex flex-col gap-space-2xs">
+<div class="flex items-center justify-between">
+<span class="font-title-md text-title-md font-bold text-on-surface">Team B (Spindle &amp; High-Speed)</span>
+<span class="px-1.5 py-0.5 rounded font-label-caps text-[10px] font-bold bg-error text-on-error uppercase flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-surface-container-lowest animate-pulse"></span>
+                Active Bay 04
+              </span>
+</div>
+<div class="font-body-sm text-body-sm text-secondary">Marcus Vance, K. Patel</div>
+<div class="mt-1 flex items-center justify-between font-label-md text-label-md pt-1">
+<span class="text-on-surface font-medium">Bay 04 (TXM-014)</span>
+<span class="text-primary font-mono font-semibold">WO-8941</span>
+</div>
+</div>
+<!-- Team C -->
+<div class="p-space-sm rounded bg-surface-container-low flex flex-col gap-space-2xs">
+<div class="flex items-center justify-between">
+<span class="font-title-md text-title-md font-bold text-on-surface">Team C (Alignment &amp; Mechanical)</span>
+<span class="px-1.5 py-0.5 rounded font-label-caps text-[10px] font-bold bg-secondary-container text-on-secondary-container uppercase">Standby</span>
+</div>
+<div class="font-body-sm text-body-sm text-secondary">Elena Rostova, J. Kim</div>
+<div class="mt-1 flex items-center justify-between font-label-md text-label-md pt-1">
+<span class="text-secondary">Prep Shift B (Bay 07)</span>
+<span class="text-secondary font-mono">WO-8945</span>
+</div>
+</div>
+<!-- Team D -->
+<div class="p-space-sm rounded bg-surface-container-low flex flex-col gap-space-2xs">
+<div class="flex items-center justify-between">
+<span class="font-title-md text-title-md font-bold text-on-surface">Team D (Sensors &amp; Calibrations)</span>
+<span class="px-1.5 py-0.5 rounded font-label-caps text-[10px] font-bold bg-tertiary-container text-on-tertiary-container uppercase">Calibrating</span>
+</div>
+<div class="font-body-sm text-body-sm text-secondary">Sarah Lin</div>
+<div class="mt-1 flex items-center justify-between font-label-md text-label-md pt-1">
+<span class="text-secondary">Bay 09 (Routine)</span>
+<span class="text-tertiary font-semibold">Available in 25m</span>
+</div>
+</div>
+</div>
+</div>
+<!-- CARD B: Maintenance SLA Compliance Windows -->
+<div class="bg-surface-container-lowest rounded shadow-sm p-space-base flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[18px] text-tertiary">timer</span>
+<h3 class="font-headline-sm text-headline-sm font-bold text-on-surface">SLA Compliance Windows</h3>
+</div>
+<span class="font-telemetry-sm text-telemetry-sm text-tertiary font-bold">97.4% On-Time</span>
+</div>
+<!-- Visual Distribution Bar Chart (Mini Telemetry) -->
+<div class="flex flex-col gap-space-sm pt-space-xs">
+<!-- Item 1 -->
+<div class="flex flex-col gap-1">
+<div class="flex items-center justify-between font-label-md text-label-md">
+<span class="font-semibold text-error flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-error"></span>
+                &lt;8h Urgent Window
+              </span>
+<span class="font-mono text-on-surface font-semibold">2 tasks · On track</span>
+</div>
+<div class="w-full bg-surface-container-high h-2 rounded overflow-hidden flex">
+<div class="bg-error h-full w-[85%]"></div>
+<div class="bg-surface-container-highest h-full w-[15%]"></div>
+</div>
+<span class="font-body-sm text-[11px] text-secondary">TXM-014 at 7.8h · TXM-027 at 10.4h</span>
+</div>
+<!-- Item 2 -->
+<div class="flex flex-col gap-1 mt-1">
+<div class="flex items-center justify-between font-label-md text-label-md">
+<span class="font-semibold text-amber-700 flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                8–24h Tactical Window
+              </span>
+<span class="font-mono text-on-surface font-semibold">4 tasks</span>
+</div>
+<div class="w-full bg-surface-container-high h-2 rounded overflow-hidden flex">
+<div class="bg-amber-500 h-full w-[65%]"></div>
+<div class="bg-surface-container-highest h-full w-[35%]"></div>
+</div>
+<span class="font-body-sm text-[11px] text-secondary">1 scheduled · 3 pending shift handover</span>
+</div>
+<!-- Item 3 -->
+<div class="flex flex-col gap-1 mt-1">
+<div class="flex items-center justify-between font-label-md text-label-md">
+<span class="font-semibold text-tertiary flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span>
+                24–72h Routine Window
+              </span>
+<span class="font-mono text-on-surface font-semibold">5 tasks</span>
+</div>
+<div class="w-full bg-surface-container-high h-2 rounded overflow-hidden">
+<div class="bg-tertiary h-full w-[100%]"></div>
+</div>
+<span class="font-body-sm text-[11px] text-secondary">All replacement components in plant inventory</span>
+</div>
+</div>
+<div class="mt-1 pt-space-xs flex items-center justify-between font-body-sm text-body-sm text-secondary bg-surface-container-low p-space-xs rounded">
+<span>Shift Dispatch Reliability:</span>
+<span class="font-semibold text-on-surface">Target Met (&gt;95%)</span>
+</div>
+</div>
+<!-- CARD C: Recently Completed Work Orders -->
+<div class="bg-surface-container-lowest rounded shadow-sm p-space-base flex flex-col gap-space-sm">
+<div class="flex items-center justify-between pb-space-xs">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[18px] text-tertiary">task_alt</span>
+<h3 class="font-headline-sm text-headline-sm font-bold text-on-surface">Recently Completed (Shift A)</h3>
+</div>
+<span class="font-label-caps text-label-caps text-secondary font-semibold">3 CLOSED</span>
+</div>
+<div class="flex flex-col gap-space-xs">
+<!-- Record 1 -->
+<div class="p-space-xs rounded hover:bg-surface-container-low transition-colors flex flex-col gap-0.5">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md font-bold text-on-surface">WO-8938 · TXM-008</span>
+<span class="font-label-caps text-[10px] text-secondary">1h ago</span>
+</div>
+<p class="font-body-sm text-body-sm text-secondary leading-tight">
+              Bearing lube completed · Verified by M. Vance
+            </p>
+<div class="flex items-center gap-1 font-label-caps text-label-caps text-tertiary font-bold mt-0.5">
+<span class="material-symbols-outlined text-[14px]">trending_up</span>
+<span>Health restored: 52% → 94%</span>
+</div>
+</div>
+<!-- Record 2 -->
+<div class="p-space-xs rounded hover:bg-surface-container-low transition-colors flex flex-col gap-0.5">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md font-bold text-on-surface">WO-8937 · TXM-031</span>
+<span class="font-label-caps text-[10px] text-secondary">2.5h ago</span>
+</div>
+<p class="font-body-sm text-body-sm text-secondary leading-tight">
+              Coolant purge &amp; thermal probe replacement
+            </p>
+<div class="flex items-center gap-1 font-label-caps text-label-caps text-tertiary font-bold mt-0.5">
+<span class="material-symbols-outlined text-[14px]">check</span>
+<span>Vibration signatures normalized</span>
+</div>
+</div>
+<!-- Record 3 -->
+<div class="p-space-xs rounded hover:bg-surface-container-low transition-colors flex flex-col gap-0.5">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md font-bold text-on-surface">WO-8935 · TXM-019</span>
+<span class="font-label-caps text-[10px] text-secondary">4h ago</span>
+</div>
+<p class="font-body-sm text-body-sm text-secondary leading-tight">
+              Belt tension calibration &amp; strobe check
+            </p>
+<div class="flex items-center gap-1 font-label-caps text-label-caps text-tertiary font-bold mt-0.5">
+<span class="material-symbols-outlined text-[14px]">check</span>
+<span>LOTO cleared &amp; signed</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Bottom Industrial Keyboard Shortcuts Bar -->
+<div class="mt-space-xl bg-surface-container-lowest p-space-sm rounded shadow-sm flex flex-col sm:flex-row items-center justify-between gap-space-sm text-secondary">
+<div class="flex items-center gap-space-sm flex-wrap text-label-caps font-label-caps uppercase tracking-wider">
+<span class="font-bold text-on-surface">KEYBOARD SHORTCUTS:</span>
+<span class="flex items-center gap-1"><kbd class="bg-surface-container-high px-1.5 py-0.5 rounded text-on-surface font-mono">ESC</kbd> Clear Selection</span>
+<span class="text-outline-variant">·</span>
+<span class="flex items-center gap-1"><kbd class="bg-surface-container-high px-1.5 py-0.5 rounded text-on-surface font-mono">N</kbd> New Work Order</span>
+<span class="text-outline-variant">·</span>
+<span class="flex items-center gap-1"><kbd class="bg-surface-container-high px-1.5 py-0.5 rounded text-on-surface font-mono">D</kbd> Dispatch Tech</span>
+<span class="text-outline-variant">·</span>
+<span class="flex items-center gap-1"><kbd class="bg-surface-container-high px-1.5 py-0.5 rounded text-on-surface font-mono">P</kbd> Print SOP</span>
+<span class="text-outline-variant">·</span>
+<span class="flex items-center gap-1"><kbd class="bg-surface-container-high px-1.5 py-0.5 rounded text-on-surface font-mono">/</kbd> Search Orders</span>
+</div>
+<div class="flex items-center gap-space-xs font-label-caps text-label-caps">
+<span class="w-2 h-2 rounded-full bg-tertiary"></span>
+<span>Live Work Order Stream · Resonex Dispatch Core v4.18 · TLS 1.3 encrypted</span>
+</div>
+</div>
+<script>
+    // Industrial keyboard shortcut handler
+    document.addEventListener('keydown', function(e) {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      if (e.key === 'n' || e.key === 'N') {
+        const createBtn = document.querySelector('button:has(.material-symbols-outlined)');
+        if (createBtn) createBtn.classList.add('scale-95');
+        setTimeout(() => { if (createBtn) createBtn.classList.remove('scale-95'); }, 150);
+      }
+    });
+  </script>
+</div></main></div></body></html>

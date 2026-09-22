@@ -3,21 +3,27 @@ import { createRoot } from 'react-dom/client';
 import './styles.css';
 import { FleetOverview, Machine, RecommendationDecision } from './types';
 import { api } from './services/api';
+import { Sidebar, NavTab } from './components/Sidebar';
+import { TopBar } from './components/TopBar';
 import { FleetDashboard } from './components/FleetDashboard';
 import { MachinesView } from './components/MachinesView';
+import { MachineDetail } from './components/MachineDetail';
 import { AlertsView } from './components/AlertsView';
 import { MaintenanceView } from './components/MaintenanceView';
 import { ReportsView } from './components/ReportsView';
-import { MachineDetail } from './components/MachineDetail';
-import { CopilotView } from './components/CopilotView';
-
-type AppTab = 'dashboard' | 'machines' | 'alerts' | 'copilot' | 'maintenance' | 'reports';
+import { SettingsView } from './components/SettingsView';
+import { ResonexAIButton } from './components/ResonexAIButton';
+import { ResonexAIDrawer, AlertContext } from './components/ResonexAIDrawer';
 
 function App() {
-  const [activeTab, setActiveTab] = useState<AppTab>('dashboard');
+  const [activeTab, setActiveTab] = useState<NavTab>('dashboard');
   const [selectedMachineId, setSelectedMachineId] = useState<string | null>(null);
 
-  // Theme state: dark or light
+  // Global Resonex AI Drawer state
+  const [isAIDrawerOpen, setIsAIDrawerOpen] = useState<boolean>(false);
+  const [activeAlertContext, setActiveAlertContext] = useState<AlertContext | null>(null);
+
+  // Theme state: light by default
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
     return (localStorage.getItem('resonex_theme') as 'light' | 'dark') || 'light';
   });
@@ -25,7 +31,10 @@ function App() {
   // Auto-refresh state (30s polling)
   const [autoRefresh, setAutoRefresh] = useState<boolean>(true);
 
-  // Global fleet state
+  // Global search query
+  const [searchQuery, setSearchQuery] = useState<string>('');
+
+  // Global fleet state from real APIs
   const [overview, setOverview] = useState<FleetOverview | null>(null);
   const [machines, setMachines] = useState<Machine[]>([]);
   const [recommendations, setRecommendations] = useState<RecommendationDecision[]>([]);
@@ -65,11 +74,10 @@ function App() {
     setTheme((prev) => (prev === 'light' ? 'dark' : 'light'));
   };
 
-  // Auto-refresh interval (every 30s when enabled and not viewing individual machine)
+  // Auto-refresh interval (every 30s when enabled)
   useEffect(() => {
     if (!autoRefresh) return;
     const interval = setInterval(() => {
-      // Quiet background refresh without wiping existing view state
       Promise.all([
         api.getFleetOverview(),
         api.getMachines(),
@@ -87,15 +95,38 @@ function App() {
 
   const handleSelectMachine = (machineId: string) => {
     setSelectedMachineId(machineId);
+    setActiveAlertContext(null);
   };
 
   const handleBackToFleet = () => {
     setSelectedMachineId(null);
   };
 
-  const handleNavClick = (tab: AppTab) => {
+  const handleNavClick = (tab: NavTab) => {
     setActiveTab(tab);
     setSelectedMachineId(null);
+    setActiveAlertContext(null);
+  };
+
+  // Open Resonex AI focused on a specific machine
+  const handleOpenAIWithMachine = (machineId: string) => {
+    setSelectedMachineId(machineId);
+    setActiveAlertContext(null);
+    setIsAIDrawerOpen(true);
+  };
+
+  // Open Resonex AI focused on a specific alert
+  const handleOpenAIWithAlert = (alertCtx: AlertContext) => {
+    setActiveAlertContext(alertCtx);
+    setIsAIDrawerOpen(true);
+  };
+
+  // TopBar search handler
+  const handleSearchMachine = (query: string) => {
+    setSearchQuery(query);
+    if (query && !selectedMachineId && activeTab !== 'machines') {
+      setActiveTab('machines');
+    }
   };
 
   // Map recommendations by machine_id for easy lookup
@@ -113,237 +144,117 @@ function App() {
 
   return (
     <div className="app-layout">
-      {/* SaaS Left Sidebar */}
-      <aside className="app-sidebar">
-        {/* Brand Header */}
-        <div className="sidebar-brand" onClick={() => handleNavClick('dashboard')}>
-          <div className="brand-logo-icon">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
-            </svg>
-          </div>
-          <div className="brand-titles">
-            <span className="brand-name">RESONEX</span>
-            <span className="brand-subline">Predictive Maintenance</span>
-          </div>
-        </div>
+      {/* 1. Left Sidebar Navigation matching Stitch */}
+      <Sidebar
+        activeTab={activeTab}
+        onNavigate={handleNavClick}
+        totalMachines={machines.length}
+        alertCount={alertCount}
+        selectedMachineId={selectedMachineId}
+      />
 
-        {/* Navigation Links */}
-        <nav className="sidebar-nav-menu">
-          <button
-            className={`nav-button ${!selectedMachineId && activeTab === 'dashboard' ? 'active' : ''}`}
-            onClick={() => handleNavClick('dashboard')}
-          >
-            <span className="nav-btn-icon">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <rect width="7" height="9" x="3" y="3" rx="1" />
-                <rect width="7" height="5" x="14" y="3" rx="1" />
-                <rect width="7" height="9" x="14" y="12" rx="1" />
-                <rect width="7" height="5" x="3" y="16" rx="1" />
-              </svg>
-            </span>
-            <span className="nav-btn-label">Dashboard</span>
-          </button>
-
-          <button
-            className={`nav-button ${!selectedMachineId && activeTab === 'machines' ? 'active' : ''}`}
-            onClick={() => handleNavClick('machines')}
-          >
-            <span className="nav-btn-icon">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <rect width="20" height="8" x="2" y="2" rx="2" />
-                <rect width="20" height="8" x="2" y="14" rx="2" />
-                <line x1="6" x2="6.01" y1="6" y2="6" />
-                <line x1="6" x2="6.01" y1="18" y2="18" />
-              </svg>
-            </span>
-            <span className="nav-btn-label">Machines</span>
-            <span className="nav-count-badge">{machines.length}</span>
-          </button>
-
-          <button
-            className={`nav-button ${!selectedMachineId && activeTab === 'alerts' ? 'active' : ''}`}
-            onClick={() => handleNavClick('alerts')}
-          >
-            <span className="nav-btn-icon">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
-                <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
-              </svg>
-            </span>
-            <span className="nav-btn-label">Alerts</span>
-            {alertCount > 0 && <span className="nav-alert-badge">{alertCount}</span>}
-          </button>
-
-          <button
-            className={`nav-button ${!selectedMachineId && activeTab === 'copilot' ? 'active' : ''}`}
-            onClick={() => handleNavClick('copilot')}
-          >
-            <span className="nav-btn-icon">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2 2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z" />
-                <rect x="3" y="8" width="18" height="12" rx="2" />
-                <path d="M9 13h6" />
-                <circle cx="9" cy="11" r="1" fill="currentColor" />
-                <circle cx="15" cy="11" r="1" fill="currentColor" />
-              </svg>
-            </span>
-            <span className="nav-btn-label">AI Copilot (RAG)</span>
-            <span className="nav-ai-pill">LLM</span>
-          </button>
-
-          <button
-            className={`nav-button ${!selectedMachineId && activeTab === 'maintenance' ? 'active' : ''}`}
-            onClick={() => handleNavClick('maintenance')}
-          >
-            <span className="nav-btn-icon">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
-              </svg>
-            </span>
-            <span className="nav-btn-label">Maintenance</span>
-          </button>
-
-          <button
-            className={`nav-button ${!selectedMachineId && activeTab === 'reports' ? 'active' : ''}`}
-            onClick={() => handleNavClick('reports')}
-          >
-            <span className="nav-btn-icon">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M3 3v18h18" />
-                <path d="m19 9-5 5-4-4-3 3" />
-              </svg>
-            </span>
-            <span className="nav-btn-label">Reports</span>
-          </button>
-        </nav>
-
-        {/* Sidebar Footer Status */}
-        <div className="sidebar-bottom-status">
-          <div className="status-live-indicator">
-            <span className="status-dot-pulse" />
-            <span className="status-live-text">Backend Connected</span>
-          </div>
-          <span className="version-info">RESONEX v1.0 • Enterprise</span>
-        </div>
-      </aside>
-
-      {/* Main Container */}
+      {/* 2. Main Workspace Container */}
       <div className="app-main-container">
-        {/* Top Header Bar */}
-        <header className="app-topbar">
-          <div className="topbar-search">
-            <span className="search-symbol">⌘</span>
-            <span className="topbar-context-text">Plant 01 • Textile Production Facility</span>
-          </div>
+        {/* Fixed TopBar Header */}
+        <TopBar
+          activeTab={activeTab}
+          selectedMachineId={selectedMachineId}
+          totalMachines={machines.length}
+          alertCount={alertCount}
+          autoRefresh={autoRefresh}
+          onToggleAutoRefresh={() => setAutoRefresh((prev) => !prev)}
+          theme={theme}
+          onToggleTheme={toggleTheme}
+          searchQuery={searchQuery}
+          onSearchMachine={handleSearchMachine}
+          onSelectMachine={handleSelectMachine}
+        />
 
-          <div className="topbar-right-actions">
-            <button
-              className={`topbar-toggle-btn ${autoRefresh ? 'active' : ''}`}
-              onClick={() => setAutoRefresh((prev) => !prev)}
-              title={autoRefresh ? 'Live Polling Active (30s) - Click to pause' : 'Polling Paused - Click to resume'}
-            >
-              <span className={`pulse-circle ${autoRefresh ? 'live' : 'paused'}`} />
-              <span>{autoRefresh ? 'Auto-Sync ON (30s)' : 'Auto-Sync Paused'}</span>
-            </button>
-
-            <button
-              className="topbar-theme-btn"
-              onClick={toggleTheme}
-              title={`Switch to ${theme === 'light' ? 'Dark' : 'Light'} Mode`}
-              aria-label="Toggle Theme"
-            >
-              {theme === 'light' ? (
-                <span className="theme-icon-group">
-                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
-                  </svg>
-                  <span className="theme-label">Dark</span>
-                </span>
-              ) : (
-                <span className="theme-icon-group">
-                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <circle cx="12" cy="12" r="4" />
-                    <path d="M12 2v2" />
-                    <path d="M12 20v2" />
-                    <path d="m4.93 4.93 1.41 1.41" />
-                    <path d="m17.66 17.66 1.41 1.41" />
-                    <path d="M2 12h2" />
-                    <path d="M20 12h2" />
-                    <path d="m6.34 17.66-1.41 1.41" />
-                    <path d="m19.07 4.93-1.41 1.41" />
-                  </svg>
-                  <span className="theme-label">Light</span>
-                </span>
-              )}
-            </button>
-
-            <div className="telemetry-badge">
-              <span className="pulse-circle" />
-              <span>Latest Sensor Telemetry</span>
-            </div>
-          </div>
-        </header>
-
-        {/* Content Body */}
+        {/* Dynamic Main Body Content */}
         <main className="app-main-body">
           {loading ? (
-            <div className="state-container">
-              <div className="spinner"></div>
+            <div className="stitch-state-container">
+              <div className="stitch-spinner" />
               <p className="state-text">Initializing RESONEX platform telemetry...</p>
             </div>
           ) : error ? (
-            <div className="state-container error">
-              <div className="error-icon">⚠️</div>
-              <h3>Backend Communication Failure</h3>
-              <p className="error-message">{error}</p>
-              <button className="saas-btn-primary" onClick={fetchGlobalData}>
+            <div className="stitch-state-container error">
+              <span className="material-symbols-outlined state-error-icon">wifi_off</span>
+              <h3 className="state-error-title">Backend Telemetry Unreachable</h3>
+              <p className="state-error-msg">{error}</p>
+              <button className="stitch-btn-primary" onClick={fetchGlobalData}>
                 Retry Connection
               </button>
             </div>
           ) : selectedMachineId ? (
-            <MachineDetail machineId={selectedMachineId} onBack={handleBackToFleet} />
+            <MachineDetail
+              machineId={selectedMachineId}
+              onBack={handleBackToFleet}
+              onOpenAIWithMachine={handleOpenAIWithMachine}
+              onNavigateTab={(tab) => handleNavClick(tab as NavTab)}
+            />
           ) : activeTab === 'dashboard' ? (
             <FleetDashboard
               overview={overview}
               machines={machines}
               recommendations={recommendations}
               onSelectMachine={handleSelectMachine}
-              onNavigateTab={(tab) => setActiveTab(tab as AppTab)}
+              onNavigateTab={(tab) => handleNavClick(tab as NavTab)}
+              onOpenAIWithMachine={handleOpenAIWithMachine}
             />
           ) : activeTab === 'machines' ? (
             <MachinesView
               machines={machines}
               recsByMachine={recsByMachine}
               onSelectMachine={handleSelectMachine}
+              onOpenAIWithMachine={handleOpenAIWithMachine}
             />
           ) : activeTab === 'alerts' ? (
             <AlertsView
               recommendations={recommendations}
               machines={machines}
               onSelectMachine={handleSelectMachine}
-            />
-          ) : activeTab === 'copilot' ? (
-            <CopilotView
-              machines={machines}
-              selectedMachineId={selectedMachineId}
-              onSelectMachine={handleSelectMachine}
+              onOpenAIWithAlert={handleOpenAIWithAlert}
+              onNavigateTab={(tab) => handleNavClick(tab as NavTab)}
             />
           ) : activeTab === 'maintenance' ? (
             <MaintenanceView
               recommendations={recommendations}
               machines={machines}
               onSelectMachine={handleSelectMachine}
+              onOpenAIWithMachine={handleOpenAIWithMachine}
             />
           ) : activeTab === 'reports' ? (
             <ReportsView
               overview={overview}
               recommendations={recommendations}
               machines={machines}
+              onSelectMachine={handleSelectMachine}
             />
+          ) : activeTab === 'settings' ? (
+            <SettingsView />
           ) : null}
         </main>
       </div>
+
+      {/* 3. Global Floating Resonex AI Button (Present on every screen) */}
+      <ResonexAIButton
+        isOpen={isAIDrawerOpen}
+        onToggle={() => setIsAIDrawerOpen((prev) => !prev)}
+        hasContextAlert={Boolean(activeAlertContext)}
+        contextMachineId={activeAlertContext?.machineId || selectedMachineId}
+      />
+
+      {/* 4. Global Context-Aware Resonex AI Slide-Over Drawer */}
+      <ResonexAIDrawer
+        isOpen={isAIDrawerOpen}
+        onClose={() => setIsAIDrawerOpen(false)}
+        activeTab={activeTab}
+        selectedMachineId={selectedMachineId}
+        activeAlertContext={activeAlertContext}
+        machines={machines}
+        onSelectMachine={handleSelectMachine}
+      />
     </div>
   );
 }

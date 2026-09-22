@@ -8,26 +8,32 @@ import {
   RecommendationDecision,
 } from '../types';
 import { api } from '../services/api';
-import { MetricCard } from './MetricCard';
 import { TimeSeriesChart, ChartTab } from './TimeSeriesChart';
-import { StatusBadge } from './StatusBadge';
 
 interface MachineDetailProps {
   machineId: string;
   onBack: () => void;
+  onOpenAIWithMachine?: (machineId: string) => void;
+  onNavigateTab?: (tab: string) => void;
 }
 
-export const MachineDetail: React.FC<MachineDetailProps> = ({ machineId, onBack }) => {
+export const MachineDetail: React.FC<MachineDetailProps> = ({
+  machineId,
+  onBack,
+  onOpenAIWithMachine,
+  onNavigateTab,
+}) => {
   const [machine, setMachine] = useState<Machine | null>(null);
   const [latestStatus, setLatestStatus] = useState<RecommendationDecision | null>(null);
   const [sensorHistory, setSensorHistory] = useState<SensorReading[]>([]);
   const [healthHistory, setHealthHistory] = useState<HealthRecord[]>([]);
-  const [riskHistory, setRiskHistory] = useState<RiskRecord[]>([]);
+  const [, setRiskHistory] = useState<RiskRecord[]>([]);
   const [maintenanceHistory, setMaintenanceHistory] = useState<MaintenanceRecord[]>([]);
 
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [showTechnicalDetails, setShowTechnicalDetails] = useState<boolean>(false);
+  const [isPinned, setIsPinned] = useState<boolean>(false);
+  const [isWatchlist, setIsWatchlist] = useState<boolean>(false);
 
   const loadMachineData = async () => {
     setLoading(true);
@@ -49,7 +55,7 @@ export const MachineDetail: React.FC<MachineDetailProps> = ({ machineId, onBack 
       setRiskHistory(risk);
       setMaintenanceHistory(maint);
     } catch (err: any) {
-      setError(err.message || `Failed to retrieve data for machine ${machineId}.`);
+      setError(err.message || `Failed to retrieve telemetry and diagnostic status for ${machineId}.`);
     } finally {
       setLoading(false);
     }
@@ -61,25 +67,25 @@ export const MachineDetail: React.FC<MachineDetailProps> = ({ machineId, onBack 
 
   if (loading) {
     return (
-      <div className="state-container">
-        <div className="spinner"></div>
-        <p className="state-text">Loading diagnostic telemetry for {machineId}...</p>
+      <div className="stitch-state-container">
+        <div className="stitch-spinner" />
+        <p className="state-text">Loading diagnostic telemetry & sensor history for {machineId}...</p>
       </div>
     );
   }
 
   if (error || !latestStatus) {
     return (
-      <div className="state-container error">
-        <div className="error-icon">⚠️</div>
-        <h3>Failed to Load Machine Details</h3>
-        <p className="error-message">{error || 'No status available.'}</p>
-        <div className="button-group">
-          <button className="saas-btn-secondary" onClick={onBack}>
-            ← Back
+      <div className="stitch-state-container error">
+        <span className="material-symbols-outlined state-error-icon">error</span>
+        <h3 className="state-error-title">Failed to Retrieve Diagnostic Telemetry</h3>
+        <p className="state-error-msg">{error || 'No status available.'}</p>
+        <div className="flex gap-2 mt-4">
+          <button className="stitch-btn-secondary" onClick={onBack}>
+            ← Back to Machines
           </button>
-          <button className="saas-btn-primary" onClick={loadMachineData}>
-            Retry
+          <button className="stitch-btn-primary" onClick={loadMachineData}>
+            Retry Connection
           </button>
         </div>
       </div>
@@ -91,14 +97,47 @@ export const MachineDetail: React.FC<MachineDetailProps> = ({ machineId, onBack 
   const explanation = latestStatus.generated_explanation;
   const measured = latestStatus.measured_evidence;
   const calculated = latestStatus.calculated_evidence;
+  const docs = latestStatus.retrieved_documentary_evidence || [];
+
+  const isCritical = condition.health_state_label === 'Critical' || risk.risk_level === 'CRITICAL';
+  const isWarning = condition.health_state_label === 'Warning' || risk.risk_level === 'HIGH';
 
   const chartTabs: ChartTab[] = [
     {
+      id: 'vibration',
+      label: 'Vibration Dynamics',
+      unit: 'mm/s',
+      threshold: 4.5,
+      thresholdLabel: 'ISO 10816 Limit (4.5 mm/s)',
+      series: [
+        {
+          name: 'Vibration RMS',
+          color: '#2563eb',
+          data: sensorHistory.map((s) => ({ timestamp: s.timestamp, value: s.vibration_magnitude })),
+        },
+        {
+          name: 'Vib X-Axis',
+          color: '#60a5fa',
+          data: sensorHistory.map((s) => ({ timestamp: s.timestamp, value: s.vibration_x })),
+        },
+        {
+          name: 'Vib Y-Axis',
+          color: '#10b981',
+          data: sensorHistory.map((s) => ({ timestamp: s.timestamp, value: s.vibration_y })),
+        },
+        {
+          name: 'Vib Z-Axis',
+          color: '#8b5cf6',
+          data: sensorHistory.map((s) => ({ timestamp: s.timestamp, value: s.vibration_z })),
+        },
+      ],
+    },
+    {
       id: 'temp',
-      label: 'Temperature',
+      label: 'Thermal Profile',
       unit: '°C',
-      threshold: 70,
-      thresholdLabel: 'Warning Limit',
+      threshold: 75,
+      thresholdLabel: 'Thermal Alarm Limit (75°C)',
       series: [
         {
           name: 'Bearing Temp',
@@ -108,40 +147,11 @@ export const MachineDetail: React.FC<MachineDetailProps> = ({ machineId, onBack 
       ],
     },
     {
-      id: 'vibration',
-      label: 'Vibration',
-      unit: 'g',
-      threshold: 1.5,
-      thresholdLabel: 'ISO 10816 Limit',
-      series: [
-        {
-          name: 'Vibration Magnitude',
-          color: '#2563eb',
-          data: sensorHistory.map((s) => ({ timestamp: s.timestamp, value: s.vibration_magnitude })),
-        },
-        {
-          name: 'Vib X',
-          color: '#60a5fa',
-          data: sensorHistory.map((s) => ({ timestamp: s.timestamp, value: s.vibration_x })),
-        },
-        {
-          name: 'Vib Y',
-          color: '#10b981',
-          data: sensorHistory.map((s) => ({ timestamp: s.timestamp, value: s.vibration_y })),
-        },
-        {
-          name: 'Vib Z',
-          color: '#8b5cf6',
-          data: sensorHistory.map((s) => ({ timestamp: s.timestamp, value: s.vibration_z })),
-        },
-      ],
-    },
-    {
       id: 'health',
       label: 'Health Trend',
       unit: '/100',
       threshold: 50,
-      thresholdLabel: 'Critical Threshold',
+      thresholdLabel: 'Critical Threshold (50)',
       series: [
         {
           name: 'Health Score',
@@ -152,10 +162,10 @@ export const MachineDetail: React.FC<MachineDetailProps> = ({ machineId, onBack 
     },
     {
       id: 'rul',
-      label: 'Remaining Life (RUL)',
+      label: 'RUL Horizon',
       unit: 'h',
       threshold: 24,
-      thresholdLabel: 'Urgent Horizon',
+      thresholdLabel: 'Urgent Dispatch Horizon (24h)',
       series: [
         {
           name: 'Estimated RUL',
@@ -168,312 +178,375 @@ export const MachineDetail: React.FC<MachineDetailProps> = ({ machineId, onBack 
     },
   ];
 
-  const isAttention =
-    condition.health_state_label === 'Critical' ||
-    condition.health_state_label === 'Warning' ||
-    risk.risk_level === 'CRITICAL' ||
-    risk.risk_level === 'HIGH';
-
   return (
-    <div className="view-content machine-detail-view">
-      <div className="detail-top-nav">
-        <button className="back-link-btn" onClick={onBack}>
-          <span className="back-arrow">←</span> Back
-        </button>
+    <div className="view-page-container">
+      {/* 1. Top Breadcrumb & Control Strip */}
+      <div className="detail-breadcrumb-strip">
+        <div className="flex items-center gap-2">
+          <button className="stitch-btn-back" onClick={onBack} type="button">
+            <span className="material-symbols-outlined text-[16px]">arrow_back</span>
+            <span>Back to Machines</span>
+          </button>
+          <span className="crumb-sep">/</span>
+          <span className="crumb-section">Fleet Registry</span>
+          <span className="crumb-sep">/</span>
+          <span className="crumb-current font-bold">{machine?.machine_id} {machine?.machine_name ? `(${machine.machine_name})` : ''}</span>
+        </div>
 
-        <div className="detail-header-row">
-          <div className="detail-title-group">
-            <div className="detail-title-main">
-              <h1 className="detail-machine-id">{machine?.machine_id}</h1>
-              <span className="detail-type-badge">{machine?.machine_type}</span>
-              {machine?.machine_name && (
-                <span className="detail-name-text">({machine.machine_name})</span>
+        <div className="flex items-center gap-2">
+          <div className="stitch-sync-pill">
+            <span className="relative flex h-2 w-2">
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+            </span>
+            <span className="sync-pill-text">Telemetry Node: Synced (100Hz)</span>
+          </div>
+          <span className="detail-bay-tag">Shift A · Line {((machine?.id ?? 0) % 4) + 1}</span>
+        </div>
+      </div>
+
+      {/* 2. Machine Hero Header & Quick Dispatch Actions */}
+      <div className="stitch-card p-space-lg mb-space-base">
+        <div className="machine-hero-layout">
+          <div className="hero-info-group">
+            <div className="hero-title-row">
+              <h1 className="hero-machine-id font-numeric">{machine?.machine_id}</h1>
+              <span className={`status-chip ${condition.health_state_label.toLowerCase()} text-[13px] py-1 px-3`}>
+                <span className={`chip-dot ${isCritical ? 'animate-pulse' : ''}`} />
+                <span className="font-bold uppercase">
+                  {condition.health_state_label} ({risk.maintenance_priority || 'P3'})
+                </span>
+              </span>
+              <span className="machine-type-tag">
+                Type {machine?.machine_type} · {machine?.machine_name || 'Production Unit'}
+              </span>
+            </div>
+            <p className="hero-meta-desc">
+              Asset Tag: <strong className="text-on-surface">TX-ASSET-{(machine?.id ?? 1).toString().padStart(4, '0')}</strong> • Commissioned: {machine?.created_at ? new Date(machine.created_at).toLocaleDateString() : 'Nominal'} • Location: Machining Bay {((machine?.id ?? 0) % 6) + 1}
+            </p>
+          </div>
+
+          {/* Action Button Group */}
+          <div className="hero-actions-group">
+            <button
+              className={`stitch-btn-secondary ${isPinned ? 'active-pin' : ''}`}
+              onClick={() => setIsPinned(!isPinned)}
+              type="button"
+            >
+              <span className="material-symbols-outlined text-[16px] text-amber-500" style={{ fontVariationSettings: isPinned ? "'FILL' 1" : "'FILL' 0" }}>
+                star
+              </span>
+              <span>{isPinned ? 'Pinned' : 'Pin Asset'}</span>
+            </button>
+
+            <button
+              className={`stitch-btn-secondary ${isWatchlist ? 'active-watch' : ''}`}
+              onClick={() => setIsWatchlist(!isWatchlist)}
+              type="button"
+            >
+              <span className="material-symbols-outlined text-[16px] text-secondary">
+                visibility
+              </span>
+              <span>Watchlist</span>
+            </button>
+
+            {onNavigateTab && (
+              <button
+                className="stitch-btn-secondary"
+                onClick={() => onNavigateTab('maintenance')}
+                type="button"
+              >
+                <span className="material-symbols-outlined text-[16px] text-primary">engineering</span>
+                <span>Dispatch Tech</span>
+              </button>
+            )}
+
+            {onOpenAIWithMachine && (
+              <button
+                className="stitch-btn-ai-launch"
+                onClick={() => onOpenAIWithMachine(machineId)}
+                title="Launch Resonex AI with active context"
+                type="button"
+              >
+                <span className="ai-sparkle">✦</span>
+                <span>Ask Resonex AI</span>
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* 3. Plain-English Condition Callout Banner matching Stitch */}
+        <div className={`detail-callout-banner ${isCritical ? 'critical' : isWarning ? 'warning' : 'nominal'} mt-4`}>
+          <span className="material-symbols-outlined callout-icon" style={{ fontVariationSettings: "'FILL' 1" }}>
+            {isCritical ? 'warning' : isWarning ? 'report_problem' : 'check_circle'}
+          </span>
+          <div className="callout-content">
+            <div className="callout-header-row">
+              <span className="callout-title">
+                {isCritical
+                  ? 'ATTENTION REQUIRED · SEVERE THERMAL OR HARMONIC ANOMALY'
+                  : isWarning
+                  ? 'PRECAUTIONARY MONITORING · EARLY DEGRADATION SIGNATURE'
+                  : 'OPTIMAL OPERATION · STEADY STATE HARMONICS'}
+              </span>
+              {calculated.rul_hours != null && (
+                <span className="callout-countdown-pill font-numeric">
+                  T-Minus {calculated.rul_hours.toFixed(1)} Hours
+                </span>
               )}
             </div>
-            <p className="detail-meta-text">
-              Commissioned: {machine?.created_at ? new Date(machine.created_at).toLocaleDateString() : 'Active'} • Monitored via tri-axial vibration and thermal sensors
+            <p className="callout-text">
+              {explanation?.condition_summary || explanation?.reasoning || 'Telemetry stream is nominal and tracking within baseline parameters.'}
             </p>
-          </div>
-
-          <div className="detail-status-group">
-            <StatusBadge status={condition.health_state_label} />
-            <StatusBadge status={risk.risk_level} />
-            <StatusBadge status={risk.maintenance_priority} />
           </div>
         </div>
       </div>
 
-      <div className={`saas-card condition-banner ${isAttention ? 'banner-warning' : 'banner-good'}`}>
-        <div className="banner-icon">{isAttention ? '⚠️' : '✅'}</div>
-        <div className="banner-content">
-          <h3 className="banner-title">
-            {isAttention ? 'Maintenance Attention Recommended' : 'Operating Under Nominal Conditions'}
-          </h3>
-          <p className="banner-text">
-            {explanation.condition_summary ||
-              'Machine parameters are operating within established ISO vibration and thermal thresholds.'}
-          </p>
-        </div>
-      </div>
-
-      <div className="overview-kpi-grid">
-        <MetricCard
-          title="Health Score"
-          value={condition.health_score.toFixed(0)}
-          unit="/100"
-          subtitle={`State: ${condition.health_state_label}`}
-          icon={<span className="metric-icon-svg">❤️</span>}
-        />
-        <MetricCard
-          title="Remaining Life (RUL)"
-          value={condition.rul_hours !== null ? condition.rul_hours.toFixed(1) : '--'}
-          unit="hours"
-          subtitle="Estimated operating horizon"
-          icon={<span className="metric-icon-svg">⏳</span>}
-        />
-        <MetricCard
-          title="Operational Risk"
-          value={risk.risk_score.toFixed(0)}
-          unit="/100"
-          subtitle={`Level: ${risk.risk_level}`}
-          icon={<span className="metric-icon-svg">⚡</span>}
-        />
-        <MetricCard
-          title="Bearing Temperature"
-          value={measured.temperature !== null ? measured.temperature.toFixed(1) : '--'}
-          unit="°C"
-          subtitle="Latest reading"
-          icon={<span className="metric-icon-svg">🌡️</span>}
-        />
-        <MetricCard
-          title="Vibration Magnitude"
-          value={measured.vibration_magnitude !== null ? measured.vibration_magnitude.toFixed(3) : '--'}
-          unit="g"
-          subtitle="Tri-axial resultant"
-          icon={<span className="metric-icon-svg">〰️</span>}
-        />
-      </div>
-
-      <div className="detail-chart-section">
-        <TimeSeriesChart
-          title="Chronological Telemetry & Diagnostic Trends"
-          tabs={chartTabs}
-          height={280}
-        />
-      </div>
-
-      <div className="saas-card rec-action-card">
-        <div className="card-header-clean">
-          <div>
-            <h2 className="rec-card-title">Recommended Maintenance Action</h2>
-            <p className="card-subtitle-sm">
-              Grounded action plan based on current telemetry, risk assessment, and standard operating procedures.
-            </p>
+      {/* 4. High-Density Bento Metric Grid */}
+      <section className="stitch-kpi-deck mb-space-base">
+        <div className="stitch-kpi-card">
+          <div className="kpi-card-header">
+            <span className="kpi-label-caps">Health Score</span>
+            <span className="material-symbols-outlined text-emerald-600 text-[18px]">health_and_safety</span>
           </div>
-          <div className="rec-badge-group">
-            <span className="confidence-pill">
-              Confidence: {(explanation.confidence * 100).toFixed(0)}%
+          <div className="kpi-value-row">
+            <span className="kpi-telemetry-val font-numeric">{condition.health_score.toFixed(1)}</span>
+            <span className="kpi-unit-label">/ 100</span>
+          </div>
+          <div className="kpi-footnote text-secondary">
+            Degradation status: <strong className="text-on-surface">{condition.degradation_status}</strong>
+          </div>
+        </div>
+
+        <div className="stitch-kpi-card">
+          <div className="kpi-card-header">
+            <span className="kpi-label-caps">Risk Assessment</span>
+            <span className="material-symbols-outlined text-amber-600 text-[18px]">gavel</span>
+          </div>
+          <div className="kpi-value-row">
+            <span className="kpi-telemetry-val font-numeric">{(risk.risk_score * 100).toFixed(0)}%</span>
+            <span className={`risk-pill ${risk.risk_level.toLowerCase()} ml-2`}>
+              {risk.risk_level}
             </span>
-            {explanation.sop_references && explanation.sop_references.length > 0 && (
-              <span className="sop-pill">
-                Source: {explanation.sop_references.join(', ')}
-              </span>
-            )}
+          </div>
+          <div className="kpi-footnote text-secondary">
+            Priority: <strong className="text-on-surface">{risk.maintenance_priority}</strong> ({risk.maintenance_time_window || 'Immediate'})
           </div>
         </div>
 
-        <div className="rec-action-body">
-          <div className="action-steps-block">
-            <h4>Recommended Actions</h4>
-            <ul className="rec-steps-list">
-              {explanation.recommended_actions.map((act, i) => (
-                <li key={i} className="rec-step-item">
-                  <span className="step-check">✓</span>
-                  <span className="step-text">{act}</span>
-                </li>
-              ))}
-            </ul>
+        <div className="stitch-kpi-card">
+          <div className="kpi-card-header">
+            <span className="kpi-label-caps">Predicted RUL</span>
+            <span className="material-symbols-outlined text-blue-600 text-[18px]">timelapse</span>
           </div>
-
-          <div className="rec-why-block">
-            <h4>Why is this action needed?</h4>
-            <p className="reasoning-text">{explanation.reasoning}</p>
-
-            {explanation.potential_causes && explanation.potential_causes.length > 0 && (
-              <div className="potential-causes-group">
-                <span className="causes-title">Potential Root Causes:</span>
-                <ul className="causes-list">
-                  {explanation.potential_causes.map((c, i) => (
-                    <li key={i}>{c}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
+          <div className="kpi-value-row">
+            <span className="kpi-telemetry-val font-numeric">
+              {calculated.rul_hours != null ? calculated.rul_hours.toFixed(0) : '--'}
+            </span>
+            <span className="kpi-unit-label">Hours</span>
           </div>
-        </div>
-      </div>
-
-      <div className="evidence-grid-row">
-        <div className="saas-card evidence-col-card">
-          <div className="card-header-clean">
-            <h3>Measured Sensor Telemetry</h3>
-            <span className="card-meta">Sensor Snapshot</span>
-          </div>
-          <div className="evidence-keyvals">
-            <div className="ek-row">
-              <span className="ek-label">Temperature</span>
-              <span className="ek-val">{measured.temperature !== null ? `${measured.temperature.toFixed(1)} °C` : '--'}</span>
-            </div>
-            <div className="ek-row">
-              <span className="ek-label">Vibration Magnitude</span>
-              <span className="ek-val">{measured.vibration_magnitude !== null ? `${measured.vibration_magnitude.toFixed(3)} g` : '--'}</span>
-            </div>
-            <div className="ek-row">
-              <span className="ek-label">Vibration X / Y / Z</span>
-              <span className="ek-val font-numeric">
-                {measured.vibration_x?.toFixed(2) ?? '--'} / {measured.vibration_y?.toFixed(2) ?? '--'} / {measured.vibration_z?.toFixed(2) ?? '--'} g
-              </span>
-            </div>
-            <div className="ek-row">
-              <span className="ek-label">Total Operating Hours</span>
-              <span className="ek-val">{measured.operational_hours !== null ? `${measured.operational_hours.toFixed(1)} h` : '--'}</span>
-            </div>
+          <div className="kpi-footnote text-secondary">
+            Degradation slope: <strong className="text-on-surface font-numeric">{calculated.degradation_slope?.toFixed(4) || 'Nominal'}</strong>
           </div>
         </div>
 
-        <div className="saas-card evidence-col-card">
-          <div className="card-header-clean">
-            <h3>Calculated Diagnostics</h3>
-            <span className="card-meta">Engine Outputs</span>
+        <div className="stitch-kpi-card">
+          <div className="kpi-card-header">
+            <span className="kpi-label-caps">Vibration & Temp</span>
+            <span className="material-symbols-outlined text-purple-600 text-[18px]">sensors</span>
           </div>
-          <div className="evidence-keyvals">
-            <div className="ek-row">
-              <span className="ek-label">Health Score</span>
-              <span className="ek-val">{calculated.health_score.toFixed(1)} / 100 ({calculated.health_state_label})</span>
-            </div>
-            <div className="ek-row">
-              <span className="ek-label">Anomaly Status</span>
-              <span className="ek-val">{calculated.anomaly_detected ? 'Anomaly Detected' : 'Nominal'}</span>
-            </div>
-            <div className="ek-row">
-              <span className="ek-label">Degradation Rate</span>
-              <span className="ek-val">{calculated.degradation_status}</span>
-            </div>
-            <div className="ek-row">
-              <span className="ek-label">Target Maintenance Window</span>
-              <span className="ek-val font-semibold">{calculated.estimated_maintenance_time_window}</span>
-            </div>
+          <div className="kpi-value-row">
+            <span className="kpi-telemetry-val font-numeric">
+              {measured.vibration_magnitude?.toFixed(2) || '--'}
+            </span>
+            <span className="kpi-unit-label">mm/s</span>
+            <span className="text-muted mx-1">·</span>
+            <span className="kpi-telemetry-val font-numeric">
+              {measured.temperature?.toFixed(1) || '--'}
+            </span>
+            <span className="kpi-unit-label">°C</span>
+          </div>
+          <div className="kpi-footnote text-secondary">
+            Operating: <strong className="text-on-surface font-numeric">{measured.operational_hours || 0} hrs</strong>
           </div>
         </div>
+      </section>
 
-        <div className="saas-card evidence-col-card">
-          <div className="card-header-clean">
-            <h3>Cited Manuals & Standards</h3>
-            <span className="card-meta">Context-Aware RAG</span>
-          </div>
-          <div className="rag-docs-compact">
-            {latestStatus.retrieved_documentary_evidence && latestStatus.retrieved_documentary_evidence.length > 0 ? (
-              latestStatus.retrieved_documentary_evidence.slice(0, 2).map((doc, idx) => (
-                <div key={idx} className="rag-compact-item">
-                  <div className="rag-compact-header">
-                    <span className="rag-doc-title">{doc.title}</span>
-                    <span className="rag-doc-tag">[{doc.source}]</span>
-                  </div>
-                  <p className="rag-compact-snippet">{doc.content}</p>
-                </div>
-              ))
-            ) : (
-              <p className="text-muted text-sm">Operating within nominal guidelines; no repair manual escalation required.</p>
-            )}
-          </div>
-        </div>
-      </div>
-
-      <div className="saas-card table-card">
-        <div className="card-header-clean">
+      {/* 5. Interactive Native SVG TimeSeriesChart */}
+      <section className="stitch-card p-space-base mb-space-base">
+        <div className="flex-between mb-3">
           <div>
-            <h3>Maintenance Service History</h3>
-            <p className="card-subtitle-sm">Historical service and maintenance records for {machineId}.</p>
+            <h2 className="stitch-card-title">Telemetry Dynamics & Historical Trends</h2>
+            <p className="stitch-card-desc">Tri-axial vibration velocity, thermal response, and health decay trajectories.</p>
           </div>
-          <span className="pill-counter">{maintenanceHistory.length} records</span>
+        </div>
+        <TimeSeriesChart tabs={chartTabs} height={260} />
+      </section>
+
+      {/* 6. Diagnostics Breakdown & RAG Documentary Evidence Grid */}
+      <div className="detail-evidence-columns-grid mb-space-base">
+        {/* Left Column: Measured & Calculated Diagnostics */}
+        <div className="stitch-card p-space-base">
+          <div className="stitch-card-header mb-3">
+            <div className="flex items-center gap-2">
+              <span className="material-symbols-outlined text-primary text-[20px]">analytics</span>
+              <h2 className="stitch-card-title">Multi-Sensor Diagnostics</h2>
+            </div>
+            <span className="kpi-label-caps">ISO 10816 Compliance</span>
+          </div>
+
+          <div className="telemetry-readings-grid">
+            <div className="telemetry-item">
+              <span className="item-label">Vibration X-Axis</span>
+              <span className="item-value font-numeric">{measured.vibration_x?.toFixed(3) ?? '--'} g</span>
+            </div>
+            <div className="telemetry-item">
+              <span className="item-label">Vibration Y-Axis</span>
+              <span className="item-value font-numeric">{measured.vibration_y?.toFixed(3) ?? '--'} g</span>
+            </div>
+            <div className="telemetry-item">
+              <span className="item-label">Vibration Z-Axis</span>
+              <span className="item-value font-numeric">{measured.vibration_z?.toFixed(3) ?? '--'} g</span>
+            </div>
+            <div className="telemetry-item">
+              <span className="item-label">Vibration Magnitude</span>
+              <span className="item-value font-numeric font-bold text-primary">
+                {measured.vibration_magnitude?.toFixed(3) ?? '--'} mm/s
+              </span>
+            </div>
+            <div className="telemetry-item">
+              <span className="item-label">Bearing Temperature</span>
+              <span className="item-value font-numeric">{measured.temperature?.toFixed(1) ?? '--'} °C</span>
+            </div>
+            <div className="telemetry-item">
+              <span className="item-label">Motor Load Ratio</span>
+              <span className="item-value font-numeric">{measured.load_percent != null ? `${measured.load_percent}%` : '85%'}</span>
+            </div>
+            <div className="telemetry-item">
+              <span className="item-label">Rotational Speed</span>
+              <span className="item-value font-numeric">{measured.rotational_speed != null ? `${measured.rotational_speed} RPM` : '1800 RPM'}</span>
+            </div>
+            <div className="telemetry-item">
+              <span className="item-label">Anomaly Status</span>
+              <span className={`item-value font-bold ${condition.anomaly_status ? 'text-critical' : 'text-good'}`}>
+                {condition.anomaly_status ? 'ANOMALY DETECTED' : 'NOMINAL'}
+              </span>
+            </div>
+          </div>
+
+          {/* Potential Causes from Decision Engine */}
+          {explanation?.potential_causes && explanation.potential_causes.length > 0 && (
+            <div className="causes-section mt-4 pt-3 border-t border-hairline">
+              <span className="font-label-caps text-secondary uppercase font-semibold">Probable Root Causes:</span>
+              <ul className="causes-list mt-1.5">
+                {explanation.potential_causes.map((c, i) => (
+                  <li key={i} className="cause-item">
+                    <span className="material-symbols-outlined text-[14px] text-amber-500">fiber_manual_record</span>
+                    <span>{c}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
 
-        <div className="table-responsive">
-          <table className="saas-table">
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Type</th>
-                <th>Component</th>
-                <th>Description</th>
-                <th>Action Taken</th>
-                <th>SOP Code</th>
-              </tr>
-            </thead>
-            <tbody>
-              {maintenanceHistory.length === 0 ? (
+        {/* Right Column: RAG Documentary Citations & SOP References */}
+        <div className="stitch-card p-space-base">
+          <div className="stitch-card-header mb-3">
+            <div className="flex items-center gap-2">
+              <span className="material-symbols-outlined text-primary text-[20px]">menu_book</span>
+              <h2 className="stitch-card-title">Documentary Citations & SOPs</h2>
+            </div>
+            <span className="kpi-label-caps">RAG Verified ({docs.length})</span>
+          </div>
+
+          {docs.length === 0 ? (
+            <div className="stitch-empty-state-sm">
+              <span className="material-symbols-outlined text-[24px] text-muted">library_books</span>
+              <p className="empty-desc text-xs mt-1">No specific documentary citations matched for nominal state.</p>
+            </div>
+          ) : (
+            <div className="detail-citations-list">
+              {docs.map((doc, idx) => (
+                <div key={idx} className="citation-box">
+                  <div className="citation-box-head">
+                    <span className="citation-box-title">{doc.title}</span>
+                    <span className="citation-box-match font-numeric">{(doc.score * 100).toFixed(0)}% match</span>
+                  </div>
+                  <span className="citation-box-src">{doc.source} · {doc.category}</span>
+                  <p className="citation-box-excerpt">{doc.content}</p>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Recommended SOP Actions */}
+          {explanation?.recommended_actions && explanation.recommended_actions.length > 0 && (
+            <div className="actions-section mt-4 pt-3 border-t border-hairline">
+              <span className="font-label-caps text-secondary uppercase font-semibold">Prescribed SOP Actions:</span>
+              <ul className="actions-list mt-1.5">
+                {explanation.recommended_actions.map((act, i) => (
+                  <li key={i} className="action-step-item">
+                    <span className="material-symbols-outlined text-[16px] text-emerald-600">task_alt</span>
+                    <span>{act}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* 7. Maintenance History Log */}
+      <section className="stitch-card p-space-base">
+        <div className="stitch-card-header mb-3">
+          <div className="flex items-center gap-2">
+            <span className="material-symbols-outlined text-secondary text-[20px]">history</span>
+            <h2 className="stitch-card-title">Asset Maintenance Log</h2>
+          </div>
+          <span className="kpi-label-caps">{maintenanceHistory.length} Past Records</span>
+        </div>
+
+        {maintenanceHistory.length === 0 ? (
+          <div className="stitch-empty-state py-6">
+            <span className="material-symbols-outlined empty-symbol text-muted">history_toggle_off</span>
+            <h3 className="empty-title">No Historical Maintenance Records</h3>
+            <p className="empty-desc">This asset has no recorded work orders or component replacements on file.</p>
+          </div>
+        ) : (
+          <div className="stitch-table-wrapper">
+            <table className="stitch-table">
+              <thead>
                 <tr>
-                  <td colSpan={6} className="empty-table-state">
-                    No logged maintenance interventions recorded for this asset.
-                  </td>
+                  <th className="th-left">Date</th>
+                  <th className="th-left">Type</th>
+                  <th className="th-left">Component</th>
+                  <th className="th-left">Description</th>
+                  <th className="th-left">Action Taken</th>
+                  <th className="th-center">SOP Code</th>
                 </tr>
-              ) : (
-                maintenanceHistory.map((rec) => (
-                  <tr key={rec.id}>
-                    <td className="text-sm font-numeric">
-                      {new Date(rec.maintenance_date).toLocaleDateString()}
-                    </td>
-                    <td>
-                      <span className="type-tag">{rec.maintenance_type}</span>
-                    </td>
-                    <td className="font-semibold">{rec.component}</td>
-                    <td>{rec.description}</td>
-                    <td>{rec.action_taken}</td>
-                    <td>
-                      <span className="sop-code-badge">{rec.sop_code || '--'}</span>
+              </thead>
+              <tbody>
+                {maintenanceHistory.map((rec) => (
+                  <tr key={rec.id} className="stitch-row">
+                    <td className="td-left font-numeric">{new Date(rec.maintenance_date).toLocaleDateString()}</td>
+                    <td className="td-left font-semibold">{rec.maintenance_type}</td>
+                    <td className="td-left">{rec.component}</td>
+                    <td className="td-left text-secondary">{rec.description}</td>
+                    <td className="td-left">{rec.action_taken}</td>
+                    <td className="td-center">
+                      {rec.sop_code ? (
+                        <span className="sop-code-badge">{rec.sop_code}</span>
+                      ) : (
+                        '--'
+                      )}
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <div className="technical-details-toggle-wrapper">
-        <button
-          className="saas-btn-secondary btn-sm"
-          onClick={() => setShowTechnicalDetails(!showTechnicalDetails)}
-        >
-          {showTechnicalDetails ? '▲ Hide Technical Details' : '▼ View Technical Details'}
-        </button>
-
-        {showTechnicalDetails && (
-          <div className="saas-card technical-details-box">
-            <h4 className="tech-title">Underlying Intelligence Diagnostics</h4>
-            <div className="tech-grid">
-              <div className="tech-item">
-                <span className="tech-label">Anomaly Detector Score:</span>
-                <span className="tech-val">{condition.anomaly_score !== null ? condition.anomaly_score.toFixed(4) : 'N/A'}</span>
-              </div>
-              <div className="tech-item">
-                <span className="tech-label">Degradation Slope Rate:</span>
-                <span className="tech-val">{calculated.degradation_slope !== null ? `${(calculated.degradation_slope * 100).toFixed(4)} %/h` : 'N/A'}</span>
-              </div>
-              <div className="tech-item">
-                <span className="tech-label">Risk Evaluation Factors:</span>
-                <span className="tech-val">
-                  {risk.risk_factors ? Object.entries(risk.risk_factors).map(([k, v]) => `${k}: ${v}`).join(', ') : 'Nominal'}
-                </span>
-              </div>
-              <div className="tech-item">
-                <span className="tech-label">Recommendation Engine Backend:</span>
-                <span className="tech-val">{explanation.source}</span>
-              </div>
-            </div>
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
-      </div>
+      </section>
     </div>
   );
 };

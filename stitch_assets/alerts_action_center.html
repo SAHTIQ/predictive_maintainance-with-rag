@@ -1,0 +1,920 @@
+<!DOCTYPE html><html lang="en" style="width: 1280px; height: 2263px; overflow: hidden; position: relative;"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><meta content="web_dashboard" name="shell-type"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = {
+  darkMode: "class",
+  theme: {
+    extend: {
+      "colors": {
+        "on-secondary-fixed": "#131b2e",
+        "surface-bright": "#f8f9ff",
+        "surface-container-low": "#eff4ff",
+        "on-tertiary-container": "#bdffdc",
+        "tertiary-container": "#007d57",
+        "primary-container": "#2563eb",
+        "on-error-container": "#93000a",
+        "secondary-fixed-dim": "#bec6e0",
+        "surface-variant": "#d3e4fe",
+        "inverse-primary": "#b4c5ff",
+        "background": "#f8f9ff",
+        "secondary-container": "#dae2fd",
+        "on-surface": "#0b1c30",
+        "primary-fixed": "#dbe1ff",
+        "secondary": "#565e74",
+        "on-secondary": "#ffffff",
+        "primary-fixed-dim": "#b4c5ff",
+        "on-primary": "#ffffff",
+        "on-secondary-container": "#5c647a",
+        "on-error": "#ffffff",
+        "primary": "#004ac6",
+        "on-secondary-fixed-variant": "#3f465c",
+        "tertiary-fixed-dim": "#68dba9",
+        "outline": "#737686",
+        "secondary-fixed": "#dae2fd",
+        "surface-container-high": "#dce9ff",
+        "inverse-surface": "#213145",
+        "on-primary-fixed": "#00174b",
+        "tertiary": "#006243",
+        "on-primary-fixed-variant": "#003ea8",
+        "on-background": "#0b1c30",
+        "error": "#ba1a1a",
+        "on-tertiary": "#ffffff",
+        "surface": "#f8f9ff",
+        "surface-container": "#e5eeff",
+        "surface-container-highest": "#d3e4fe",
+        "surface-tint": "#0053db",
+        "outline-variant": "#c3c6d7",
+        "surface-dim": "#cbdbf5",
+        "inverse-on-surface": "#eaf1ff",
+        "on-tertiary-fixed": "#002114",
+        "tertiary-fixed": "#85f8c4",
+        "on-tertiary-fixed-variant": "#005137",
+        "on-surface-variant": "#434655",
+        "surface-container-lowest": "#ffffff",
+        "on-primary-container": "#eeefff",
+        "error-container": "#ffdad6"
+      },
+      "borderRadius": {
+        "DEFAULT": "0.125rem",
+        "lg": "0.25rem",
+        "xl": "0.5rem",
+        "full": "0.75rem"
+      },
+      "spacing": {
+        "margin-mobile": "1rem",
+        "space-2xl": "2rem",
+        "space-sm": "0.5rem",
+        "space-2xs": "0.125rem",
+        "gutter": "1rem",
+        "gutter-dense": "0.5rem",
+        "space-xs": "0.25rem",
+        "margin": "1.5rem",
+        "space-lg": "1.25rem",
+        "space-xl": "1.5rem",
+        "space-base": "1rem",
+        "space-md": "0.75rem"
+      },
+      "fontFamily": {
+        "title-md": ["Inter"],
+        "label-md": ["Inter"],
+        "label-caps": ["Inter"],
+        "telemetry-xl": ["Inter"],
+        "body-md": ["Inter"],
+        "telemetry-md": ["Inter"],
+        "headline-lg": ["Inter"],
+        "headline-md": ["Inter"],
+        "body-sm": ["Inter"],
+        "telemetry-sm": ["Inter"],
+        "body-lg": ["Inter"],
+        "headline-sm": ["Inter"],
+        "display-lg": ["Inter"]
+      },
+      "fontSize": {
+        "title-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "600"}],
+        "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.01em", "fontWeight": "500"}],
+        "label-caps": ["11px", {"lineHeight": "14px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+        "telemetry-xl": ["28px", {"lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+        "body-md": ["13px", {"lineHeight": "18px", "letterSpacing": "0em", "fontWeight": "400"}],
+        "telemetry-md": ["14px", {"lineHeight": "18px", "letterSpacing": "0em", "fontWeight": "600"}],
+        "headline-lg": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.015em", "fontWeight": "600"}],
+        "headline-md": ["20px", {"lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+        "body-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0em", "fontWeight": "400"}],
+        "telemetry-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0em", "fontWeight": "500"}],
+        "body-lg": ["15px", {"lineHeight": "22px", "letterSpacing": "0em", "fontWeight": "400"}],
+        "headline-sm": ["16px", {"lineHeight": "24px", "letterSpacing": "-0.005em", "fontWeight": "600"}],
+        "display-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600"}]
+      }
+    }
+  }
+}</script></head><body class="bg-background font-body-md text-on-surface antialiased"><aside class="fixed left-0 top-0 h-full w-64 bg-surface-container-lowest shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-50 flex flex-col justify-between"><div class="flex flex-col"><div class="h-16 px-space-base flex items-center gap-space-sm bg-surface-container-lowest"><img alt="Resonex Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1W5zwb0R-cINsk7JQGH4zLdjc9iWZtEtW0NVuoLaQFf88Yt5N4tSPo8clU2tnf0zwEzDSnoV9I4bYxAXd7wpO8zWvKZpM1_wHfYMBpBo8rVsI4ufNC6DK_lCe3UoI2ubpd-v3xaBqzwA7fcwZZK4SHPKgNywhEk3GEe6a0_f2rYmYUS9DmHMRrgz3IU86nIoVK_olscocOocDElj0LcwV2W-xkTNXlOB_mU2NcvnSE"><div class="flex flex-col"><span class="font-headline-sm text-headline-sm tracking-tight text-on-surface font-bold leading-none">RESONEX</span><span class="font-label-caps text-label-caps uppercase text-secondary font-semibold">Telemetry Core</span></div></div><div class="px-space-base py-space-xs"><div class="flex items-center gap-space-xs px-space-sm py-space-2xs bg-surface-container-low rounded"><span class="w-2 h-2 rounded-full bg-tertiary"></span><span class="font-label-caps text-label-caps font-semibold text-secondary uppercase tracking-wider">50 Machines Connected</span></div></div><nav class="flex flex-col gap-space-2xs px-space-sm mt-space-sm" data-active-classes="bg-primary-container text-on-primary-container font-semibold"><a class="flex items-center justify-between px-space-base py-space-sm rounded text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-title-md text-title-md" data-path="overview" href="#"><span class="">Overview</span></a><a class="flex items-center justify-between px-space-base py-space-sm rounded text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-title-md text-title-md" data-path="machines" href="#"><span class="">Machines</span></a><a aria-current="page" class="flex items-center justify-between px-space-base py-space-sm rounded bg-primary-container text-on-primary-container font-semibold" data-path="alerts" href="#"><span class="">Alerts</span><span class="flex items-center gap-1"><span class="px-1.5 py-0.5 rounded-full bg-error text-on-error font-label-caps text-[10px] font-bold leading-none">28</span><span class="px-1.5 py-0.5 rounded-full bg-surface-container-lowest/20 text-on-primary-container font-label-caps text-[10px] font-medium leading-none">4 unack</span></span></a><a class="flex items-center justify-between px-space-base py-space-sm rounded text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-title-md text-title-md" data-path="maintenance" href="#"><span class="">Maintenance</span></a><a class="flex items-center justify-between px-space-base py-space-sm rounded text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-title-md text-title-md" data-path="reports" href="#"><span class="">Reports</span></a><a class="flex items-center justify-between px-space-base py-space-sm rounded text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-title-md text-title-md" data-path="settings" href="#"><span class="">Settings</span></a></nav></div><div class="p-space-base bg-surface-container-low"><div class="flex items-center justify-between"><span class="font-label-caps text-label-caps uppercase text-secondary font-semibold">Vibration Telemetry</span><span class="font-telemetry-sm text-telemetry-sm text-tertiary font-bold">99.98%</span></div><div class="w-full bg-surface-container-highest h-1 rounded mt-space-2xs overflow-hidden"><div class="bg-tertiary h-full w-[99.98%]"></div></div></div></aside><div class="pl-64"><header class="fixed top-0 left-64 right-0 h-16 bg-surface-container-lowest shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-40"><div class="w-full h-16 px-space-xl flex items-center justify-between gap-space-base"><div class="flex items-center gap-space-lg"><div class="flex items-center gap-space-xs font-label-md text-label-md"><span class="text-secondary">Resonex</span><span class="text-outline-variant">/</span><span class="text-on-surface font-semibold">Alerts Center</span></div><div class="relative flex items-center w-72"><span class="material-symbols-outlined absolute left-2.5 text-secondary text-[18px]">search</span><input class="w-full h-8 pl-8 pr-3 bg-surface-container-low text-on-surface placeholder:text-secondary font-body-sm text-body-sm rounded outline-none focus:bg-surface-container-lowest" placeholder="Search machines... (press /)" type="text"><kbd class="absolute right-2 font-label-caps text-label-caps text-secondary bg-surface-container-highest px-1 py-0.5 rounded">/</kbd></div></div><div class="flex items-center gap-space-base"><div class="flex items-center gap-space-xs px-space-sm py-space-2xs rounded-full bg-tertiary-fixed text-on-tertiary-fixed font-label-caps text-label-caps font-semibold"><span class="w-1.5 h-1.5 rounded-full bg-tertiary animate-pulse"></span>Monitoring Active · 50/50 Synced</div><div class="flex items-center gap-space-xs px-space-sm py-space-2xs rounded bg-surface-container-low text-secondary font-label-md text-label-md"><span class="material-symbols-outlined text-[16px]">schedule</span>Shift A · Line 1-4</div><div class="relative flex items-center justify-center p-space-xs rounded hover:bg-surface-container-low text-on-surface cursor-pointer"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="absolute top-1 right-1 w-4 h-4 bg-error text-on-error font-label-caps text-[9px] font-bold rounded-full flex items-center justify-center leading-none">4</span></div><div class="flex items-center gap-space-sm pl-space-sm"><img alt="Profile" class="w-8 h-8 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCP9dPLIQ9MqGqW_X9IiNcCJzWGEojJxkB4iZxdWId0l5tgDHUU_0sUfiN6XXsTXWbi4sEzFKqoU_yXi85jfvV3w3dtd4VU3Loj3Qb8WVxeQNEhsAvyG_QNhrGhgQjxuNG-WZ4hMnjBvh7mTjxltL2KDAm8ALPJCcFf_xAJO8JCJSW_if7tqjgSY5IeFKmhF7t3vYkYRmvg4Otzta7aYKR8ljJDUPOoyREU3j5r_g"><div class="flex flex-col"><span class="font-title-md text-title-md text-on-surface leading-tight">Mark Jenkins</span><span class="font-label-caps text-label-caps text-secondary uppercase">Lead Monitorer</span></div></div></div></div></header><main class="relative w-full pt-16 bg-background px-space-xl py-space-lg min-h-screen"><div class="flex flex-col w-full gap-space-lg">
+<!-- TOP HEADER & ACTION BAR -->
+<section class="flex flex-col xl:flex-row xl:items-center justify-between gap-space-base bg-surface-container-lowest p-space-lg rounded-xl shadow-sm">
+<div class="flex flex-col gap-space-2xs">
+<div class="flex items-center gap-space-sm">
+<h1 class="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight">Alerts &amp; Action Center</h1>
+<div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-error-container text-on-error-container font-label-caps text-label-caps font-bold">
+<span class="w-1.5 h-1.5 rounded-full bg-error animate-ping"></span>
+<span class="">LIVE ANOMALY STREAM</span>
+</div>
+</div>
+<p class="font-body-md text-body-md text-secondary">
+        Real-time anomaly triage, multi-sensor divergence alerts, and immediate mitigation dispatch across 50 active assets.
+      </p>
+</div>
+<!-- Right Header Action Utilities -->
+<div class="flex flex-wrap items-center gap-space-sm">
+<button class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-surface-container-low text-on-surface hover:bg-surface-container font-label-md text-label-md rounded shadow-sm transition-colors" type="button">
+<span class="material-symbols-outlined text-[16px] text-secondary">done_all</span>
+<span class="">Acknowledge All Warnings</span>
+</button>
+<button class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-surface-container-low text-on-surface hover:bg-surface-container font-label-md text-label-md rounded shadow-sm transition-colors" type="button">
+<span class="material-symbols-outlined text-[16px] text-secondary">file_download</span>
+<span class="">Export Incident Log</span>
+</button>
+<button class="inline-flex items-center gap-1.5 px-4 py-1.5 bg-primary-container text-on-primary font-label-md text-label-md font-semibold rounded shadow-sm hover:opacity-95 transition-all" type="button">
+<span class="material-symbols-outlined text-[16px]">local_shipping</span>
+<span class="">Batch Maintenance Dispatch</span>
+</button>
+</div>
+</section>
+<!-- QUICK SUMMARY KPI TILES -->
+<section class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-space-md">
+<!-- Total Active Alerts -->
+<div class="flex flex-col justify-between p-space-base bg-surface-container-lowest rounded-xl shadow-sm">
+<div class="flex items-center justify-between">
+<span class="font-label-caps text-label-caps uppercase text-secondary">Total Alerts</span>
+<span class="material-symbols-outlined text-secondary text-[18px]">notifications_active</span>
+</div>
+<div class="mt-space-sm flex items-baseline gap-2">
+<span class="font-telemetry-xl text-telemetry-xl text-on-surface font-bold">34</span>
+<span class="font-body-sm text-body-sm text-secondary">fleetwide</span>
+</div>
+<div class="mt-space-xs text-secondary font-label-md text-label-md">Across 15 flagged units</div>
+</div>
+<!-- Critical P1 Immediate -->
+<div class="flex flex-col justify-between p-space-base bg-surface-container-lowest rounded-xl shadow-sm">
+<div class="flex items-center justify-between">
+<span class="font-label-caps text-label-caps uppercase text-error">Critical (P1)</span>
+<span class="w-2 h-2 rounded-full bg-error animate-pulse"></span>
+</div>
+<div class="mt-space-sm flex items-baseline gap-2">
+<span class="font-telemetry-xl text-telemetry-xl text-error font-bold">18</span>
+<span class="font-body-sm text-body-sm text-error font-medium">alerts</span>
+</div>
+<div class="mt-space-xs font-label-md text-label-md text-secondary">6 machines &lt; 12h RUL</div>
+</div>
+<!-- High Risk P2 -->
+<div class="flex flex-col justify-between p-space-base bg-surface-container-lowest rounded-xl shadow-sm">
+<div class="flex items-center justify-between">
+<span class="font-label-caps text-label-caps uppercase text-[#ea580c]">High Risk (P2)</span>
+<span class="w-2 h-2 rounded-full bg-[#ea580c]"></span>
+</div>
+<div class="mt-space-sm flex items-baseline gap-2">
+<span class="font-telemetry-xl text-telemetry-xl text-[#ea580c] font-bold">11</span>
+<span class="font-body-sm text-body-sm text-[#ea580c] font-medium">alerts</span>
+</div>
+<div class="mt-space-xs font-label-md text-label-md text-secondary">5 machines requiring triage</div>
+</div>
+<!-- Warning P3 -->
+<div class="flex flex-col justify-between p-space-base bg-surface-container-lowest rounded-xl shadow-sm">
+<div class="flex items-center justify-between">
+<span class="font-label-caps text-label-caps uppercase text-[#d97706]">Warning (P3)</span>
+<span class="w-2 h-2 rounded-full bg-[#f59e0b]"></span>
+</div>
+<div class="mt-space-sm flex items-baseline gap-2">
+<span class="font-telemetry-xl text-telemetry-xl text-[#d97706] font-bold">5</span>
+<span class="font-body-sm text-body-sm text-[#d97706] font-medium">watch items</span>
+</div>
+<div class="mt-space-xs font-label-md text-label-md text-secondary">4 machines on trend review</div>
+</div>
+<!-- In Progress -->
+<div class="flex flex-col justify-between p-space-base bg-surface-container-lowest rounded-xl shadow-sm col-span-2 md:col-span-1">
+<div class="flex items-center justify-between">
+<span class="font-label-caps text-label-caps uppercase text-tertiary">Work Orders</span>
+<span class="material-symbols-outlined text-tertiary text-[18px]">engineering</span>
+</div>
+<div class="mt-space-sm flex items-baseline gap-2">
+<span class="font-telemetry-xl text-telemetry-xl text-tertiary font-bold">8</span>
+<span class="font-body-sm text-body-sm text-tertiary font-medium">active</span>
+</div>
+<div class="mt-space-xs font-label-md text-label-md text-secondary">6 crews currently deployed</div>
+</div>
+</section>
+<!-- PINNED EMERGENCY BANNER -->
+<section class="relative overflow-hidden bg-error-container/60 rounded-xl p-space-base shadow-sm">
+<div class="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-space-base">
+<div class="flex items-start sm:items-center gap-space-base">
+<div class="flex items-center justify-center w-10 h-10 rounded-lg bg-error text-on-error shrink-0 shadow-sm">
+<span class="material-symbols-outlined text-[24px]">crisis_alert</span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<span class="font-label-caps text-label-caps text-error font-bold uppercase tracking-wider">Immediate Mitigation Required</span>
+<span class="text-secondary font-label-caps text-label-caps">·</span>
+<span class="font-label-caps text-label-caps text-on-surface font-semibold uppercase">2 Machines Within &lt; 12h RUL Failure Window</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface mt-0.5">
+            Critical divergence confirmed on <strong class="text-on-surface">TXM-014</strong> (Spindle Drive · 8.2h RUL · 3 alerts) and <strong class="text-on-surface">TXM-027</strong> (Extruder Drive · 11.0h RUL · 2 alerts). Unmitigated operation risks catastrophic bearing seizure.
+          </p>
+</div>
+</div>
+<div class="flex items-center gap-space-sm shrink-0 pl-14 sm:pl-0">
+<button class="px-3.5 py-1.5 bg-error text-on-error font-label-md text-label-md font-semibold rounded shadow-sm hover:opacity-95 transition-all inline-flex items-center gap-1.5" type="button">
+<span class="material-symbols-outlined text-[16px]">fmd_bad</span>
+<span class="">Dispatch Tech Team to Bay 04 &amp; 01</span>
+</button>
+<button class="px-3.5 py-1.5 bg-surface-container-lowest text-on-surface font-label-md text-label-md rounded shadow-sm hover:bg-surface-container transition-colors inline-flex items-center gap-1.5" type="button">
+<span class="material-symbols-outlined text-[16px] text-secondary">checklist</span>
+<span class="">Open Safety Checklist</span>
+</button>
+</div>
+</div>
+</section>
+<!-- FILTER & TRIAGE CONTROL BAR -->
+<section class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-space-base bg-surface-container-lowest p-space-sm rounded-xl shadow-sm">
+<!-- Filter Chips -->
+<div class="flex flex-wrap items-center gap-1.5">
+<button class="inline-flex items-center gap-1.5 px-3 py-1 bg-primary text-on-primary font-label-md text-label-md font-semibold rounded-full shadow-sm" type="button">
+<span class="">All Alerts</span>
+<span class="px-1.5 py-0.2 rounded-full bg-surface-container-lowest/20 font-label-caps text-label-caps">34</span>
+</button>
+<button class="inline-flex items-center gap-1.5 px-3 py-1 bg-surface-container-low text-on-surface hover:bg-surface-container font-label-md text-label-md rounded-full transition-colors" type="button">
+<span class="w-1.5 h-1.5 rounded-full bg-error"></span>
+<span class="">Critical P1</span>
+<span class="px-1.5 py-0.2 rounded-full bg-error-container text-on-error-container font-label-caps text-label-caps font-bold">18</span>
+</button>
+<button class="inline-flex items-center gap-1.5 px-3 py-1 bg-surface-container-low text-on-surface hover:bg-surface-container font-label-md text-label-md rounded-full transition-colors" type="button">
+<span class="w-1.5 h-1.5 rounded-full bg-[#ea580c]"></span>
+<span class="">High P2</span>
+<span class="px-1.5 py-0.2 rounded-full bg-surface-container-high text-on-surface font-label-caps text-label-caps font-semibold">11</span>
+</button>
+<button class="inline-flex items-center gap-1.5 px-3 py-1 bg-surface-container-low text-on-surface hover:bg-surface-container font-label-md text-label-md rounded-full transition-colors" type="button">
+<span class="w-1.5 h-1.5 rounded-full bg-[#f59e0b]"></span>
+<span class="">Warning P3</span>
+<span class="px-1.5 py-0.2 rounded-full bg-surface-container-high text-on-surface font-label-caps text-label-caps font-semibold">5</span>
+</button>
+<button class="inline-flex items-center gap-1.5 px-3 py-1 bg-surface-container-low text-secondary hover:bg-surface-container hover:text-on-surface font-label-md text-label-md rounded-full transition-colors" type="button">
+<span class="material-symbols-outlined text-[14px]">check_circle</span>
+<span class="">Resolved / Cleared</span>
+<span class="px-1.5 py-0.2 rounded-full bg-surface-container-high text-secondary font-label-caps text-label-caps">12</span>
+</button>
+</div>
+<!-- Dropdown Selectors & Mode Toggle -->
+<div class="flex flex-wrap items-center gap-space-sm">
+<div class="flex items-center gap-1 bg-surface-container-low px-2 py-1 rounded">
+<span class="font-label-caps text-label-caps uppercase text-secondary">Line:</span>
+<select class="bg-transparent font-label-md text-label-md text-on-surface outline-none cursor-pointer">
+<option>All Lines (1-4)</option>
+<option>Line 1</option>
+<option>Line 2</option>
+<option>Line 3</option>
+<option>Line 4</option>
+</select>
+</div>
+<div class="flex items-center gap-1 bg-surface-container-low px-2 py-1 rounded">
+<span class="font-label-caps text-label-caps uppercase text-secondary">Sensor:</span>
+<select class="bg-transparent font-label-md text-label-md text-on-surface outline-none cursor-pointer">
+<option>All Telemetry Sources</option>
+<option>Vibration Harmonics</option>
+<option>Thermal Gradient</option>
+<option>RUL Degradation</option>
+<option>Phase / Electrical</option>
+</select>
+</div>
+<!-- Grouping Mode Switch -->
+<div class="inline-flex p-0.5 bg-surface-container rounded">
+<button class="px-2.5 py-1 bg-surface-container-lowest text-primary font-label-caps text-label-caps font-semibold rounded shadow-sm" type="button">
+          Group by Machine
+        </button>
+<button class="px-2.5 py-1 text-secondary hover:text-on-surface font-label-caps text-label-caps font-semibold rounded transition-colors" type="button">
+          Chronological Stream
+        </button>
+</div>
+</div>
+</section>
+<!-- GROUPED ALERT FEED SECTION -->
+<div class="flex flex-col gap-space-lg">
+<!-- GROUP 1: TXM-014 (CRITICAL P1 · 3 ALERTS) -->
+<article class="bg-surface-container-lowest rounded-xl shadow-sm p-space-base flex flex-col gap-space-base">
+<!-- Group Header -->
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-space-base bg-surface-container-low p-space-base rounded-lg">
+<div class="flex flex-wrap items-center gap-space-base">
+<div class="flex items-center gap-space-sm">
+<span class="font-headline-sm text-headline-sm text-on-surface font-bold">TXM-014</span>
+<span class="font-label-caps text-label-caps px-2 py-0.5 rounded bg-surface-container-highest text-on-surface font-semibold">Spindle Drive Type C</span>
+</div>
+<div class="flex items-center gap-space-md text-secondary font-body-sm text-body-sm">
+<span class="">Line 1 · Bay 04</span>
+<span class="">·</span>
+<span class="">Commissioned Q3 2022</span>
+<span class="">·</span>
+<span class="flex items-center gap-1 font-semibold text-error">
+<span class="material-symbols-outlined text-[16px]">warning</span> Health 21% (Critical)
+            </span>
+<span class="">·</span>
+<span class="font-semibold text-error">RUL: 8.2h Remaining</span>
+</div>
+</div>
+<div class="flex items-center gap-space-sm flex-wrap">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-error-container text-on-error-container font-label-caps text-label-caps font-bold">
+<span class="w-1.5 h-1.5 rounded-full bg-error animate-ping"></span>
+            CRITICAL P1 · 3 CORRELATED ALERTS
+          </span>
+<button class="px-3 py-1 bg-surface-container-lowest hover:bg-surface-container text-primary font-label-md text-label-md font-semibold rounded shadow-sm transition-colors" type="button">
+            Inspect Machine →
+          </button>
+</div>
+</div>
+<!-- Correlated Sub-Alerts Grid -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-space-md">
+<!-- Sub-Alert 1 -->
+<div class="flex flex-col justify-between p-space-base bg-surface-bright rounded-lg shadow-sm">
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-center justify-between">
+<span class="font-label-caps text-label-caps uppercase text-error font-bold">Vibration Harmonic Spike</span>
+<span class="font-label-caps text-label-caps text-secondary">14m ago</span>
+</div>
+<div class="flex items-baseline gap-2 mt-1">
+<span class="font-telemetry-md text-telemetry-md text-on-surface font-bold">0.82 mm/s RMS</span>
+<span class="font-label-caps text-label-caps text-error font-bold">+115% elevation</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">
+              BPFO outer-race 142 Hz harmonic signature detected on lead sensor <code>B4-RAD</code>. ISO threshold breached (0.65 mm/s limit).
+            </p>
+</div>
+<div class="mt-space-sm pt-space-xs flex items-center justify-between text-secondary font-label-caps text-label-caps">
+<span class="">Lead: Sensor B4-RAD</span>
+<span class="text-error font-semibold">99.2% Conf</span>
+</div>
+</div>
+<!-- Sub-Alert 2 -->
+<div class="flex flex-col justify-between p-space-base bg-surface-bright rounded-lg shadow-sm">
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-center justify-between">
+<span class="font-label-caps text-label-caps uppercase text-error font-bold">Thermal Runaway Signature</span>
+<span class="font-label-caps text-label-caps text-secondary">22m ago</span>
+</div>
+<div class="flex items-baseline gap-2 mt-1">
+<span class="font-telemetry-md text-telemetry-md text-on-surface font-bold">71.4°C</span>
+<span class="font-label-caps text-label-caps text-error font-bold">+1.8°C / hr</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">
+              Drive-end casing delta is +13.4°C above baseline ambient. Operating temperature is approaching 75.0°C thermal protection shutdown limit.
+            </p>
+</div>
+<div class="mt-space-sm pt-space-xs flex items-center justify-between text-secondary font-label-caps text-label-caps">
+<span class="">Sensor: T-09 Internal</span>
+<span class="text-error font-semibold">Fast Heat Surge</span>
+</div>
+</div>
+<!-- Sub-Alert 3 -->
+<div class="flex flex-col justify-between p-space-base bg-surface-bright rounded-lg shadow-sm">
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-center justify-between">
+<span class="font-label-caps text-label-caps uppercase text-error font-bold">Non-Linear RUL Decay</span>
+<span class="font-label-caps text-label-caps text-secondary">35m ago</span>
+</div>
+<div class="flex items-baseline gap-2 mt-1">
+<span class="font-telemetry-md text-telemetry-md text-on-surface font-bold">8.2 Hours</span>
+<span class="font-label-caps text-label-caps text-error font-bold">↓ 28h drop</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">
+              Markov state wear transition accelerated past Stage 3 fatigue. Calculated mean-time-to-critical-failure reduced to under one shift.
+            </p>
+</div>
+<div class="mt-space-sm pt-space-xs flex items-center justify-between text-secondary font-label-caps text-label-caps">
+<span class="">Model: Edge Node 03</span>
+<span class="text-primary font-semibold">98.4% Confidence</span>
+</div>
+</div>
+</div>
+<!-- Prescribed Mitigation SOP & Operator Controls -->
+<div class="p-space-base bg-surface-container-low rounded-lg flex flex-col xl:flex-row xl:items-center justify-between gap-space-base">
+<div class="flex items-start gap-space-sm">
+<span class="material-symbols-outlined text-primary text-[20px] shrink-0 mt-0.5">verified</span>
+<div class="flex flex-col">
+<span class="font-title-md text-title-md text-on-surface font-semibold">Prescribed SOP-MECH-04: Drive-End Bearing Replacement &amp; Flush</span>
+<p class="font-body-sm text-body-sm text-secondary mt-0.5">
+              Shut down during scheduled buffer at 15:30. Flush lubrication circuit, inspect race for spalling, install SKF 6208 ball assembly before 16:00 UTC shift handover.
+            </p>
+</div>
+</div>
+<div class="flex flex-wrap items-center gap-space-sm shrink-0">
+<div class="flex items-center gap-1.5 text-secondary font-label-caps text-label-caps px-2 py-1 bg-surface-container rounded">
+<span class="material-symbols-outlined text-[14px] text-tertiary">check</span>
+<span class="">Ack by M. Jenkins (10:02 UTC)</span>
+</div>
+<button class="px-3 py-1.5 bg-surface-container-lowest text-on-surface hover:bg-surface-container font-label-md text-label-md rounded shadow-sm transition-colors" type="button">
+            Quick Note
+          </button>
+<button class="px-3 py-1.5 bg-surface-container-lowest text-on-surface hover:bg-surface-container font-label-md text-label-md rounded shadow-sm transition-colors" type="button">
+            Snooze 30m
+          </button>
+<button class="px-3.5 py-1.5 bg-primary-container text-on-primary font-label-md text-label-md font-semibold rounded shadow-sm hover:opacity-95 transition-all" type="button">
+            Dispatch Tech Team B (#WO-8941)
+          </button>
+</div>
+</div>
+</article>
+<!-- GROUP 2: TXM-027 (CRITICAL P1 · 2 ALERTS) -->
+<article class="bg-surface-container-lowest rounded-xl shadow-sm p-space-base flex flex-col gap-space-base">
+<!-- Group Header -->
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-space-base bg-surface-container-low p-space-base rounded-lg">
+<div class="flex flex-wrap items-center gap-space-base">
+<div class="flex items-center gap-space-sm">
+<span class="font-headline-sm text-headline-sm text-on-surface font-bold">TXM-027</span>
+<span class="font-label-caps text-label-caps px-2 py-0.5 rounded bg-surface-container-highest text-on-surface font-semibold">High-Torque Extruder Drive</span>
+</div>
+<div class="flex items-center gap-space-md text-secondary font-body-sm text-body-sm">
+<span class="">Line 2 · Bay 01</span>
+<span class="">·</span>
+<span class="flex items-center gap-1 font-semibold text-error">
+<span class="material-symbols-outlined text-[16px]">warning</span> Health 18% (Critical)
+            </span>
+<span class="">·</span>
+<span class="font-semibold text-error">RUL: 11.0h Remaining</span>
+</div>
+</div>
+<div class="flex items-center gap-space-sm flex-wrap">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-error-container text-on-error-container font-label-caps text-label-caps font-bold">
+<span class="w-1.5 h-1.5 rounded-full bg-error animate-ping"></span>
+            CRITICAL P1 · 2 CORRELATED ALERTS
+          </span>
+<button class="px-3 py-1 bg-surface-container-lowest hover:bg-surface-container text-primary font-label-md text-label-md font-semibold rounded shadow-sm transition-colors" type="button">
+            Review Lube System →
+          </button>
+</div>
+</div>
+<!-- Correlated Sub-Alerts Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-space-md">
+<!-- Sub-Alert 1 -->
+<div class="flex flex-col justify-between p-space-base bg-surface-bright rounded-lg shadow-sm">
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-center justify-between">
+<span class="font-label-caps text-label-caps uppercase text-error font-bold">Lubrication Film Depletion</span>
+<span class="font-label-caps text-label-caps text-secondary">28m ago</span>
+</div>
+<div class="flex items-baseline gap-2 mt-1">
+<span class="font-telemetry-md text-telemetry-md text-on-surface font-bold">&lt; 15 cSt Shear</span>
+<span class="font-label-caps text-label-caps text-error font-bold">+1.4°C/hr thermal friction</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">
+              Optical oil sensor detects particulate buildup and sudden drop in film viscosity. Metal-on-metal hydrodynamic boundary breach underway.
+            </p>
+</div>
+<div class="mt-space-sm pt-space-xs flex items-center justify-between text-secondary font-label-caps text-label-caps">
+<span class="">Sensor: LUB-EXT-02</span>
+<span class="text-error font-semibold">Immediate Risk</span>
+</div>
+</div>
+<!-- Sub-Alert 2 -->
+<div class="flex flex-col justify-between p-space-base bg-surface-bright rounded-lg shadow-sm">
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-center justify-between">
+<span class="font-label-caps text-label-caps uppercase text-[#ea580c] font-bold">Vibration Crest Factor Surge</span>
+<span class="font-label-caps text-label-caps text-secondary">31m ago</span>
+</div>
+<div class="flex items-baseline gap-2 mt-1">
+<span class="font-telemetry-md text-telemetry-md text-on-surface font-bold">0.79 mm/s RMS</span>
+<span class="font-label-caps text-label-caps text-[#ea580c] font-bold">+39% baseline elevation</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">
+              Crest factor spike to 4.8 indicates repetitive impact shocks in planetary stage 2 ring gears.
+            </p>
+</div>
+<div class="mt-space-sm pt-space-xs flex items-center justify-between text-secondary font-label-caps text-label-caps">
+<span class="">Sensor: VIB-AX-01</span>
+<span class="text-primary font-semibold">96.1% Conf</span>
+</div>
+</div>
+</div>
+<!-- Prescribed Mitigation SOP -->
+<div class="p-space-base bg-surface-container-low rounded-lg flex flex-col xl:flex-row xl:items-center justify-between gap-space-base">
+<div class="flex items-start gap-space-sm">
+<span class="material-symbols-outlined text-primary text-[20px] shrink-0 mt-0.5">verified</span>
+<div class="flex flex-col">
+<span class="font-title-md text-title-md text-on-surface font-semibold">Prescribed SOP-LUB-02: Planetary Gearbox Flush &amp; Filter Swap</span>
+<p class="font-body-sm text-body-sm text-secondary mt-0.5">
+              Flush gearbox lubricant reservoir with ISO VG 220, inspect planetary gear mesh for scuffing or tooth pitting.
+            </p>
+</div>
+</div>
+<div class="flex flex-wrap items-center gap-space-sm shrink-0">
+<button class="px-3.5 py-1.5 bg-surface-container-lowest text-on-surface hover:bg-surface-container font-label-md text-label-md rounded shadow-sm transition-colors" type="button">
+            Assign Lube Tech
+          </button>
+<button class="px-3.5 py-1.5 bg-primary-container text-on-primary font-label-md text-label-md font-semibold rounded shadow-sm hover:opacity-95 transition-all" type="button">
+            Issue Work Order #WO-8942
+          </button>
+</div>
+</div>
+</article>
+<!-- GROUP 3: TXM-041 (HIGH P2 · 2 ALERTS) -->
+<article class="bg-surface-container-lowest rounded-xl shadow-sm p-space-base flex flex-col gap-space-base">
+<!-- Group Header -->
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-space-base bg-surface-container-low p-space-base rounded-lg">
+<div class="flex flex-wrap items-center gap-space-base">
+<div class="flex items-center gap-space-sm">
+<span class="font-headline-sm text-headline-sm text-on-surface font-bold">TXM-041</span>
+<span class="font-label-caps text-label-caps px-2 py-0.5 rounded bg-surface-container-highest text-on-surface font-semibold">Precision Weaving Loom Type E</span>
+</div>
+<div class="flex items-center gap-space-md text-secondary font-body-sm text-body-sm">
+<span class="">Line 3 · Bay 07</span>
+<span class="">·</span>
+<span class="flex items-center gap-1 font-semibold text-[#ea580c]">
+<span class="material-symbols-outlined text-[16px]">report</span> Health 35% (High Risk)
+            </span>
+<span class="">·</span>
+<span class="font-semibold text-[#ea580c]">RUL: 19.4h Remaining</span>
+</div>
+</div>
+<div class="flex items-center gap-space-sm flex-wrap">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#fed7aa] text-[#ea580c] font-label-caps text-label-caps font-bold">
+            HIGH P2 · 2 CORRELATED ALERTS
+          </span>
+<button class="px-3 py-1 bg-surface-container-lowest hover:bg-surface-container text-primary font-label-md text-label-md font-semibold rounded shadow-sm transition-colors" type="button">
+            Schedule Alignment →
+          </button>
+</div>
+</div>
+<!-- Correlated Sub-Alerts Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-space-md">
+<!-- Sub-Alert 1 -->
+<div class="flex flex-col justify-between p-space-base bg-surface-bright rounded-lg shadow-sm">
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-center justify-between">
+<span class="font-label-caps text-label-caps uppercase text-[#ea580c] font-bold">Gearbox 3X Harmonic Anomaly</span>
+<span class="font-label-caps text-label-caps text-secondary">48m ago</span>
+</div>
+<div class="flex items-baseline gap-2 mt-1">
+<span class="font-telemetry-md text-telemetry-md text-on-surface font-bold">0.68 mm/s RMS</span>
+<span class="font-label-caps text-label-caps text-[#ea580c] font-bold">+28% deviation</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">
+              Axial shaft angular displacement detected at primary reduction stage. Coupling misalignment suspected.
+            </p>
+</div>
+<div class="mt-space-sm pt-space-xs flex items-center justify-between text-secondary font-label-caps text-label-caps">
+<span class="">Sensor: G-AX-04</span>
+<span class="text-secondary font-semibold">Trend Stable</span>
+</div>
+</div>
+<!-- Sub-Alert 2 -->
+<div class="flex flex-col justify-between p-space-base bg-surface-bright rounded-lg shadow-sm">
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-center justify-between">
+<span class="font-label-caps text-label-caps uppercase text-[#d97706] font-bold">Operating Load Asymmetry</span>
+<span class="font-label-caps text-label-caps text-secondary">1h ago</span>
+</div>
+<div class="flex items-baseline gap-2 mt-1">
+<span class="font-telemetry-md text-telemetry-md text-on-surface font-bold">4.2% Imbalance</span>
+<span class="font-label-caps text-label-caps text-[#d97706] font-bold">Phase C delta</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">
+              Motor current signature demonstrates uneven torque transmission across mechanical shaft oscillation.
+            </p>
+</div>
+<div class="mt-space-sm pt-space-xs flex items-center justify-between text-secondary font-label-caps text-label-caps">
+<span class="">Sensor: ELEC-M04</span>
+<span class="text-secondary font-semibold">91.4% Conf</span>
+</div>
+</div>
+</div>
+<!-- Prescribed Mitigation SOP -->
+<div class="p-space-base bg-surface-container-low rounded-lg flex flex-col xl:flex-row xl:items-center justify-between gap-space-base">
+<div class="flex items-start gap-space-sm">
+<span class="material-symbols-outlined text-primary text-[20px] shrink-0 mt-0.5">verified</span>
+<div class="flex flex-col">
+<span class="font-title-md text-title-md text-on-surface font-semibold">Prescribed SOP-ALGN-01: Laser Alignment on Intermediate Coupling</span>
+<p class="font-body-sm text-body-sm text-secondary mt-0.5">
+              Execute dynamic dial gauge check on intermediate coupling during standard shift transition (Window: 18:00 - 18:45).
+            </p>
+</div>
+</div>
+<div class="flex flex-wrap items-center gap-space-sm shrink-0">
+<button class="px-3.5 py-1.5 bg-surface-container-lowest text-on-surface hover:bg-surface-container font-label-md text-label-md rounded shadow-sm transition-colors" type="button">
+            Acknowledge Alert
+          </button>
+<button class="px-3.5 py-1.5 bg-primary text-on-primary font-label-md text-label-md font-semibold rounded shadow-sm hover:opacity-95 transition-all" type="button">
+            Schedule Alignment Window
+          </button>
+</div>
+</div>
+</article>
+<!-- COMPACT SPLIT ROW: GROUP 4 (TXM-009) & GROUP 5 (TXM-033) -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-space-lg">
+<!-- GROUP 4: TXM-009 (HIGH P2 · 1 ALERT) -->
+<article class="bg-surface-container-lowest rounded-xl shadow-sm p-space-base flex flex-col justify-between gap-space-base">
+<div>
+<!-- Header -->
+<div class="flex items-center justify-between gap-space-sm pb-space-sm">
+<div class="flex items-center gap-2">
+<span class="font-title-md text-title-md text-on-surface font-bold">TXM-009</span>
+<span class="font-label-caps text-label-caps text-secondary">Centrifugal Pump · Line 1</span>
+</div>
+<span class="px-2 py-0.5 rounded-full bg-[#fed7aa] text-[#ea580c] font-label-caps text-label-caps font-bold">
+              HIGH P2
+            </span>
+</div>
+<!-- Alert Details -->
+<div class="bg-surface-bright p-space-base rounded-lg flex flex-col gap-1 shadow-sm mt-space-xs">
+<div class="flex items-center justify-between">
+<span class="font-label-caps text-label-caps uppercase text-[#ea580c] font-bold">Coolant Thermal Breach</span>
+<span class="font-label-caps text-label-caps text-secondary">1h 12m ago</span>
+</div>
+<div class="flex items-baseline gap-2 mt-1">
+<span class="font-telemetry-md text-telemetry-md text-on-surface font-bold">74.2°C Core Spindle</span>
+<span class="font-label-caps text-label-caps text-error font-semibold">Coolant pressure drop</span>
+</div>
+<p class="font-body-sm text-body-sm text-secondary mt-1">
+              Spindle casing running hot. Auxiliary coolant supply line shows a 0.4 bar pressure loss across secondary filter.
+            </p>
+</div>
+<div class="mt-space-sm p-space-sm bg-surface-container-low rounded text-secondary font-body-sm text-body-sm">
+<strong class="text-on-surface">SOP Action:</strong> Inspect auxiliary valve and clean heat exchanger intake basket.
+          </div>
+</div>
+<div class="flex items-center justify-between pt-space-xs">
+<div class="text-secondary font-label-caps text-label-caps">
+            Est. RUL: <strong class="text-[#ea580c]">22.0h</strong> · Health: 39%
+          </div>
+<button class="px-3 py-1.5 bg-primary text-on-primary font-label-md text-label-md font-semibold rounded shadow-sm hover:opacity-95 transition-all" type="button">
+            Check Coolant System
+          </button>
+</div>
+</article>
+<!-- GROUP 5: TXM-033 (WARNING P3 · 1 ALERT) -->
+<article class="bg-surface-container-lowest rounded-xl shadow-sm p-space-base flex flex-col justify-between gap-space-base">
+<div>
+<!-- Header -->
+<div class="flex items-center justify-between gap-space-sm pb-space-sm">
+<div class="flex items-center gap-2">
+<span class="font-title-md text-title-md text-on-surface font-bold">TXM-033</span>
+<span class="font-label-caps text-label-caps text-secondary">Industrial Blower · Line 2</span>
+</div>
+<span class="px-2 py-0.5 rounded-full bg-[#fde68a] text-[#b45309] font-label-caps text-label-caps font-bold">
+              WARNING P3
+            </span>
+</div>
+<!-- Alert Details -->
+<div class="bg-surface-bright p-space-base rounded-lg flex flex-col gap-1 shadow-sm mt-space-xs">
+<div class="flex items-center justify-between">
+<span class="font-label-caps text-label-caps uppercase text-[#b45309] font-bold">Gradual Thermal Creep</span>
+<span class="font-label-caps text-label-caps text-secondary">2h 40m ago</span>
+</div>
+<div class="flex items-baseline gap-2 mt-1">
+<span class="font-telemetry-md text-telemetry-md text-on-surface font-bold">+4.2°C Drift</span>
+<span class="font-label-caps text-label-caps text-secondary font-medium">Over 48h window</span>
+</div>
+<p class="font-body-sm text-body-sm text-secondary mt-1">
+              Consistent slow temperature accumulation without corresponding vibration jump. Potential dust buildup in motor shroud.
+            </p>
+</div>
+<div class="mt-space-sm p-space-sm bg-surface-container-low rounded text-secondary font-body-sm text-body-sm">
+<strong class="text-on-surface">SOP Action:</strong> Inspect blower shroud on next tour. No immediate production pause needed.
+          </div>
+</div>
+<div class="flex items-center justify-between pt-space-xs">
+<div class="text-secondary font-label-caps text-label-caps">
+            Est. RUL: <strong class="text-tertiary">41.5h</strong> · Health: 58%
+          </div>
+<div class="flex items-center gap-2">
+<button class="px-2.5 py-1.5 bg-surface-container-low text-on-surface font-label-md text-label-md rounded hover:bg-surface-container transition-colors" type="button">
+              Add to Watchlist
+            </button>
+<button class="px-2.5 py-1.5 bg-surface-container-low text-secondary font-label-md text-label-md rounded hover:bg-surface-container transition-colors" type="button">
+              Mark Reviewed
+            </button>
+</div>
+</div>
+</article>
+</div>
+</div>
+<!-- ACTIVITY & QUICK RESOLUTION FOOTER BAR -->
+<footer class="mt-space-sm bg-surface-container-lowest p-space-base rounded-xl shadow-sm flex flex-col md:flex-row items-center justify-between gap-space-base">
+<!-- Live Audit Telemetry Ticker -->
+<div class="flex items-center gap-space-sm text-secondary font-label-md text-label-md">
+<span class="w-2 h-2 rounded-full bg-tertiary"></span>
+<span class="">Last alert acknowledged <strong>3m ago</strong> by Mark Jenkins</span>
+<span class="">·</span>
+<span class="">Telemetry sync: <strong>100 Hz</strong></span>
+<span class="">·</span>
+<span class="">Edge Node 03: <span class="text-tertiary font-semibold">Nominal</span></span>
+</div>
+<!-- Keyboard Shortcuts Legend -->
+<div class="flex flex-wrap items-center gap-space-md text-secondary font-label-caps text-label-caps uppercase">
+<div class="flex items-center gap-1">
+<kbd class="px-1.5 py-0.5 rounded bg-surface-container font-mono text-[11px] text-on-surface font-bold">A</kbd>
+<span class="">Ack Selected</span>
+</div>
+<div class="flex items-center gap-1">
+<kbd class="px-1.5 py-0.5 rounded bg-surface-container font-mono text-[11px] text-on-surface font-bold">W</kbd>
+<span class="">Work Order</span>
+</div>
+<div class="flex items-center gap-1">
+<kbd class="px-1.5 py-0.5 rounded bg-surface-container font-mono text-[11px] text-on-surface font-bold">D</kbd>
+<span class="">Dispatch Tech</span>
+</div>
+<div class="flex items-center gap-1">
+<kbd class="px-1.5 py-0.5 rounded bg-surface-container font-mono text-[11px] text-on-surface font-bold">ESC</kbd>
+<span class="">Deselect</span>
+</div>
+<div class="flex items-center gap-1">
+<kbd class="px-1.5 py-0.5 rounded bg-surface-container font-mono text-[11px] text-on-surface font-bold">/</kbd>
+<span class="">Filter</span>
+</div>
+</div>
+</footer>
+</div></main></div>
+
+<div id="snapdom-sandbox" data-snapdom-sandbox="true" aria-hidden="true" style="position: absolute; left: -9999px; top: -9999px; width: 0px; height: 0px; overflow: hidden;"></div><!-- RESONEX AI FLOATING CONTEXTUAL INVESTIGATION PANEL -->
+<div id="resonex-ai-widget" class="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3 pointer-events-auto select-none">
+  <!-- Chatbot Drawer / Card Window -->
+  <div id="ai-chat-window" class="flex flex-col w-[420px] h-[640px] max-h-[calc(100vh-5rem)] bg-surface-container-lowest rounded-2xl shadow-2xl border border-secondary-container overflow-hidden transition-all duration-300">
+    <!-- Header -->
+    <div class="px-4 py-3 bg-surface-container-lowest border-b border-surface-container flex items-center justify-between shrink-0">
+      <div class="flex items-center gap-2.5">
+        <div class="relative flex items-center justify-center w-8 h-8 rounded-lg bg-primary-container text-on-primary shadow-sm">
+          <span class="material-symbols-outlined text-[18px]">auto_awesome</span>
+          <span class="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-tertiary-fixed-dim ring-2 ring-white"></span>
+        </div>
+        <div class="flex flex-col">
+          <div class="flex items-center gap-1.5">
+            <span class="font-title-md text-title-md text-on-surface font-bold leading-none">Resonex AI</span>
+            <span class="px-1.5 py-0.2 rounded bg-primary/10 text-primary font-label-caps text-[10px] font-bold uppercase tracking-wider">Context Active</span>
+          </div>
+          <span class="font-label-caps text-label-caps text-secondary mt-0.5">Investigating Asset: <strong class="text-on-surface font-semibold">TXM-014</strong></span>
+        </div>
+      </div>
+      <!-- Window Controls -->
+      <div class="flex items-center gap-1 text-secondary">
+        <button class="p-1.5 rounded hover:bg-surface-container-low hover:text-on-surface transition-colors" title="Minimize" type="button" onclick="document.getElementById('ai-chat-window').classList.toggle('hidden');">
+          <span class="material-symbols-outlined text-[18px]">remove</span>
+        </button>
+        <button class="p-1.5 rounded hover:bg-surface-container-low hover:text-on-surface transition-colors" title="Expand" type="button">
+          <span class="material-symbols-outlined text-[18px]">open_in_full</span>
+        </button>
+        <button class="p-1.5 rounded hover:bg-surface-container-low hover:text-on-surface transition-colors" title="Close" type="button" onclick="document.getElementById('ai-chat-window').classList.add('hidden');">
+          <span class="material-symbols-outlined text-[18px]">close</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Context Ribbon / Active Asset Sync -->
+    <div class="px-4 py-2 bg-error-container/40 border-b border-error-container/80 flex items-center justify-between shrink-0">
+      <div class="flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-error animate-pulse"></span>
+        <span class="font-label-caps text-label-caps font-bold text-on-surface uppercase">TXM-014 · Critical (P1)</span>
+        <span class="text-outline-variant font-label-caps">|</span>
+        <span class="font-label-caps text-label-caps text-error font-semibold">RUL: 8.2h Remaining</span>
+      </div>
+      <span class="font-label-caps text-label-caps text-secondary">3 Correlated Alerts</span>
+    </div>
+
+    <!-- Chat Conversation Stream (Scrollable) -->
+    <div class="flex-1 overflow-y-auto p-4 flex flex-col gap-3 bg-surface-container-low/40">
+      <!-- AI Initial Greeting Message -->
+      <div class="flex items-start gap-2.5">
+        <div class="w-7 h-7 rounded-md bg-primary text-on-primary flex items-center justify-center shrink-0 mt-0.5 shadow-sm">
+          <span class="material-symbols-outlined text-[15px]">smart_toy</span>
+        </div>
+        <div class="flex flex-col gap-1 max-w-[320px]">
+          <div class="bg-surface-container-lowest p-3 rounded-xl rounded-tl-sm shadow-sm border border-surface-container text-body-sm text-on-surface">
+            I can help you investigate <strong class="text-primary font-semibold">TXM-014</strong> (Spindle Drive Type C · Line 1 · Bay 04). What would you like to know?
+          </div>
+          <span class="font-label-caps text-[10px] text-secondary ml-1">10:05 UTC · Context synced</span>
+        </div>
+      </div>
+
+      <!-- Quick Prompt Pills -->
+      <div class="flex flex-wrap gap-1.5 ml-9">
+        <button class="px-2.5 py-1 rounded-full bg-surface-container-lowest hover:bg-surface-container border border-secondary-container text-primary font-label-caps text-[11px] font-semibold text-left transition-colors shadow-sm flex items-center gap-1">
+          <span class="material-symbols-outlined text-[13px]">help_outline</span> Why is this machine critical?
+        </button>
+        <button class="px-2.5 py-1 rounded-full bg-surface-container-lowest hover:bg-surface-container border border-secondary-container text-primary font-label-caps text-[11px] font-semibold text-left transition-colors shadow-sm flex items-center gap-1">
+          <span class="material-symbols-outlined text-[13px]">crisis_alert</span> What caused the risk?
+        </button>
+        <button class="px-2.5 py-1 rounded-full bg-surface-container-lowest hover:bg-surface-container border border-secondary-container text-primary font-label-caps text-[11px] font-semibold text-left transition-colors shadow-sm flex items-center gap-1">
+          <span class="material-symbols-outlined text-[13px]">query_stats</span> What evidence supports this?
+        </button>
+        <button class="px-2.5 py-1 rounded-full bg-surface-container-lowest hover:bg-surface-container border border-secondary-container text-primary font-label-caps text-[11px] font-semibold text-left transition-colors shadow-sm flex items-center gap-1">
+          <span class="material-symbols-outlined text-[13px]">build</span> What maintenance is recommended?
+        </button>
+        <button class="px-2.5 py-1 rounded-full bg-surface-container-lowest hover:bg-surface-container border border-secondary-container text-primary font-label-caps text-[11px] font-semibold text-left transition-colors shadow-sm flex items-center gap-1">
+          <span class="material-symbols-outlined text-[13px]">timelapse</span> How much RUL is remaining?
+        </button>
+      </div>
+
+      <!-- User Query Simulation -->
+      <div class="flex items-end justify-end gap-2.5 mt-2">
+        <div class="flex flex-col items-end gap-1 max-w-[290px]">
+          <div class="bg-primary text-on-primary p-3 rounded-xl rounded-tr-sm shadow-sm font-body-sm text-body-sm">
+            Why is this machine critical, and what evidence supports the bearing failure?
+          </div>
+          <span class="font-label-caps text-[10px] text-secondary mr-1">10:06 UTC · Mark Jenkins</span>
+        </div>
+      </div>
+
+      <!-- Structured AI Diagnostic Breakdown -->
+      <div class="flex items-start gap-2.5 mt-1">
+        <div class="w-7 h-7 rounded-md bg-primary text-on-primary flex items-center justify-center shrink-0 mt-0.5 shadow-sm">
+          <span class="material-symbols-outlined text-[15px]">smart_toy</span>
+        </div>
+        <div class="flex flex-col gap-2 max-w-[340px]">
+          <div class="bg-surface-container-lowest p-3.5 rounded-xl rounded-tl-sm shadow-sm border border-surface-container flex flex-col gap-2.5">
+            
+            <!-- 1. Measured Sensor Evidence -->
+            <div class="flex flex-col gap-1 p-2 rounded bg-surface-container-low border-l-2 border-primary">
+              <div class="flex items-center gap-1 font-label-caps text-label-caps uppercase text-primary font-bold">
+                <span class="material-symbols-outlined text-[14px]">sensors</span>
+                1. Measured Sensor Evidence
+              </div>
+              <ul class="text-[12px] leading-relaxed text-on-surface list-disc list-inside space-y-0.5">
+                <li class="">Lead Sensor <code class="font-mono text-primary font-semibold">B4-RAD</code>: <strong>0.82 mm/s RMS</strong> vibration spike (+115% above 0.65 mm/s ISO limit). Outer-race 142 Hz harmonic signature present.</li>
+                <li class="">Sensor <code class="font-mono text-primary font-semibold">T-09 Internal</code>: <strong>71.4°C</strong> drive casing (+1.8°C/hr surge), nearing 75.0°C shutdown trigger.</li>
+              </ul>
+            </div>
+
+            <!-- 2. Calculated ML Diagnostics -->
+            <div class="flex flex-col gap-1 p-2 rounded bg-surface-container-low border-l-2 border-[#ea580c]">
+              <div class="flex items-center gap-1 font-label-caps text-label-caps uppercase text-[#ea580c] font-bold">
+                <span class="material-symbols-outlined text-[14px]">memory</span>
+                2. Calculated ML Diagnostics
+              </div>
+              <p class="text-[12px] leading-relaxed text-on-surface">
+                Markov fatigue model (<span class="font-semibold text-on-surface">Edge Node 03</span> · <strong>98.4% Conf</strong>) calculated non-linear wear acceleration with Stage 3 fatigue. Est. <strong>RUL: 8.2h remaining</strong> (↓28h drop in 35m). Overall asset health is at <strong>21% (Critical)</strong>.
+              </p>
+            </div>
+
+            <!-- 3. Retrieved Documentation / RAG Evidence -->
+            <div class="flex flex-col gap-1 p-2 rounded bg-surface-container-low border-l-2 border-tertiary">
+              <div class="flex items-center gap-1 font-label-caps text-label-caps uppercase text-tertiary font-bold">
+                <span class="material-symbols-outlined text-[14px]">menu_book</span>
+                3. Retrieved SOP &amp; Manuals (RAG)
+              </div>
+              <p class="text-[12px] leading-relaxed text-on-surface">
+                Matched SOP: <strong class="text-on-surface">SOP-MECH-04</strong> (Drive-End Bearing Replacement &amp; Flush). Required spare: SKF 6208 ball assembly. Target maintenance window: 15:30 buffer before 16:00 UTC handover.
+              </p>
+            </div>
+
+            <!-- 4. AI-Generated Explanation -->
+            <div class="flex flex-col gap-1 p-2 rounded bg-surface-container-low border-l-2 border-secondary">
+              <div class="flex items-center gap-1 font-label-caps text-label-caps uppercase text-secondary font-bold">
+                <span class="material-symbols-outlined text-[14px]">psychology</span>
+                4. AI-Generated Synthesis
+              </div>
+              <p class="text-[12px] leading-relaxed text-on-surface-variant">
+                The outer-race spalling signature coupled with casing thermal surge proves mechanical micro-friction in the primary spindle bearing. Continuing normal rpm without grease flush and bearing replacement risks catastrophic race seizure within the shift.
+              </p>
+            </div>
+
+            <!-- In-Response Contextual Actions -->
+            <div class="pt-1 border-t border-surface-container flex flex-wrap gap-1.5">
+              <button class="px-2 py-1 bg-surface-container-low hover:bg-surface-container text-on-surface font-label-caps text-[11px] font-semibold rounded inline-flex items-center gap-1 shadow-sm transition-colors" type="button">
+                <span class="material-symbols-outlined text-[13px] text-primary">precision_manufacturing</span> View Machine
+              </button>
+              <button class="px-2 py-1 bg-surface-container-low hover:bg-surface-container text-on-surface font-label-caps text-[11px] font-semibold rounded inline-flex items-center gap-1 shadow-sm transition-colors" type="button">
+                <span class="material-symbols-outlined text-[13px] text-tertiary">analytics</span> View Evidence
+              </button>
+              <button class="px-2 py-1 bg-surface-container-low hover:bg-surface-container text-on-surface font-label-caps text-[11px] font-semibold rounded inline-flex items-center gap-1 shadow-sm transition-colors" type="button">
+                <span class="material-symbols-outlined text-[13px] text-[#ea580c]">engineering</span> Open Maintenance
+              </button>
+              <button class="px-2 py-1 bg-primary text-on-primary font-label-caps text-[11px] font-semibold rounded inline-flex items-center gap-1 shadow-sm hover:opacity-95 transition-all" type="button">
+                <span class="material-symbols-outlined text-[13px]">verified</span> View SOP-MECH-04
+              </button>
+            </div>
+
+          </div>
+          <span class="font-label-caps text-[10px] text-secondary ml-1">10:06 UTC · Verified telemetry citation</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Prompt Input & Controls Footer -->
+    <div class="p-3 bg-surface-container-lowest border-t border-surface-container flex flex-col gap-2 shrink-0">
+      <div class="relative flex items-center">
+        <input class="w-full h-10 pl-3 pr-10 bg-surface-container-low text-on-surface placeholder:text-secondary font-body-sm text-body-sm rounded-lg outline-none border border-surface-container focus:border-primary focus:bg-surface-container-lowest transition-colors" placeholder="Ask about TXM-014, harmonics, RUL..." type="text" value="">
+        <button class="absolute right-1.5 w-7 h-7 rounded-md bg-primary text-on-primary flex items-center justify-center shadow-sm hover:opacity-95 transition-opacity" type="button" title="Send">
+          <span class="material-symbols-outlined text-[16px]">arrow_upward</span>
+        </button>
+      </div>
+      <div class="flex items-center justify-between text-[11px] text-secondary px-1">
+        <span class="flex items-center gap-1">
+          <span class="material-symbols-outlined text-[13px] text-tertiary">shield</span> No simulated readings · 100% verified stream
+        </span>
+        <span class="font-mono text-[10px]">RAG v2.4</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating AI Trigger Pill Button -->
+  <button class="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-primary-container text-on-primary shadow-xl hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer border border-white/20" type="button" onclick="document.getElementById('ai-chat-window').classList.toggle('hidden');">
+    <span class="material-symbols-outlined text-[20px] animate-pulse">auto_awesome</span>
+    <div class="flex flex-col text-left">
+      <span class="font-label-md text-label-md font-bold leading-tight flex items-center gap-1.5">
+        Ask Resonex AI
+        <span class="w-1.5 h-1.5 rounded-full bg-tertiary-fixed-dim"></span>
+      </span>
+      <span class="font-label-caps text-[10px] text-on-primary-container leading-none opacity-90">TXM-014 Context Ready</span>
+    </div>
+  </button>
+</div></body></html>
