@@ -221,6 +221,89 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
         </div>
       </section>
 
+      {/* 2.5 SVG Visual Shift Telemetry Timeline Chart matching Stitch Screen 9 */}
+      <section className="stitch-card p-space-base mb-space-base">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+          <div>
+            <h2 className="stitch-card-title">Shift Operational Health & Anomaly Timeline</h2>
+            <p className="stitch-card-desc">Telemetry stability, threshold excursion dips, and maintenance recovery progression.</p>
+          </div>
+          <div className="flex items-center gap-3 text-secondary font-label-md text-label-md">
+            <span className="flex items-center gap-1.5">
+              <span className="w-3 h-1 bg-surface-container-high inline-block rounded"></span>
+              Tolerance Corridor (70-90%)
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="w-3 h-0.5 bg-primary inline-block"></span>
+              Shift A Telemetry
+            </span>
+          </div>
+        </div>
+
+        {/* SVG Timeline Canvas */}
+        <div className="relative w-full h-64 bg-surface-container-low rounded-lg p-space-sm overflow-hidden flex flex-col justify-between border border-outline-variant/40">
+          <svg className="w-full h-full" preserveAspectRatio="none" viewBox="0 0 760 210">
+            {/* Grid Lines */}
+            <line stroke="currentColor" className="text-outline-variant/40" strokeDasharray="3 3" strokeWidth="1" x1="0" x2="760" y1="35" y2="35" />
+            <line stroke="currentColor" className="text-outline-variant/40" strokeDasharray="3 3" strokeWidth="1" x1="0" x2="760" y1="85" y2="85" />
+            <line stroke="currentColor" className="text-outline-variant/40" strokeDasharray="3 3" strokeWidth="1" x1="0" x2="760" y1="135" y2="135" />
+            <line stroke="currentColor" className="text-outline-variant/40" strokeDasharray="3 3" strokeWidth="1" x1="0" x2="760" y1="185" y2="185" />
+
+            {/* Baseline Corridor Shading (70% - 90%) */}
+            <polygon fill="#3b82f6" fillOpacity="0.12" points="0,55 190,55 380,55 570,55 760,55 760,115 570,115 380,115 190,115 0,115" />
+
+            {/* Shift A Trend Line */}
+            <path d="M 0,70 Q 95,75 190,77 T 350,115 Q 400,105 490,82 T 760,84" fill="none" stroke="#2563eb" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" />
+
+            {/* Data Point Markers */}
+            <circle cx="0" cy="70" fill="#2563eb" r="3.5" />
+            <circle cx="190" cy="77" fill="#2563eb" r="3.5" />
+            <circle cx="350" cy="115" fill="#ef4444" r="5" stroke="var(--surface-container-lowest)" strokeWidth="2" />
+            <circle cx="490" cy="82" fill="#10b981" r="5" stroke="var(--surface-container-lowest)" strokeWidth="2" />
+            <circle cx="760" cy="84" fill="#2563eb" r="4" />
+
+            {/* Critical Threshold Guideline (65%) */}
+            <line stroke="#ef4444" strokeWidth="1.5" x1="0" x2="760" y1="145" y2="145" strokeDasharray="4 4" />
+            <text fill="#ef4444" fontFamily="Inter, sans-serif" fontSize="9" fontWeight="700" x="8" y="140">CRITICAL THRESHOLD (65%)</text>
+          </svg>
+
+          {/* Overlaid Event Callout Tags matching Stitch */}
+          <div className="absolute left-[44%] top-[50%] -translate-x-1/2 flex flex-col items-center pointer-events-none">
+            <div className="bg-error-container text-on-error-container text-[11px] font-bold px-2 py-0.5 rounded shadow-sm border border-error/20 flex items-center gap-1">
+              <span className="material-symbols-outlined text-[12px]">trending_down</span>
+              <span>09:42 · TXM-014 Spindle Anomaly (-6.2%)</span>
+            </div>
+            <div className="w-px h-3 bg-error" />
+          </div>
+
+          <div className="absolute left-[64%] top-[22%] -translate-x-1/2 flex flex-col items-center pointer-events-none">
+            <div className="bg-tertiary-fixed text-on-tertiary-fixed text-[11px] font-bold px-2 py-0.5 rounded shadow-sm border border-tertiary/20 flex items-center gap-1">
+              <span className="material-symbols-outlined text-[12px]">trending_up</span>
+              <span>11:15 · TXM-008 Lube Stabilized (+4.8%)</span>
+            </div>
+            <div className="w-px h-3 bg-tertiary" />
+          </div>
+
+          {/* Time X-Axis Grid */}
+          <div className="flex justify-between items-center text-secondary font-label-caps text-label-caps pt-1 border-t border-outline-variant/40 px-2">
+            <span>06:00 (Shift Start)</span>
+            <span>08:00</span>
+            <span>10:00</span>
+            <span>12:00</span>
+            <span className="text-on-surface font-bold">14:00 (Handover Staging)</span>
+          </div>
+        </div>
+
+        {/* Trend Summary Strip */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between px-space-base py-space-xs bg-surface-container-low rounded-lg mt-2 font-body-sm text-body-sm border border-outline-variant/30">
+          <div className="flex items-center gap-space-sm text-on-surface">
+            <span className="material-symbols-outlined text-secondary text-[18px]">query_stats</span>
+            <span>Telemetry Stability Index: <strong className="font-numeric">94.2%</strong> across Shift A (2 intervention mitigations logged)</span>
+          </div>
+          <span className="font-label-caps text-label-caps text-tertiary font-bold uppercase">All Lines Stabilized for Handover</span>
+        </div>
+      </section>
+
       {/* 3. Distribution Breakdown Cards Grid */}
       <div className="detail-evidence-columns-grid mb-space-base">
         {/* Health State Breakdown */}

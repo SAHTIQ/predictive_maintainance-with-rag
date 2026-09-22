@@ -148,7 +148,7 @@ export interface RecommendationDecision {
     source: string;
     sop_references?: string[];
   };
-  source_traceability: {
+  source_traceability?: {
     machine_id: string;
     primary_manual_referenced: string;
     applicable_standards: string[];

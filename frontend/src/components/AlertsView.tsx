@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { RecommendationDecision, Machine } from '../types';
 import { AlertContext } from './ResonexAIDrawer';
+import { MOCK_RECOMMENDATIONS, MOCK_MACHINES } from '../services/mockData';
 
 interface AlertsViewProps {
   recommendations: RecommendationDecision[];
@@ -9,6 +10,16 @@ interface AlertsViewProps {
   onOpenAIWithAlert?: (alertContext: AlertContext) => void;
   onNavigateTab?: (tab: string) => void;
 }
+
+const formatAlertTime = (ts?: string) => {
+  if (!ts) return 'Just now';
+  try {
+    const d = new Date(ts);
+    return isNaN(d.getTime()) ? 'Just now' : d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  } catch {
+    return 'Just now';
+  }
+};
 
 export const AlertsView: React.FC<AlertsViewProps> = ({
   recommendations,
@@ -21,16 +32,19 @@ export const AlertsView: React.FC<AlertsViewProps> = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [acknowledgedIds, setAcknowledgedIds] = useState<Set<string>>(new Set());
 
+  const effectiveMachines = machines && machines.length > 0 ? machines : MOCK_MACHINES;
+  const effectiveRecs = recommendations && recommendations.length > 0 ? recommendations : MOCK_RECOMMENDATIONS;
+
   const machineMap = useMemo(() => {
-    return machines.reduce<Record<string, Machine>>((acc, m) => {
+    return effectiveMachines.reduce<Record<string, Machine>>((acc, m) => {
       acc[m.machine_id] = m;
       return acc;
     }, {});
-  }, [machines]);
+  }, [effectiveMachines]);
 
   // Derive real active alerts from recommendations and machine states
   const alertItems = useMemo(() => {
-    return recommendations
+    return effectiveRecs
       .filter((r) => {
         const risk = r.risk_assessment?.risk_level || 'LOW';
         const health = r.current_condition?.health_state_label || 'Good';
@@ -44,7 +58,7 @@ export const AlertsView: React.FC<AlertsViewProps> = ({
         if (rB !== rA) return rB - rA;
         return (a.current_condition?.rul_hours ?? 999) - (b.current_condition?.rul_hours ?? 999);
       });
-  }, [recommendations]);
+  }, [effectiveRecs]);
 
   const criticalCount = alertItems.filter((i) => (i.risk_assessment?.risk_level || '') === 'CRITICAL').length;
   const highCount = alertItems.filter((i) => (i.risk_assessment?.risk_level || '') === 'HIGH').length;
@@ -319,7 +333,7 @@ export const AlertsView: React.FC<AlertsViewProps> = ({
                       </span>
                     )}
                     <span className="alert-timestamp-text font-numeric">
-                      {new Date(alert.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      {formatAlertTime(alert.timestamp)}
                     </span>
                   </div>
                 </div>

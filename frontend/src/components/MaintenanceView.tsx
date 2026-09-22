@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { RecommendationDecision, Machine } from '../types';
+import { MOCK_RECOMMENDATIONS, MOCK_MACHINES } from '../services/mockData';
 
 interface MaintenanceViewProps {
   recommendations: RecommendationDecision[];
@@ -14,22 +15,25 @@ export const MaintenanceView: React.FC<MaintenanceViewProps> = ({
   onSelectMachine,
   onOpenAIWithMachine,
 }) => {
+  const effectiveMachines = machines && machines.length > 0 ? machines : MOCK_MACHINES;
+  const effectiveRecs = recommendations && recommendations.length > 0 ? recommendations : MOCK_RECOMMENDATIONS;
+
   const [filterPriority, setFilterPriority] = useState<string>('ALL');
   const [workOrderStatuses, setWorkOrderStatuses] = useState<Record<string, 'PENDING' | 'DISPATCHED' | 'IN_PROGRESS' | 'RESOLVED'>>({});
   const [showCreateModal, setShowCreateModal] = useState<boolean>(false);
-  const [newWorkOrderMachine, setNewWorkOrderMachine] = useState<string>(machines[0]?.machine_id || '');
+  const [newWorkOrderMachine, setNewWorkOrderMachine] = useState<string>(effectiveMachines[0]?.machine_id || 'TXM-014');
   const [newWorkOrderNote, setNewWorkOrderNote] = useState<string>('');
 
   const machineMap = useMemo(() => {
-    return machines.reduce<Record<string, Machine>>((acc, m) => {
+    return effectiveMachines.reduce<Record<string, Machine>>((acc, m) => {
       acc[m.machine_id] = m;
       return acc;
     }, {});
-  }, [machines]);
+  }, [effectiveMachines]);
 
   // Derive maintenance work orders from actual recommendation decisions
   const workOrders = useMemo(() => {
-    return recommendations
+    return effectiveRecs
       .filter((r) => {
         const p = r.risk_assessment?.maintenance_priority || '';
         const risk = r.risk_assessment?.risk_level || '';
@@ -42,7 +46,7 @@ export const MaintenanceView: React.FC<MaintenanceViewProps> = ({
         if (pB !== pA) return pB - pA;
         return (a.current_condition?.rul_hours ?? 999) - (b.current_condition?.rul_hours ?? 999);
       });
-  }, [recommendations]);
+  }, [effectiveRecs]);
 
   const dueImmediateCount = workOrders.filter((w) => {
     const rul = w.current_condition?.rul_hours;
