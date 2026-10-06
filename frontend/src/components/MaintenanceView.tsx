@@ -9,6 +9,25 @@ interface MaintenanceViewProps {
   onOpenAIWithMachine?: (machineId: string) => void;
 }
 
+const getActionString = (actionItem: any): string => {
+  if (!actionItem) return 'Perform standard mechanical inspection & sensor check.';
+  if (typeof actionItem === 'string') return actionItem;
+  if (typeof actionItem === 'object') {
+    return actionItem.action || actionItem.description || actionItem.step || JSON.stringify(actionItem);
+  }
+  return String(actionItem);
+};
+
+const getSopCode = (item: any): string => {
+  const sops = item?.generated_explanation?.sop_references;
+  if (Array.isArray(sops) && sops.length > 0 && typeof sops[0] === 'string') return sops[0];
+  const recActions = item?.generated_explanation?.recommended_actions;
+  if (Array.isArray(recActions) && recActions.length > 0 && recActions[0]?.cited_procedure) {
+    return recActions[0].cited_procedure;
+  }
+  return 'SOP-MECH-04';
+};
+
 export const MaintenanceView: React.FC<MaintenanceViewProps> = ({
   recommendations,
   machines,
@@ -75,7 +94,7 @@ export const MaintenanceView: React.FC<MaintenanceViewProps> = ({
       machine_id: w.machine_id,
       priority: w.risk_assessment?.maintenance_priority,
       window: w.risk_assessment?.maintenance_time_window,
-      action: w.generated_explanation?.recommended_actions?.[0] || 'Standard maintenance',
+      action: getActionString(w.generated_explanation?.recommended_actions?.[0]),
       status: workOrderStatuses[w.machine_id] || 'PENDING',
     }));
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -93,13 +112,13 @@ export const MaintenanceView: React.FC<MaintenanceViewProps> = ({
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-space-base">
           <div className="flex flex-col gap-1">
             <div className="flex items-center gap-2">
-              <h1 className="stitch-page-title">Maintenance Dispatch & Work Orders</h1>
+              <h1 className="stitch-page-title">Maintenance & Repair Tasks</h1>
               <span className="px-2 py-0.5 rounded bg-surface-container-high text-primary font-label-caps text-label-caps uppercase font-bold">
-                Shift A Live
+                Active Shift · Plant 1
               </span>
             </div>
             <p className="stitch-page-desc max-w-3xl">
-              Coordinate predictive mitigation, track technician teams, and verify standard operating procedures (SOPs) across all active machine alerts.
+              Coordinate repair tasks, track technician status, and verify official step-by-step repair guides for any machines needing attention.
             </p>
           </div>
 
@@ -110,7 +129,7 @@ export const MaintenanceView: React.FC<MaintenanceViewProps> = ({
               type="button"
             >
               <span className="material-symbols-outlined text-[18px] text-secondary">add_circle</span>
-              <span>Create Ad-Hoc Work Order</span>
+              <span>Create Repair Request</span>
             </button>
 
             <button
@@ -119,7 +138,7 @@ export const MaintenanceView: React.FC<MaintenanceViewProps> = ({
               type="button"
             >
               <span className="material-symbols-outlined text-[18px] text-secondary">file_download</span>
-              <span>Export Dispatch Manifest</span>
+              <span>Download Task List (JSON)</span>
             </button>
 
             {dueImmediateCount > 0 && (
@@ -135,7 +154,7 @@ export const MaintenanceView: React.FC<MaintenanceViewProps> = ({
                 type="button"
               >
                 <span className="material-symbols-outlined text-[18px]">bolt</span>
-                <span>Emergency Dispatch ({dueImmediateCount} Due Now)</span>
+                <span>Send Emergency Repair Team ({dueImmediateCount} Urgent)</span>
               </button>
             )}
           </div>
@@ -147,64 +166,64 @@ export const MaintenanceView: React.FC<MaintenanceViewProps> = ({
         {/* Card 1: Critical Immediate */}
         <div className="stitch-kpi-card critical-border">
           <div className="kpi-card-header">
-            <span className="kpi-label-caps text-critical">DUE IMMEDIATELY (&lt;12h RUL)</span>
-            <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-error-container text-on-error-container font-label-caps text-[10px] font-bold uppercase">
-              <span className="w-1.5 h-1.5 rounded-full bg-error animate-pulse" />
-              CRITICAL ACTION
+            <span className="kpi-label-caps text-[#EF4444]">NEEDS REPAIR RIGHT NOW (&lt;12h Left)</span>
+            <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-[rgba(239,68,68,0.1)] text-[#EF4444] border border-[rgba(239,68,68,0.3)] font-label-caps text-[10px] font-semibold uppercase">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#EF4444]" />
+              URGENT REPAIR
             </span>
           </div>
           <div className="kpi-value-row">
-            <span className="kpi-telemetry-val text-critical font-numeric">{dueImmediateCount}</span>
-            <span className="kpi-unit-label text-critical font-semibold">Assets on Curve</span>
+            <span className="kpi-telemetry-val text-[#EF4444] font-numeric">{dueImmediateCount}</span>
+            <span className="kpi-unit-label text-[#EF4444] font-semibold">Machines at Risk</span>
           </div>
-          <div className="kpi-footnote text-secondary">
-            {dueImmediateCount > 0 ? 'Mitigation crews assigned' : 'No emergency interventions pending'}
+          <div className="kpi-footnote text-[#94A3B8]">
+            {dueImmediateCount > 0 ? 'Repair teams assigned' : 'No urgent repairs pending'}
           </div>
         </div>
 
         {/* Card 2: Active Work Orders */}
         <div className="stitch-kpi-card">
           <div className="kpi-card-header">
-            <span className="kpi-label-caps">ACTIVE WORK ORDERS</span>
-            <span className="px-2 py-0.5 rounded-full bg-surface-container-high text-secondary font-label-caps text-[10px] font-semibold uppercase">
-              {workOrders.length} REGISTERED
+            <span className="kpi-label-caps">ACTIVE REPAIR TASKS</span>
+            <span className="px-2 py-0.5 rounded-full bg-[#162338] text-[#94A3B8] border border-[#243247] font-label-caps text-[10px] font-semibold uppercase">
+              {workOrders.length} SCHEDULED
             </span>
           </div>
           <div className="kpi-value-row">
             <span className="kpi-telemetry-val font-numeric">{workOrders.length}</span>
-            <span className="kpi-unit-label">Active in Cycle</span>
+            <span className="kpi-unit-label">Tasks in Progress</span>
           </div>
-          <div className="kpi-footnote text-secondary">
-            Average mitigation lead time: 1.4h
+          <div className="kpi-footnote text-[#94A3B8]">
+            Average repair response time: 1.4 hours
           </div>
         </div>
 
         {/* Card 3: SOP Verification */}
         <div className="stitch-kpi-card">
           <div className="kpi-card-header">
-            <span className="kpi-label-caps">SOP COMPLIANCE</span>
-            <span className="material-symbols-outlined text-emerald-600 text-[18px]">verified</span>
+            <span className="kpi-label-caps">REPAIR GUIDE MATCH</span>
+            <span className="material-symbols-outlined text-[#94A3B8] text-[18px]">verified</span>
           </div>
           <div className="kpi-value-row">
-            <span className="kpi-telemetry-val font-numeric text-emerald-600">100%</span>
-            <span className="kpi-unit-label">RAG Grounded</span>
+            <span className="kpi-telemetry-val font-numeric text-[#22C55E]">100%</span>
+            <span className="kpi-unit-label">Manuals Verified</span>
           </div>
-          <div className="kpi-footnote text-secondary">
-            All work orders linked to ISO 10816 SOPs
+          <div className="kpi-footnote text-[#94A3B8]">
+            All tasks verified with factory maintenance manuals
           </div>
         </div>
 
         {/* Card 4: Shop Floor Coverage */}
         <div className="stitch-kpi-card">
           <div className="kpi-card-header">
-            <span className="kpi-label-caps">PLANT COVERAGE</span>
-            <span className="material-symbols-outlined text-primary text-[18px]">engineering</span>
+            <span className="kpi-label-caps">FACTORY COVERAGE</span>
+            <span className="material-symbols-outlined text-[#94A3B8] text-[18px]">engineering</span>
           </div>
           <div className="kpi-value-row">
             <span className="kpi-telemetry-val font-numeric">Lines 1–4</span>
           </div>
-          <div className="kpi-footnote text-secondary">
-            Shift A maintenance crew on standby
+          <div className="kpi-footnote text-[#94A3B8]">
+            Shift A repair technicians on duty
           </div>
         </div>
       </div>
@@ -217,24 +236,24 @@ export const MaintenanceView: React.FC<MaintenanceViewProps> = ({
               className={`segment-btn ${filterPriority === 'ALL' ? 'active' : ''}`}
               onClick={() => setFilterPriority('ALL')}
             >
-              All Priorities ({workOrders.length})
+              All Tasks ({workOrders.length})
             </button>
             <button
               className={`segment-btn ${filterPriority === 'P1' ? 'active' : ''}`}
               onClick={() => setFilterPriority('P1')}
             >
-              P1 Immediate ({workOrders.filter((w) => w.risk_assessment?.maintenance_priority === 'P1').length})
+              P1 - Urgent Today ({workOrders.filter((w) => w.risk_assessment?.maintenance_priority === 'P1').length})
             </button>
             <button
               className={`segment-btn ${filterPriority === 'P2' ? 'active' : ''}`}
               onClick={() => setFilterPriority('P2')}
             >
-              P2 High ({workOrders.filter((w) => w.risk_assessment?.maintenance_priority === 'P2').length})
+              P2 - High Priority ({workOrders.filter((w) => w.risk_assessment?.maintenance_priority === 'P2').length})
             </button>
           </div>
 
           <span className="text-secondary text-xs">
-            Showing real work orders derived from ML risk & degradation engine
+            Repair list generated automatically from live sensor monitoring
           </span>
         </div>
       </div>
@@ -244,8 +263,8 @@ export const MaintenanceView: React.FC<MaintenanceViewProps> = ({
         {filteredOrders.length === 0 ? (
           <div className="stitch-empty-state py-12">
             <span className="material-symbols-outlined empty-symbol text-emerald-500">task_alt</span>
-            <h3 className="empty-title">No Pending Work Orders</h3>
-            <p className="empty-desc">All monitored textile assets are within safe degradation thresholds.</p>
+            <h3 className="empty-title">No Pending Repairs</h3>
+            <p className="empty-desc">All factory machines are running smoothly within normal health levels.</p>
           </div>
         ) : (
           <div className="stitch-table-wrapper">
@@ -253,13 +272,13 @@ export const MaintenanceView: React.FC<MaintenanceViewProps> = ({
               <thead>
                 <tr>
                   <th className="th-center">Priority</th>
-                  <th className="th-left">Machine Asset</th>
-                  <th className="th-left">Sub-assembly / Type</th>
-                  <th className="th-left">Prescribed Action</th>
-                  <th className="th-left">Target Window</th>
-                  <th className="th-center">SOP Code</th>
-                  <th className="th-right">RUL Horizon</th>
-                  <th className="th-center">Dispatch Status</th>
+                  <th className="th-left">Machine</th>
+                  <th className="th-left">Model</th>
+                  <th className="th-left">Recommended Repair Step</th>
+                  <th className="th-left">Finish By</th>
+                  <th className="th-center">Guide Ref</th>
+                  <th className="th-right">Hours Left</th>
+                  <th className="th-center">Repair Status</th>
                   <th className="th-right">Actions</th>
                 </tr>
               </thead>
@@ -269,9 +288,8 @@ export const MaintenanceView: React.FC<MaintenanceViewProps> = ({
                   const priority = item.risk_assessment?.maintenance_priority || 'P2';
                   const isP1 = priority === 'P1';
                   const windowText = item.risk_assessment?.maintenance_time_window || '< 24 Hours';
-                  const action = item.generated_explanation?.recommended_actions?.[0] || 'Perform mechanical inspection.';
-                  const sops = item.generated_explanation?.sop_references || [];
-                  const sopCode = sops[0] || 'SOP-VIB-014';
+                  const action = getActionString(item.generated_explanation?.recommended_actions?.[0]);
+                  const sopCode = getSopCode(item);
                   const rul = item.current_condition?.rul_hours;
                   const currentStatus = workOrderStatuses[item.machine_id] || 'PENDING';
 
@@ -285,7 +303,7 @@ export const MaintenanceView: React.FC<MaintenanceViewProps> = ({
                     >
                       <td className="td-center">
                         <span className={`priority-tag ${priority.toLowerCase()} font-bold`}>
-                          {priority}
+                          {priority === 'P1' ? 'P1 Urgent' : priority === 'P2' ? 'P2 High' : 'P3 Normal'}
                         </span>
                       </td>
                       <td className="td-left">
@@ -319,10 +337,10 @@ export const MaintenanceView: React.FC<MaintenanceViewProps> = ({
                           value={currentStatus}
                           onChange={(e) => handleUpdateStatus(item.machine_id, e.target.value as any)}
                         >
-                          <option value="PENDING">Pending</option>
-                          <option value="DISPATCHED">Dispatched</option>
+                          <option value="PENDING">Waiting</option>
+                          <option value="DISPATCHED">Assigned</option>
                           <option value="IN_PROGRESS">In Progress</option>
-                          <option value="RESOLVED">Resolved</option>
+                          <option value="RESOLVED">Fixed / Done</option>
                         </select>
                       </td>
                       <td className="td-right" onClick={(e) => e.stopPropagation()}>
@@ -331,7 +349,7 @@ export const MaintenanceView: React.FC<MaintenanceViewProps> = ({
                             <button
                               className="stitch-btn-icon-ai"
                               onClick={() => onOpenAIWithMachine(item.machine_id)}
-                              title={`Ask Resonex AI about work order for ${item.machine_id}`}
+                              title={`Ask AI Assistant about repair for ${item.machine_id}`}
                               type="button"
                             >
                               <span className="ai-sparkle">✦</span>
@@ -342,7 +360,7 @@ export const MaintenanceView: React.FC<MaintenanceViewProps> = ({
                             onClick={() => onSelectMachine(item.machine_id)}
                             type="button"
                           >
-                            <span>Inspect</span>
+                            <span>View Details</span>
                             <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
                           </button>
                         </div>
@@ -361,12 +379,12 @@ export const MaintenanceView: React.FC<MaintenanceViewProps> = ({
         <div className="stitch-modal-backdrop" onClick={() => setShowCreateModal(false)}>
           <div className="stitch-modal-dialog" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h3 className="modal-title">Create Ad-Hoc Maintenance Work Order</h3>
+              <h3 className="modal-title">Create New Repair Request</h3>
               <button className="modal-close-btn" onClick={() => setShowCreateModal(false)}>×</button>
             </div>
             <form onSubmit={handleCreateAdHoc} className="modal-form">
               <div className="form-group">
-                <label className="form-label">Target Asset:</label>
+                <label className="form-label">Select Machine:</label>
                 <select
                   className="form-select"
                   value={newWorkOrderMachine}
@@ -381,11 +399,11 @@ export const MaintenanceView: React.FC<MaintenanceViewProps> = ({
               </div>
 
               <div className="form-group">
-                <label className="form-label">Intervention Notes / Inspection Request:</label>
+                <label className="form-label">Repair Instructions or Notes:</label>
                 <textarea
                   className="form-textarea"
                   rows={3}
-                  placeholder="Describe technician instructions, observed acoustic noise, lubrication check..."
+                  placeholder="Describe what needs fixing, unusual sounds, oil check, parts to replace..."
                   value={newWorkOrderNote}
                   onChange={(e) => setNewWorkOrderNote(e.target.value)}
                 />
@@ -400,7 +418,7 @@ export const MaintenanceView: React.FC<MaintenanceViewProps> = ({
                   Cancel
                 </button>
                 <button type="submit" className="stitch-btn-primary">
-                  Dispatch Crew
+                  Assign & Save Request
                 </button>
               </div>
             </form>

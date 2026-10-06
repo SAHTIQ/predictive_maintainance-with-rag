@@ -43,23 +43,23 @@ export const TopBar: React.FC<TopBarProps> = ({
 
   const getBreadcrumb = () => {
     if (selectedMachineId) {
-      return { section: 'Machines', current: `Machine Detail (${selectedMachineId})` };
+      return { section: 'Machines', current: `Machine Details (${selectedMachineId})` };
     }
     switch (activeTab) {
       case 'dashboard':
-        return { section: 'Fleet Operations', current: 'Operational Matrix' };
+        return { section: 'Factory Overview', current: 'Machine Health' };
       case 'machines':
-        return { section: 'Fleet Registry', current: 'All Operational Units' };
+        return { section: 'Machine Inventory', current: 'All Machines' };
       case 'alerts':
-        return { section: 'Action Center', current: 'Real-Time Anomaly Triage' };
+        return { section: 'Warning Center', current: 'Active Alerts' };
       case 'maintenance':
-        return { section: 'Dispatch', current: 'Work Orders & Mitigation' };
+        return { section: 'Maintenance', current: 'Repairs & Work Orders' };
       case 'reports':
-        return { section: 'Operations', current: 'Shift & Fleet Reports' };
+        return { section: 'Shift Reports', current: 'Shift & Health Summaries' };
       case 'settings':
-        return { section: 'System', current: 'Configuration & Thresholds' };
+        return { section: 'Settings', current: 'Safety Limits & Alerts' };
       default:
-        return { section: 'Operations', current: 'Overview' };
+        return { section: 'Overview', current: 'Factory Status' };
     }
   };
 
@@ -84,7 +84,7 @@ export const TopBar: React.FC<TopBarProps> = ({
             ref={searchInputRef}
             type="text"
             className="topbar-search-input"
-            placeholder="Search machines... (press /)"
+            placeholder="Search machines (e.g. TXM-014)... press /"
             value={searchQuery}
             onChange={(e) => onSearchMachine && onSearchMachine(e.target.value)}
           />
@@ -95,8 +95,8 @@ export const TopBar: React.FC<TopBarProps> = ({
       <div className="topbar-right-cluster">
         {/* Sync Status Badge */}
         <div className="topbar-sync-pill">
-          <span className="sync-dot-pulse" />
-          <span className="sync-pill-text">Monitoring Active · {totalMachines}/{totalMachines} Synced</span>
+          <span className="sync-dot-clean" />
+          <span className="sync-pill-text">Live Monitoring · All {totalMachines} Connected</span>
         </div>
 
         {/* Shift Badge */}
@@ -108,7 +108,7 @@ export const TopBar: React.FC<TopBarProps> = ({
         {/* Notifications Icon with Badge */}
         <div className="topbar-notifications-wrap" title={`${alertCount} Active Alerts`}>
           <span className="material-symbols-outlined bell-icon">notifications</span>
-          {alertCount > 0 && <span className="topbar-notif-count">{alertCount}</span>}
+          {alertCount > 0 && <span className="topbar-notif-count font-numeric">{alertCount}</span>}
         </div>
 
         {/* Auto-Refresh Toggle */}

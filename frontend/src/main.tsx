@@ -25,9 +25,9 @@ function App() {
   const [isAIDrawerOpen, setIsAIDrawerOpen] = useState<boolean>(false);
   const [activeAlertContext, setActiveAlertContext] = useState<AlertContext | null>(null);
 
-  // Theme state: light by default
+  // Theme state: Dark Mission Control by default
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
-    return (localStorage.getItem('resonex_theme') as 'light' | 'dark') || 'light';
+    return (localStorage.getItem('resonex_theme') as 'light' | 'dark') || 'dark';
   });
 
   // Auto-refresh state (30s polling)
@@ -36,34 +36,46 @@ function App() {
   // Global search query
   const [searchQuery, setSearchQuery] = useState<string>('');
 
-  // Global fleet state from real APIs or fallback
-  const [overview, setOverview] = useState<FleetOverview | null>(null);
-  const [machines, setMachines] = useState<Machine[]>([]);
-  const [recommendations, setRecommendations] = useState<RecommendationDecision[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  // Global fleet state: initialized with rich telemetry cache so UI is instantaneous
+  const [overview, setOverview] = useState<FleetOverview>(MOCK_FLEET_OVERVIEW);
+  const [machines, setMachines] = useState<Machine[]>(MOCK_MACHINES);
+  const [recommendations, setRecommendations] = useState<RecommendationDecision[]>(MOCK_RECOMMENDATIONS);
+  const [loading, setLoading] = useState<boolean>(false);
   const [isOffline, setIsOffline] = useState<boolean>(false);
 
   const fetchGlobalData = async () => {
-    setLoading(true);
-    try {
-      const [overviewData, machinesData, recsData] = await Promise.all([
-        api.getFleetOverview(),
-        api.getMachines(),
-        api.getFleetRecommendations().catch(() => []),
-      ]);
-      setOverview(overviewData);
-      setMachines(machinesData.length > 0 ? machinesData : MOCK_MACHINES);
-      setRecommendations(recsData.length > 0 ? recsData : MOCK_RECOMMENDATIONS);
-      setIsOffline(false);
-    } catch {
-      // Backend offline or unreachable: fall back smoothly to rich local plant telemetry cache
-      setOverview(MOCK_FLEET_OVERVIEW);
-      setMachines(MOCK_MACHINES);
-      setRecommendations(MOCK_RECOMMENDATIONS);
-      setIsOffline(true);
-    } finally {
-      setLoading(false);
-    }
+    let anySuccess = false;
+
+    // Concurrently fetch each endpoint without blocking each other
+    const p1 = api.getFleetOverview()
+      .then((data) => {
+        if (data && data.total_machines > 0) {
+          setOverview(data);
+          anySuccess = true;
+        }
+      })
+      .catch(() => {});
+
+    const p2 = api.getMachines()
+      .then((data) => {
+        if (data && data.length > 0) {
+          setMachines(data);
+          anySuccess = true;
+        }
+      })
+      .catch(() => {});
+
+    const p3 = api.getFleetRecommendations()
+      .then((data) => {
+        if (data && data.length > 0) {
+          setRecommendations(data);
+          anySuccess = true;
+        }
+      })
+      .catch(() => {});
+
+    await Promise.allSettled([p1, p2, p3]);
+    setIsOffline(!anySuccess);
   };
 
   useEffect(() => {
@@ -187,14 +199,14 @@ function App() {
         {/* Dynamic Main Body Content */}
         <main className="app-main-body">
           {isOffline && (
-            <div className="flex items-center justify-between px-space-base py-space-xs mb-space-sm bg-surface-container-low border border-outline-variant/60 rounded-lg text-secondary text-xs">
-              <div className="flex items-center gap-space-xs">
-                <span className="material-symbols-outlined text-[16px] text-primary">cloud_sync</span>
+            <div className="flex items-center justify-between px-4 py-2 mb-3 bg-[#111C2E] border border-[#243247] rounded-lg text-[#94A3B8] text-xs">
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-[16px] text-[#06B6D4]">cloud_sync</span>
                 <span>Active on local telemetry cache · Auto-connecting to backend on localhost:8000</span>
               </div>
               <button
                 onClick={fetchGlobalData}
-                className="px-2 py-0.5 rounded bg-surface-container-high hover:bg-surface-container text-on-surface font-semibold transition-colors"
+                className="px-2.5 py-1 rounded bg-[#162338] hover:bg-[#1E2D44] border border-[#243247] text-[#F1F5F9] font-medium transition-colors"
                 type="button"
               >
                 Sync Now

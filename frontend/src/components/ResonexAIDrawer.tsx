@@ -74,13 +74,13 @@ export const ResonexAIDrawer: React.FC<ResonexAIDrawerProps> = ({
   // Generate contextual initial message if thread is empty
   useEffect(() => {
     if (messages.length === 0) {
-      let welcomeText = 'Hello! I am RESONEX Industrial AI, linked to your shop-floor telemetry, ISO 10816 vibration standards, and plant maintenance SOPs.';
+      let welcomeText = 'Hello! I am your Resonex Factory Assistant. I track live sensor readings, machine health, and official factory repair manuals. How can I help you today?';
       if (activeAlertContext) {
-        welcomeText = `I have loaded context for alert on ${activeAlertContext.machineId} (${activeAlertContext.severity}). Telemetry indicates: "${activeAlertContext.condition}". How can I assist with this incident?`;
+        welcomeText = `I am looking at the alert for ${activeAlertContext.machineId} (${activeAlertContext.severity}). Status: "${activeAlertContext.condition}". What would you like to know or fix?`;
       } else if (selectedMachineId) {
-        welcomeText = `I am currently analyzing machine ${selectedMachineId}. Ask me about vibration harmonics, bearing degradation, or recommended standard operating procedures (SOPs).`;
+        welcomeText = `I am currently monitoring machine ${selectedMachineId}. Ask me about shaking (vibration), temperature, how many hours are left, or recommended repair steps.`;
       } else if (activeTab === 'dashboard') {
-        welcomeText = 'Fleet monitoring assistant active. Ask me about critical machine clusters, degradation trends, or upcoming shift handover requirements.';
+        welcomeText = 'Factory Assistant active. Ask me which machines need attention, overall factory health, or shift handover summary.';
       }
 
       setMessages([
@@ -107,62 +107,62 @@ export const ResonexAIDrawer: React.FC<ResonexAIDrawerProps> = ({
     if (activeAlertContext) {
       const mid = activeAlertContext.machineId;
       return [
-        `Why is ${mid} critical?`,
-        `What caused the risk on ${mid}?`,
-        `What evidence supports this alert?`,
-        `What maintenance is recommended for ${mid}?`,
+        `Why does ${mid} need an urgent fix?`,
+        `What problem was detected on ${mid}?`,
+        `Show sensor readings for this alert`,
+        `How do I fix ${mid}?`,
         `What should I do right now?`,
       ];
     }
     if (selectedMachineId) {
       return [
         `Why is ${selectedMachineId} flagged?`,
-        `What is the calculated RUL for ${selectedMachineId}?`,
-        `Explain vibration harmonics on ${selectedMachineId}`,
-        `Show maintenance SOP for this machine`,
+        `How many hours left for ${selectedMachineId}?`,
+        `Explain shaking (vibration) on ${selectedMachineId}`,
+        `Show repair guide for this machine`,
       ];
     }
     switch (activeTab) {
       case 'dashboard':
         return [
           'Which machines need attention first?',
-          'What is the average fleet RUL?',
-          'Summarize machines in critical state',
-          'Explain fleet vibration distribution',
+          'What is the average hours left across all machines?',
+          'List machines that need urgent repair',
+          'Show overall vibration levels',
         ];
       case 'machines':
         return [
-          'Which machine has the lowest RUL?',
-          'Compare spinning loom vibration levels',
-          'Which machines show acceleration in degradation?',
+          'Which machine has the shortest time left?',
+          'Compare machine vibration levels',
+          'Which machines are wearing out fastest?',
         ];
       case 'alerts':
         return [
-          'What are the primary causes of active alerts?',
-          'Which alert has the shortest maintenance window?',
-          'Show SOPs for high vibration warnings',
+          'What are the main causes of active alerts?',
+          'Which alert needs repair earliest today?',
+          'Show repair steps for high vibration warnings',
         ];
       case 'maintenance':
         return [
-          'Which maintenance task should I handle first?',
-          'What are the SOP steps for spindle lubrication?',
-          'How many assets are on the steep failure curve?',
+          'Which repair task should I handle first?',
+          'What are the steps to lubricate spindle bearings?',
+          'How many machines need repair today?',
         ];
       case 'reports':
         return [
-          'Explain the fleet health trend for Shift A',
-          'Summarize top temperature and vibration anomalies',
-          'What is our compliance rate with ISO 10816?',
+          'Explain the machine health trend for Shift A',
+          'Summarize hottest and highest shaking machines',
+          'Are all machines within safe vibration standards?',
         ];
       case 'settings':
         return [
-          'What are the ISO 10816 vibration velocity thresholds?',
-          'Explain sigma sensitivity settings for anomaly detection',
+          'What are the safe vibration thresholds?',
+          'How does anomaly sensitivity work?',
         ];
       default:
         return [
           'Which machines need attention?',
-          'What are the current fleet risks?',
+          'What are the current machine risks?',
         ];
     }
   };
@@ -313,7 +313,7 @@ export const ResonexAIDrawer: React.FC<ResonexAIDrawerProps> = ({
                     <div className="ai-evidence-card measured">
                       <div className="evidence-header">
                         <span className="material-symbols-outlined evidence-icon">sensors</span>
-                        <span className="evidence-title">1. Measured Telemetry</span>
+                        <span className="evidence-title">1. Live Sensor Readings</span>
                       </div>
                       <div className="evidence-metrics-grid">
                         <div className="evidence-metric-tile">
@@ -325,7 +325,7 @@ export const ResonexAIDrawer: React.FC<ResonexAIDrawerProps> = ({
                           </span>
                         </div>
                         <div className="evidence-metric-tile">
-                          <span className="metric-name">Vibration RMS</span>
+                          <span className="metric-name">Shaking (Vibration)</span>
                           <span className="metric-val font-numeric">
                             {msg.telemetryContext.vibration_magnitude != null
                               ? `${msg.telemetryContext.vibration_magnitude.toFixed(2)} mm/s`
@@ -347,7 +347,7 @@ export const ResonexAIDrawer: React.FC<ResonexAIDrawerProps> = ({
                     <div className="ai-evidence-card calculated">
                       <div className="evidence-header">
                         <span className="material-symbols-outlined evidence-icon">analytics</span>
-                        <span className="evidence-title">2. Calculated ML Diagnostics</span>
+                        <span className="evidence-title">2. Machine Health & Hours Left</span>
                       </div>
                       <div className="evidence-metrics-grid">
                         <div className="evidence-metric-tile">
@@ -359,7 +359,7 @@ export const ResonexAIDrawer: React.FC<ResonexAIDrawerProps> = ({
                           </span>
                         </div>
                         <div className="evidence-metric-tile">
-                          <span className="metric-name">Predicted RUL</span>
+                          <span className="metric-name">Hours Left (RUL)</span>
                           <span className="metric-val font-numeric">
                             {msg.telemetryContext.rul_hours != null
                               ? `${msg.telemetryContext.rul_hours.toFixed(0)} Hours`
@@ -367,7 +367,7 @@ export const ResonexAIDrawer: React.FC<ResonexAIDrawerProps> = ({
                           </span>
                         </div>
                         <div className="evidence-metric-tile">
-                          <span className="metric-name">Risk Assessment</span>
+                          <span className="metric-name">Risk Level</span>
                           <span className={`metric-val risk-tag ${msg.telemetryContext.risk_level?.toLowerCase() || 'low'}`}>
                             {msg.telemetryContext.risk_level || 'LOW'}
                           </span>
@@ -382,7 +382,7 @@ export const ResonexAIDrawer: React.FC<ResonexAIDrawerProps> = ({
                       <div className="evidence-header">
                         <span className="material-symbols-outlined evidence-icon">menu_book</span>
                         <span className="evidence-title">
-                          3. Documentary Citations ({msg.sources.length} Verified)
+                          3. Factory Manuals & Guides ({msg.sources.length} Found)
                         </span>
                       </div>
                       <div className="rag-citation-list">
@@ -423,7 +423,7 @@ export const ResonexAIDrawer: React.FC<ResonexAIDrawerProps> = ({
                     <div className="ai-evidence-card actions">
                       <div className="evidence-header">
                         <span className="material-symbols-outlined evidence-icon">build_circle</span>
-                        <span className="evidence-title">4. Recommended Maintenance Actions</span>
+                        <span className="evidence-title">4. Recommended Steps to Fix</span>
                       </div>
                       <ul className="evidence-actions-list">
                         {msg.suggestedActions.map((action, aIdx) => (
@@ -472,8 +472,8 @@ export const ResonexAIDrawer: React.FC<ResonexAIDrawerProps> = ({
               className="ai-chat-input"
               placeholder={
                 drawerMachineId
-                  ? `Ask Resonex AI about ${drawerMachineId}...`
-                  : 'Ask about fleet health, SOPs, or alerts...'
+                  ? `Ask AI Assistant about ${drawerMachineId}...`
+                  : 'Ask about machine health, repair guides, or alerts...'
               }
               value={inputQuery}
               onChange={(e) => setInputQuery(e.target.value)}
@@ -489,7 +489,7 @@ export const ResonexAIDrawer: React.FC<ResonexAIDrawerProps> = ({
             </button>
           </form>
           <span className="ai-footnote">
-            Ground truth verified against machine telemetry & SOP documents. AI never hallucinates readings.
+            All answers are verified directly with live sensor readings and official factory repair manuals.
           </span>
         </div>
       </aside>

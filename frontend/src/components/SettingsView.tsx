@@ -48,13 +48,13 @@ export const SettingsView: React.FC = () => {
           <div className="flex flex-col gap-1">
             <div className="flex items-center gap-2">
               <h1 className="stitch-page-title">Settings & System Configuration</h1>
-              <span className="px-2 py-0.5 rounded-full bg-tertiary-fixed text-on-tertiary-fixed font-label-caps text-label-caps font-bold tracking-wider uppercase flex items-center gap-1.5 shadow-sm">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                Cluster Synced
+              <span className="px-2 py-0.5 rounded bg-[#162338] text-[#94A3B8] border border-[#243247] font-label-caps text-label-caps font-semibold tracking-wider uppercase flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#22C55E]" />
+                Connected & Synced
               </span>
             </div>
             <p className="stitch-page-desc max-w-4xl">
-              Manage telemetry sensor baselines, alert sensitivity thresholds, MQTT/OPC-UA streaming endpoints, shift schedules, and team permissions across all 50 operational assets.
+              Configure sensor check rates, safety warning limits, factory network connections, shift schedules, and team logins across all monitored machines.
             </p>
           </div>
 
@@ -65,7 +65,7 @@ export const SettingsView: React.FC = () => {
               type="button"
             >
               <span className="material-symbols-outlined text-[18px]">undo</span>
-              <span>Discard</span>
+              <span>Reset</span>
             </button>
 
             <button
@@ -82,7 +82,7 @@ export const SettingsView: React.FC = () => {
         {saveSuccess && (
           <div className="save-confirmation-banner mt-3">
             <span className="material-symbols-outlined text-emerald-600 text-[18px]">check_circle</span>
-            <span>System configuration parameters committed and synchronized with cluster telemetry edge nodes.</span>
+            <span>Settings saved successfully and applied to all factory sensors.</span>
           </div>
         )}
       </div>
@@ -95,7 +95,7 @@ export const SettingsView: React.FC = () => {
           type="button"
         >
           <span className="material-symbols-outlined text-[18px]">sensors</span>
-          <span>Telemetry & Sensors</span>
+          <span>Sensors & Readings</span>
         </button>
 
         <button
@@ -104,7 +104,7 @@ export const SettingsView: React.FC = () => {
           type="button"
         >
           <span className="material-symbols-outlined text-[18px]">warning_amber</span>
-          <span>Alerts & Threshold Rules</span>
+          <span>Danger Limits & Alerts</span>
         </button>
 
         <button
@@ -113,7 +113,7 @@ export const SettingsView: React.FC = () => {
           type="button"
         >
           <span className="material-symbols-outlined text-[18px]">hub</span>
-          <span>Integrations (MQTT / OPC-UA)</span>
+          <span>Data Connections</span>
         </button>
 
         <button
@@ -122,7 +122,7 @@ export const SettingsView: React.FC = () => {
           type="button"
         >
           <span className="material-symbols-outlined text-[18px]">calendar_view_week</span>
-          <span>Shift Schedules & Handover</span>
+          <span>Shift Hours & Reports</span>
         </button>
 
         <button
@@ -131,7 +131,7 @@ export const SettingsView: React.FC = () => {
           type="button"
         >
           <span className="material-symbols-outlined text-[18px]">badge</span>
-          <span>Users & Access Control</span>
+          <span>Users & Logins</span>
         </button>
       </div>
 
@@ -140,13 +140,13 @@ export const SettingsView: React.FC = () => {
         {subTab === 'sensors' && (
           <div className="settings-section-form">
             <div className="section-head mb-4">
-              <h2 className="stitch-card-title">Telemetry Ingestion & Sensor Baselines</h2>
-              <p className="stitch-card-desc">Configure streaming frequencies, buffer horizons, and hardware sensor telemetry.</p>
+              <h2 className="stitch-card-title">Sensor Reading Speed & Storage</h2>
+              <p className="stitch-card-desc">Set how frequently sensors send data and how long live history is kept.</p>
             </div>
 
             <div className="form-grid">
               <div className="form-field">
-                <label className="form-label">Sampling Frequency (Hz):</label>
+                <label className="form-label">Sensor Check Rate (Times per second):</label>
                 <div className="flex items-center gap-3">
                   <input
                     type="range"
@@ -157,36 +157,36 @@ export const SettingsView: React.FC = () => {
                     value={samplingRate}
                     onChange={(e) => setSamplingRate(Number(e.target.value))}
                   />
-                  <span className="slider-val-badge font-numeric">{samplingRate} Hz</span>
+                  <span className="slider-val-badge font-numeric">{samplingRate} /sec</span>
                 </div>
-                <span className="form-help-text">Edge nodes buffer at 100Hz default for high-speed looms and spindle bearings.</span>
+                <span className="form-help-text">Factory default is 100 times per second for high-speed textile machines.</span>
               </div>
 
               <div className="form-field">
-                <label className="form-label">In-Memory Telemetry History Buffer (Minutes):</label>
+                <label className="form-label">Keep Live History For (Minutes):</label>
                 <input
                   type="number"
                   className="stitch-input font-numeric"
                   value={streamBufferMinutes}
                   onChange={(e) => setStreamBufferMinutes(Number(e.target.value))}
                 />
-                <span className="form-help-text">Controls real-time rolling window before permanent disk persistence.</span>
+                <span className="form-help-text">Controls how many minutes of live sensor history are saved in fast memory.</span>
               </div>
 
               <div className="form-field">
-                <label className="form-label">Vibration Axis Configuration:</label>
+                <label className="form-label">Shaking Sensor Directions:</label>
                 <select className="stitch-select">
-                  <option value="triaxial">Tri-Axial (X, Y, Z + Resultant RMS) [Standard]</option>
-                  <option value="dual">Dual-Axis Radial (X, Y)</option>
-                  <option value="uniaxial">Single Uniaxial Accelerometer</option>
+                  <option value="triaxial">3-Direction Shaking (Side, Front, Vertical) [Standard]</option>
+                  <option value="dual">2-Direction Shaking (Side, Front)</option>
+                  <option value="uniaxial">Single Direction Shaking</option>
                 </select>
               </div>
 
               <div className="form-field">
-                <label className="form-label">Acoustic Telemetry Stream:</label>
+                <label className="form-label">Machine Sound Monitoring:</label>
                 <div className="flex items-center gap-2 mt-1">
                   <input type="checkbox" id="acousticCheck" defaultChecked className="stitch-checkbox" />
-                  <label htmlFor="acousticCheck" className="text-sm font-medium">Enable ultrasonic bearing friction detection</label>
+                  <label htmlFor="acousticCheck" className="text-sm font-medium">Enable high-pitch bearing friction sound detection</label>
                 </div>
               </div>
             </div>
@@ -196,13 +196,13 @@ export const SettingsView: React.FC = () => {
         {subTab === 'thresholds' && (
           <div className="settings-section-form">
             <div className="section-head mb-4">
-              <h2 className="stitch-card-title">Diagnostic Alarm Horizons & ISO 10816 Limits</h2>
-              <p className="stitch-card-desc">Configure velocity thresholds and predictive failure warning horizons.</p>
+              <h2 className="stitch-card-title">Safety Warning & Danger Limits</h2>
+              <p className="stitch-card-desc">Set danger levels for vibration, temperature, and hours left before repair.</p>
             </div>
 
             <div className="form-grid">
               <div className="form-field">
-                <label className="form-label">ISO 10816 Velocity Limit (mm/s RMS):</label>
+                <label className="form-label">Maximum Safe Shaking (Vibration) Limit (mm/s):</label>
                 <div className="flex items-center gap-3">
                   <input
                     type="number"
@@ -213,11 +213,11 @@ export const SettingsView: React.FC = () => {
                   />
                   <span className="text-secondary font-numeric">mm/s</span>
                 </div>
-                <span className="form-help-text">Machines breaching this limit automatically trigger a P1 Immediate Alert.</span>
+                <span className="form-help-text">Machines exceeding this shaking level immediately trigger an Urgent P1 Alert.</span>
               </div>
 
               <div className="form-field">
-                <label className="form-label">Bearing Temperature Warning Ceiling (°C):</label>
+                <label className="form-label">Maximum Safe Temperature (°C):</label>
                 <div className="flex items-center gap-3">
                   <input
                     type="number"
@@ -228,11 +228,11 @@ export const SettingsView: React.FC = () => {
                   />
                   <span className="text-secondary font-numeric">°C</span>
                 </div>
-                <span className="form-help-text">Thermal alarm threshold for motor core and spindle race.</span>
+                <span className="form-help-text">Heat alert limit for motor core and spindle bearings.</span>
               </div>
 
               <div className="form-field">
-                <label className="form-label">Predictive RUL Emergency Horizon (Hours):</label>
+                <label className="form-label">Emergency Alert Threshold (Hours Left Before Failure):</label>
                 <div className="flex items-center gap-3">
                   <input
                     type="number"
@@ -243,7 +243,7 @@ export const SettingsView: React.FC = () => {
                   />
                   <span className="text-secondary font-numeric">Hours</span>
                 </div>
-                <span className="form-help-text">Remaining Useful Life threshold for emergency dispatch banner.</span>
+                <span className="form-help-text">Estimated hours left threshold that triggers emergency repair warnings.</span>
               </div>
             </div>
           </div>

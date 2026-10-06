@@ -225,8 +225,8 @@ export const MachineDetail: React.FC<MachineDetailProps> = ({
             <div className="hero-title-row">
               <h1 className="hero-machine-id font-numeric">{machine?.machine_id}</h1>
               <span className={`status-chip ${condition.health_state_label.toLowerCase()} text-[13px] py-1 px-3`}>
-                <span className={`chip-dot ${isCritical ? 'animate-pulse' : ''}`} />
-                <span className="font-bold uppercase">
+                <span className="chip-dot" />
+                <span className="font-semibold uppercase">
                   {condition.health_state_label} ({risk.maintenance_priority || 'P3'})
                 </span>
               </span>
@@ -249,7 +249,7 @@ export const MachineDetail: React.FC<MachineDetailProps> = ({
               <span className="material-symbols-outlined text-[16px] text-amber-500" style={{ fontVariationSettings: isPinned ? "'FILL' 1" : "'FILL' 0" }}>
                 star
               </span>
-              <span>{isPinned ? 'Pinned' : 'Pin Asset'}</span>
+              <span>{isPinned ? 'Pinned' : 'Pin Machine'}</span>
             </button>
 
             <button
@@ -270,7 +270,7 @@ export const MachineDetail: React.FC<MachineDetailProps> = ({
                 type="button"
               >
                 <span className="material-symbols-outlined text-[16px] text-primary">engineering</span>
-                <span>Dispatch Tech</span>
+                <span>Send Repair Team</span>
               </button>
             )}
 
@@ -278,17 +278,17 @@ export const MachineDetail: React.FC<MachineDetailProps> = ({
               <button
                 className="stitch-btn-ai-launch"
                 onClick={() => onOpenAIWithMachine(machineId)}
-                title="Launch Resonex AI with active context"
+                title="Ask AI Assistant about this machine"
                 type="button"
               >
                 <span className="ai-sparkle">✦</span>
-                <span>Ask Resonex AI</span>
+                <span>Ask AI Assistant</span>
               </button>
             )}
           </div>
         </div>
 
-        {/* 3. Plain-English Condition Callout Banner matching Stitch */}
+        {/* 3. Plain-English Condition Callout Banner */}
         <div className={`detail-callout-banner ${isCritical ? 'critical' : isWarning ? 'warning' : 'nominal'} mt-4`}>
           <span className="material-symbols-outlined callout-icon" style={{ fontVariationSettings: "'FILL' 1" }}>
             {isCritical ? 'warning' : isWarning ? 'report_problem' : 'check_circle'}
@@ -297,19 +297,19 @@ export const MachineDetail: React.FC<MachineDetailProps> = ({
             <div className="callout-header-row">
               <span className="callout-title">
                 {isCritical
-                  ? 'ATTENTION REQUIRED · SEVERE THERMAL OR HARMONIC ANOMALY'
+                  ? 'URGENT ATTENTION NEEDED · Overheating or High Shaking Detected'
                   : isWarning
-                  ? 'PRECAUTIONARY MONITORING · EARLY DEGRADATION SIGNATURE'
-                  : 'OPTIMAL OPERATION · STEADY STATE HARMONICS'}
+                  ? 'WARNING · Early Signs of Machine Wear Detected'
+                  : 'ALL CLEAR · Machine Running Normally Within Safe Limits'}
               </span>
               {calculated.rul_hours != null && (
                 <span className="callout-countdown-pill font-numeric">
-                  T-Minus {calculated.rul_hours.toFixed(1)} Hours
+                  ~{calculated.rul_hours.toFixed(0)} Hours Left Before Repair Needed
                 </span>
               )}
             </div>
             <p className="callout-text">
-              {explanation?.condition_summary || explanation?.reasoning || 'Telemetry stream is nominal and tracking within baseline parameters.'}
+              {explanation?.condition_summary || explanation?.reasoning || 'All machine sensor readings are within normal safe limits.'}
             </p>
           </div>
         </div>
@@ -320,21 +320,21 @@ export const MachineDetail: React.FC<MachineDetailProps> = ({
         <div className="stitch-kpi-card">
           <div className="kpi-card-header">
             <span className="kpi-label-caps">Health Score</span>
-            <span className="material-symbols-outlined text-emerald-600 text-[18px]">health_and_safety</span>
+            <span className="material-symbols-outlined text-[#94A3B8] text-[18px]">health_and_safety</span>
           </div>
           <div className="kpi-value-row">
             <span className="kpi-telemetry-val font-numeric">{condition.health_score.toFixed(1)}</span>
-            <span className="kpi-unit-label">/ 100</span>
+            <span className="kpi-unit-label">/ 100 Health</span>
           </div>
-          <div className="kpi-footnote text-secondary">
-            Degradation status: <strong className="text-on-surface">{condition.degradation_status}</strong>
+          <div className="kpi-footnote text-[#94A3B8]">
+            Wear condition: <strong className="text-[#F1F5F9] font-medium">{condition.degradation_status}</strong>
           </div>
         </div>
 
         <div className="stitch-kpi-card">
           <div className="kpi-card-header">
-            <span className="kpi-label-caps">Risk Assessment</span>
-            <span className="material-symbols-outlined text-amber-600 text-[18px]">gavel</span>
+            <span className="kpi-label-caps">Risk of Failure</span>
+            <span className="material-symbols-outlined text-[#94A3B8] text-[18px]">gavel</span>
           </div>
           <div className="kpi-value-row">
             <span className="kpi-telemetry-val font-numeric">{(risk.risk_score * 100).toFixed(0)}%</span>
@@ -342,45 +342,45 @@ export const MachineDetail: React.FC<MachineDetailProps> = ({
               {risk.risk_level}
             </span>
           </div>
-          <div className="kpi-footnote text-secondary">
-            Priority: <strong className="text-on-surface">{risk.maintenance_priority}</strong> ({risk.maintenance_time_window || 'Immediate'})
+          <div className="kpi-footnote text-[#94A3B8]">
+            Repair urgency: <strong className="text-[#F1F5F9] font-medium">{risk.maintenance_priority}</strong> ({risk.maintenance_time_window || 'Immediate'})
           </div>
         </div>
 
         <div className="stitch-kpi-card">
           <div className="kpi-card-header">
-            <span className="kpi-label-caps">Predicted RUL</span>
-            <span className="material-symbols-outlined text-blue-600 text-[18px]">timelapse</span>
+            <span className="kpi-label-caps">Estimated Lifetime Left</span>
+            <span className="material-symbols-outlined text-[#94A3B8] text-[18px]">timelapse</span>
           </div>
           <div className="kpi-value-row">
             <span className="kpi-telemetry-val font-numeric">
               {calculated.rul_hours != null ? calculated.rul_hours.toFixed(0) : '--'}
             </span>
-            <span className="kpi-unit-label">Hours</span>
+            <span className="kpi-unit-label">Hours Left</span>
           </div>
-          <div className="kpi-footnote text-secondary">
-            Degradation slope: <strong className="text-on-surface font-numeric">{calculated.degradation_slope?.toFixed(4) || 'Nominal'}</strong>
+          <div className="kpi-footnote text-[#94A3B8]">
+            Wear speed: <strong className="text-[#F1F5F9] font-medium">{calculated.degradation_slope != null ? (calculated.degradation_slope > 0 ? 'Accelerating' : 'Normal') : 'Normal'}</strong>
           </div>
         </div>
 
         <div className="stitch-kpi-card">
           <div className="kpi-card-header">
-            <span className="kpi-label-caps">Vibration & Temp</span>
-            <span className="material-symbols-outlined text-purple-600 text-[18px]">sensors</span>
+            <span className="kpi-label-caps">Vibration & Temperature</span>
+            <span className="material-symbols-outlined text-[#94A3B8] text-[18px]">sensors</span>
           </div>
           <div className="kpi-value-row">
             <span className="kpi-telemetry-val font-numeric">
               {measured.vibration_magnitude?.toFixed(2) || '--'}
             </span>
             <span className="kpi-unit-label">mm/s</span>
-            <span className="text-muted mx-1">·</span>
+            <span className="text-[#64748B] mx-1">·</span>
             <span className="kpi-telemetry-val font-numeric">
               {measured.temperature?.toFixed(1) || '--'}
             </span>
             <span className="kpi-unit-label">°C</span>
           </div>
-          <div className="kpi-footnote text-secondary">
-            Operating: <strong className="text-on-surface font-numeric">{measured.operational_hours || 0} hrs</strong>
+          <div className="kpi-footnote text-[#94A3B8]">
+            Total runtime: <strong className="text-[#F1F5F9] font-numeric font-medium">{measured.operational_hours || 0} hrs</strong>
           </div>
         </div>
       </section>
@@ -389,8 +389,8 @@ export const MachineDetail: React.FC<MachineDetailProps> = ({
       <section className="stitch-card p-space-base mb-space-base">
         <div className="flex-between mb-3">
           <div>
-            <h2 className="stitch-card-title">Telemetry Dynamics & Historical Trends</h2>
-            <p className="stitch-card-desc">Tri-axial vibration velocity, thermal response, and health decay trajectories.</p>
+            <h2 className="stitch-card-title">Live Sensor Waveform & History</h2>
+            <p className="stitch-card-desc">Real-time shaking, heat levels, and health trends over the last 24 hours.</p>
           </div>
         </div>
         <TimeSeriesChart tabs={chartTabs} height={260} />
@@ -403,46 +403,46 @@ export const MachineDetail: React.FC<MachineDetailProps> = ({
           <div className="stitch-card-header mb-3">
             <div className="flex items-center gap-2">
               <span className="material-symbols-outlined text-primary text-[20px]">analytics</span>
-              <h2 className="stitch-card-title">Multi-Sensor Diagnostics</h2>
+              <h2 className="stitch-card-title">Machine Sensor Readings</h2>
             </div>
-            <span className="kpi-label-caps">ISO 10816 Compliance</span>
+            <span className="kpi-label-caps">Vibration Safety Check</span>
           </div>
 
           <div className="telemetry-readings-grid">
             <div className="telemetry-item">
-              <span className="item-label">Vibration X-Axis</span>
+              <span className="item-label">Side-to-Side Shaking (X)</span>
               <span className="item-value font-numeric">{measured.vibration_x?.toFixed(3) ?? '--'} g</span>
             </div>
             <div className="telemetry-item">
-              <span className="item-label">Vibration Y-Axis</span>
+              <span className="item-label">Front-to-Back Shaking (Y)</span>
               <span className="item-value font-numeric">{measured.vibration_y?.toFixed(3) ?? '--'} g</span>
             </div>
             <div className="telemetry-item">
-              <span className="item-label">Vibration Z-Axis</span>
+              <span className="item-label">Up-and-Down Shaking (Z)</span>
               <span className="item-value font-numeric">{measured.vibration_z?.toFixed(3) ?? '--'} g</span>
             </div>
             <div className="telemetry-item">
-              <span className="item-label">Vibration Magnitude</span>
+              <span className="item-label">Overall Vibration Level</span>
               <span className="item-value font-numeric font-bold text-primary">
                 {measured.vibration_magnitude?.toFixed(3) ?? '--'} mm/s
               </span>
             </div>
             <div className="telemetry-item">
-              <span className="item-label">Bearing Temperature</span>
+              <span className="item-label">Machine Temperature</span>
               <span className="item-value font-numeric">{measured.temperature?.toFixed(1) ?? '--'} °C</span>
             </div>
             <div className="telemetry-item">
-              <span className="item-label">Motor Load Ratio</span>
+              <span className="item-label">Motor Workload</span>
               <span className="item-value font-numeric">{measured.load_percent != null ? `${measured.load_percent}%` : '85%'}</span>
             </div>
             <div className="telemetry-item">
-              <span className="item-label">Rotational Speed</span>
+              <span className="item-label">Motor Speed</span>
               <span className="item-value font-numeric">{measured.rotational_speed != null ? `${measured.rotational_speed} RPM` : '1800 RPM'}</span>
             </div>
             <div className="telemetry-item">
-              <span className="item-label">Anomaly Status</span>
-              <span className={`item-value font-bold ${condition.anomaly_status ? 'text-critical' : 'text-good'}`}>
-                {condition.anomaly_status ? 'ANOMALY DETECTED' : 'NOMINAL'}
+              <span className="item-label">Problem Detected?</span>
+              <span className={`item-value font-bold ${condition.anomaly_status ? 'text-red-400' : 'text-emerald-400'}`}>
+                {condition.anomaly_status ? 'YES - ISSUE FOUND' : 'NO - RUNNING FINE'}
               </span>
             </div>
           </div>
@@ -450,7 +450,7 @@ export const MachineDetail: React.FC<MachineDetailProps> = ({
           {/* Potential Causes from Decision Engine */}
           {explanation?.potential_causes && explanation.potential_causes.length > 0 && (
             <div className="causes-section mt-4 pt-3 border-t border-hairline">
-              <span className="font-label-caps text-secondary uppercase font-semibold">Probable Root Causes:</span>
+              <span className="font-label-caps text-secondary uppercase font-semibold">Most Likely Reasons for Problem:</span>
               <ul className="causes-list mt-1.5">
                 {explanation.potential_causes.map((c, i) => (
                   <li key={i} className="cause-item">
@@ -468,15 +468,15 @@ export const MachineDetail: React.FC<MachineDetailProps> = ({
           <div className="stitch-card-header mb-3">
             <div className="flex items-center gap-2">
               <span className="material-symbols-outlined text-primary text-[20px]">menu_book</span>
-              <h2 className="stitch-card-title">Documentary Citations & SOPs</h2>
+              <h2 className="stitch-card-title">Repair Guides & Manuals</h2>
             </div>
-            <span className="kpi-label-caps">RAG Verified ({docs.length})</span>
+            <span className="kpi-label-caps">Verified by Manuals ({docs.length})</span>
           </div>
 
           {docs.length === 0 ? (
             <div className="stitch-empty-state-sm">
               <span className="material-symbols-outlined text-[24px] text-muted">library_books</span>
-              <p className="empty-desc text-xs mt-1">No specific documentary citations matched for nominal state.</p>
+              <p className="empty-desc text-xs mt-1">No repair guides needed right now. Machine is running normally.</p>
             </div>
           ) : (
             <div className="detail-citations-list">
@@ -496,11 +496,11 @@ export const MachineDetail: React.FC<MachineDetailProps> = ({
           {/* Recommended SOP Actions */}
           {explanation?.recommended_actions && explanation.recommended_actions.length > 0 && (
             <div className="actions-section mt-4 pt-3 border-t border-hairline">
-              <span className="font-label-caps text-secondary uppercase font-semibold">Prescribed SOP Actions:</span>
+              <span className="font-label-caps text-secondary uppercase font-semibold">Recommended Steps to Fix:</span>
               <ul className="actions-list mt-1.5">
                 {explanation.recommended_actions.map((act, i) => (
                   <li key={i} className="action-step-item">
-                    <span className="material-symbols-outlined text-[16px] text-emerald-600">task_alt</span>
+                    <span className="material-symbols-outlined text-[16px] text-emerald-400">task_alt</span>
                     <span>{act}</span>
                   </li>
                 ))}
@@ -515,7 +515,7 @@ export const MachineDetail: React.FC<MachineDetailProps> = ({
         <div className="stitch-card-header mb-3">
           <div className="flex items-center gap-2">
             <span className="material-symbols-outlined text-secondary text-[20px]">history</span>
-            <h2 className="stitch-card-title">Asset Maintenance Log</h2>
+            <h2 className="stitch-card-title">Past Repair & Service History</h2>
           </div>
           <span className="kpi-label-caps">{maintenanceHistory.length} Past Records</span>
         </div>

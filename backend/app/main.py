@@ -123,12 +123,100 @@ def get_machine_recommendation(machine_id: str) -> Dict[str, Any]:
     rec_engine = MaintenanceRecommendationEngine()
     return rec_engine.evaluate_machine_recommendation(machine_data)
 
+# In-memory TTL caches for sub-millisecond responses
+import time
+import json
+
+_fleet_overview_cache: Dict[str, Any] = {"timestamp": 0.0, "data": None}
+_fleet_recommendations_cache: Dict[str, Any] = {"timestamp": 0.0, "data": []}
+
+def invalidate_fleet_caches():
+    _fleet_overview_cache["timestamp"] = 0.0
+    _fleet_overview_cache["data"] = None
+    _fleet_recommendations_cache["timestamp"] = 0.0
+    _fleet_recommendations_cache["data"] = []
+
+def _serialize_rec_record(rec: RecommendationRecord) -> Dict[str, Any]:
+    def _parse(v, default):
+        if v is None:
+            return default
+        if isinstance(v, (dict, list)):
+            return v
+        if isinstance(v, str):
+            try:
+                return json.loads(v)
+            except Exception:
+                return default
+        return default
+
+    condition = _parse(rec.condition_summary, {})
+    causes = _parse(rec.potential_causes, [])
+    actions = _parse(rec.recommended_actions, [])
+    m_ev = _parse(rec.measured_evidence, {})
+    c_ev = _parse(rec.calculated_evidence, {})
+    d_ev = _parse(rec.retrieved_documentary_evidence, [])
+    trace = _parse(rec.source_traceability, {})
+
+    return {
+        "machine_id": rec.machine_id,
+        "machine_type": condition.get("machine_type") or "TypeA",
+        "timestamp": rec.timestamp.isoformat() if rec.timestamp else None,
+        "current_condition": {
+            "health_state": None,
+            "health_state_label": rec.health_state,
+            "health_score": rec.health_score,
+            "anomaly_status": condition.get("anomaly_status", False),
+            "anomaly_score": condition.get("anomaly_score", 0.0),
+            "degradation_status": condition.get("degradation_status", "NOMINAL"),
+            "rul_hours": rec.rul_hours,
+        },
+        "risk_assessment": {
+            "risk_score": rec.risk_score,
+            "risk_level": rec.risk_level,
+            "maintenance_priority": rec.maintenance_priority,
+            "maintenance_time_window": rec.maintenance_window,
+        },
+        "measured_evidence": m_ev,
+        "calculated_evidence": c_ev,
+        "retrieved_documentary_evidence": d_ev,
+        "generated_explanation": {
+            "condition_summary": condition.get("condition_summary") or rec.reasoning or "",
+            "potential_causes": causes,
+            "recommended_actions": actions,
+            "reasoning": rec.reasoning,
+            "confidence": rec.confidence,
+        },
+        "source_traceability": trace,
+    }
+
 @app.get("/api/v1/fleet-recommendations")
-def get_fleet_recommendations() -> List[Dict[str, Any]]:
+def get_fleet_recommendations(db: Session = Depends(get_db)) -> List[Dict[str, Any]]:
     """Returns grounded maintenance recommendation decisions for the entire fleet ranked by priority."""
+    now = time.time()
+    if _fleet_recommendations_cache["data"] and (now - _fleet_recommendations_cache["timestamp"]) < 15.0:
+        return _fleet_recommendations_cache["data"]
+
+    # 1. Try reading from persisted database records
+    db_records = db.query(RecommendationRecord).order_by(RecommendationRecord.timestamp.desc()).all()
+    if db_records:
+        latest = {}
+        for r in db_records:
+            if r.machine_id not in latest:
+                latest[r.machine_id] = r
+        if len(latest) >= 50:
+            recs = [_serialize_rec_record(r) for r in latest.values()]
+            recs.sort(key=lambda r: (r.get("risk_assessment", {}).get("risk_score") or 0.0), reverse=True)
+            _fleet_recommendations_cache["timestamp"] = now
+            _fleet_recommendations_cache["data"] = recs
+            return recs
+
+    # 2. Fallback to computing from dataset_df if DB is unseeded
     from backend.app.services.recommendation.engine import MaintenanceRecommendationEngine
     rec_engine = MaintenanceRecommendationEngine()
-    return rec_engine.evaluate_fleet_recommendations(dataset_df)
+    recs = rec_engine.evaluate_fleet_recommendations(dataset_df)
+    _fleet_recommendations_cache["timestamp"] = now
+    _fleet_recommendations_cache["data"] = recs
+    return recs
 
 
 # ---------------------------------------------------------
@@ -230,6 +318,7 @@ def get_machine_latest_status(machine_id: str, db: Session = Depends(get_db)) ->
     
     try:
         decision = db_pipeline_service.process_and_persist_machine_decision(db, machine_id)
+        invalidate_fleet_caches()
         return decision
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -242,50 +331,76 @@ def get_fleet_overview(db: Session = Depends(get_db)):
     Returns an aggregated overview of all machines in the database,
     including total counts, state distributions, and risk priorities.
     """
+    now = time.time()
+    if _fleet_overview_cache["data"] and (now - _fleet_overview_cache["timestamp"]) < 10.0:
+        return _fleet_overview_cache["data"]
+
     total_machines = db.query(Machine).count()
-    machines = db.query(Machine).all()
-    
+    if total_machines == 0:
+        return FleetOverviewResponse(
+            total_machines=0,
+            health_states={"Good": 0, "Warning": 0, "Critical": 0},
+            risk_levels={"LOW": 0, "MEDIUM": 0, "HIGH": 0, "CRITICAL": 0},
+            maintenance_priorities={},
+            average_health_score=0.0,
+            average_rul_hours=0.0,
+            machines_requiring_maintenance_count=0
+        )
+
+    # Fetch latest health and risk records in 2 single batch queries (instead of 100 in a loop)
+    latest_health = {}
+    for h in db.query(HealthRecord).order_by(HealthRecord.timestamp.asc()).all():
+        latest_health[h.machine_id] = h
+
+    latest_risk = {}
+    for r in db.query(RiskRecord).order_by(RiskRecord.timestamp.asc()).all():
+        latest_risk[r.machine_id] = r
+
     health_states = {"Good": 0, "Warning": 0, "Critical": 0}
     risk_levels = {"LOW": 0, "MEDIUM": 0, "HIGH": 0, "CRITICAL": 0}
     priorities = {}
-    
     health_scores = []
     rul_hours_list = []
     maintenance_needed_count = 0
-    
-    for m in machines:
-        latest_health = db.query(HealthRecord).filter(
-            HealthRecord.machine_id == m.machine_id
-        ).order_by(HealthRecord.timestamp.desc()).first()
-        
-        if latest_health:
-            health_scores.append(latest_health.health_score)
-            if latest_health.rul_hours is not None:
-                rul_hours_list.append(latest_health.rul_hours)
-            label = latest_health.health_state_label
-            if label in health_states:
-                health_states[label] += 1
-            else:
-                health_states[label] = 1
-        
-        latest_risk = db.query(RiskRecord).filter(
-            RiskRecord.machine_id == m.machine_id
-        ).order_by(RiskRecord.timestamp.desc()).first()
-        
-        if latest_risk:
-            r_level = latest_risk.risk_level
+
+    if latest_health or latest_risk:
+        for m_id, h in latest_health.items():
+            health_scores.append(h.health_score)
+            if h.rul_hours is not None:
+                rul_hours_list.append(h.rul_hours)
+            label = h.health_state_label or "Good"
+            health_states[label] = health_states.get(label, 0) + 1
+
+        for m_id, r in latest_risk.items():
+            r_level = r.risk_level or "LOW"
             risk_levels[r_level] = risk_levels.get(r_level, 0) + 1
-            
-            prio = latest_risk.maintenance_priority
+            prio = r.maintenance_priority or "P3"
             priorities[prio] = priorities.get(prio, 0) + 1
-            
+            if r_level in ["HIGH", "CRITICAL"]:
+                maintenance_needed_count += 1
+    else:
+        # Fallback to recommendation_records if health_records table is unpopulated
+        latest_recs = {}
+        for r in db.query(RecommendationRecord).order_by(RecommendationRecord.timestamp.asc()).all():
+            latest_recs[r.machine_id] = r
+        for m_id, r in latest_recs.items():
+            if r.health_score is not None:
+                health_scores.append(r.health_score)
+            if r.rul_hours is not None:
+                rul_hours_list.append(r.rul_hours)
+            label = r.health_state or "Good"
+            health_states[label] = health_states.get(label, 0) + 1
+            r_level = r.risk_level or "LOW"
+            risk_levels[r_level] = risk_levels.get(r_level, 0) + 1
+            prio = r.maintenance_priority or "P3"
+            priorities[prio] = priorities.get(prio, 0) + 1
             if r_level in ["HIGH", "CRITICAL"]:
                 maintenance_needed_count += 1
 
     avg_health = sum(health_scores) / len(health_scores) if health_scores else 0.0
     avg_rul = sum(rul_hours_list) / len(rul_hours_list) if rul_hours_list else 0.0
 
-    return FleetOverviewResponse(
+    res = FleetOverviewResponse(
         total_machines=total_machines,
         health_states=health_states,
         risk_levels=risk_levels,
@@ -294,6 +409,9 @@ def get_fleet_overview(db: Session = Depends(get_db)):
         average_rul_hours=round(avg_rul, 2),
         machines_requiring_maintenance_count=maintenance_needed_count
     )
+    _fleet_overview_cache["timestamp"] = now
+    _fleet_overview_cache["data"] = res
+    return res
 
 
 # ---------------------------------------------------------

@@ -21,6 +21,31 @@ const formatAlertTime = (ts?: string) => {
   }
 };
 
+const getActionString = (actionItem: any): string => {
+  if (!actionItem) return 'Inspect asset mechanical bearings & thermal sensors.';
+  if (typeof actionItem === 'string') return actionItem;
+  if (typeof actionItem === 'object') {
+    return actionItem.action || actionItem.description || actionItem.step || JSON.stringify(actionItem);
+  }
+  return String(actionItem);
+};
+
+const formatCauses = (causes: any): string => {
+  if (!causes) return '';
+  if (Array.isArray(causes)) {
+    return causes
+      .map((c) => {
+        if (typeof c === 'string') return c;
+        if (typeof c === 'object' && c !== null) return c.cause || c.name || JSON.stringify(c);
+        return String(c);
+      })
+      .filter(Boolean)
+      .join('; ');
+  }
+  if (typeof causes === 'string') return causes;
+  return '';
+};
+
 export const AlertsView: React.FC<AlertsViewProps> = ({
   recommendations,
   machines,
@@ -107,7 +132,7 @@ export const AlertsView: React.FC<AlertsViewProps> = ({
       rul_hours: a.current_condition?.rul_hours,
       temperature: a.measured_evidence?.temperature,
       vibration: a.measured_evidence?.vibration_magnitude,
-      action: a.generated_explanation?.recommended_actions?.[0] || 'Inspect machine',
+      action: getActionString(a.generated_explanation?.recommended_actions?.[0]),
     }));
     const blob = new Blob([JSON.stringify(rows, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -124,17 +149,14 @@ export const AlertsView: React.FC<AlertsViewProps> = ({
         <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-space-base">
           <div className="flex flex-col gap-1">
             <div className="flex items-center gap-2">
-              <h1 className="stitch-page-title">Alerts & Action Center</h1>
+              <h1 className="stitch-page-title">Safety Alerts & Warning Feed</h1>
               <div className="live-stream-badge">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-error opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-error"></span>
-                </span>
-                <span>LIVE ANOMALY STREAM</span>
+                <span className="w-2 h-2 rounded-full bg-[#EF4444]" />
+                <span>LIVE WARNING FEED</span>
               </div>
             </div>
             <p className="stitch-page-desc">
-              Real-time anomaly triage, multi-sensor divergence alerts, and immediate mitigation dispatch across {machines.length} active assets.
+              Live machine problems detected by sensors with plain-English reasons and automatic repair recommendations across {machines.length} active machines.
             </p>
           </div>
 
@@ -145,7 +167,7 @@ export const AlertsView: React.FC<AlertsViewProps> = ({
               type="button"
             >
               <span className="material-symbols-outlined text-[16px] text-secondary">done_all</span>
-              <span>Acknowledge All</span>
+              <span>Mark All as Checked</span>
             </button>
 
             <button
@@ -154,7 +176,7 @@ export const AlertsView: React.FC<AlertsViewProps> = ({
               type="button"
             >
               <span className="material-symbols-outlined text-[16px] text-secondary">file_download</span>
-              <span>Export Incident Log</span>
+              <span>Download Warning List</span>
             </button>
 
             {onNavigateTab && (
@@ -164,7 +186,7 @@ export const AlertsView: React.FC<AlertsViewProps> = ({
                 type="button"
               >
                 <span className="material-symbols-outlined text-[16px]">local_shipping</span>
-                <span>Batch Maintenance Dispatch</span>
+                <span>Create Repairs for All</span>
               </button>
             )}
           </div>
@@ -175,57 +197,57 @@ export const AlertsView: React.FC<AlertsViewProps> = ({
       <section className="stitch-kpi-deck mb-space-base">
         <div className="stitch-kpi-card">
           <div className="kpi-card-header">
-            <span className="kpi-label-caps">Total Alerts</span>
-            <span className="material-symbols-outlined text-secondary text-[18px]">notifications_active</span>
+            <span className="kpi-label-caps">Total Warnings</span>
+            <span className="material-symbols-outlined text-[#94A3B8] text-[18px]">notifications_active</span>
           </div>
           <div className="kpi-value-row">
             <span className="kpi-telemetry-val font-numeric">{alertItems.length}</span>
-            <span className="kpi-unit-label">Fleetwide</span>
+            <span className="kpi-unit-label">Active Warnings</span>
           </div>
-          <div className="kpi-footnote text-secondary">
-            Across {alertItems.length} flagged machinery units
+          <div className="kpi-footnote text-[#94A3B8]">
+            Across {alertItems.length} machines needing review
           </div>
         </div>
 
         <div className="stitch-kpi-card critical-border">
           <div className="kpi-card-header">
-            <span className="kpi-label-caps text-critical">Critical (P1)</span>
-            <span className="w-2 h-2 rounded-full bg-error animate-pulse" />
+            <span className="kpi-label-caps text-[#EF4444]">Urgent Alarms (P1)</span>
+            <span className="w-2 h-2 rounded-full bg-[#EF4444]" />
           </div>
           <div className="kpi-value-row">
-            <span className="kpi-telemetry-val text-critical font-numeric">{criticalCount}</span>
-            <span className="kpi-unit-label text-critical font-semibold">Immediate</span>
+            <span className="kpi-telemetry-val text-[#EF4444] font-numeric">{criticalCount}</span>
+            <span className="kpi-unit-label text-[#EF4444] font-semibold">Fix Today</span>
           </div>
-          <div className="kpi-footnote text-critical">
-            Assets with imminent failure horizon
+          <div className="kpi-footnote text-[#EF4444]">
+            Machines estimated to fail very soon
           </div>
         </div>
 
         <div className="stitch-kpi-card">
           <div className="kpi-card-header">
-            <span className="kpi-label-caps text-[#ea580c]">High Risk (P2)</span>
-            <span className="w-2 h-2 rounded-full bg-[#ea580c]" />
+            <span className="kpi-label-caps text-[#F59E0B]">High Priority (P2)</span>
+            <span className="w-2 h-2 rounded-full bg-[#F59E0B]" />
           </div>
           <div className="kpi-value-row">
-            <span className="kpi-telemetry-val text-[#ea580c] font-numeric">{highCount}</span>
-            <span className="kpi-unit-label text-[#ea580c] font-semibold">Triage</span>
+            <span className="kpi-telemetry-val text-[#F59E0B] font-numeric">{highCount}</span>
+            <span className="kpi-unit-label text-[#F59E0B] font-semibold">Inspect Soon</span>
           </div>
-          <div className="kpi-footnote text-secondary">
-            Degradation accelerating above baseline
+          <div className="kpi-footnote text-[#94A3B8]">
+            Rapid wear or rising heat detected
           </div>
         </div>
 
         <div className="stitch-kpi-card">
           <div className="kpi-card-header">
-            <span className="kpi-label-caps text-[#d97706]">Warning (P3)</span>
-            <span className="w-2 h-2 rounded-full bg-[#d97706]" />
+            <span className="kpi-label-caps text-[#94A3B8]">Moderate (P3)</span>
+            <span className="w-2 h-2 rounded-full bg-[#94A3B8]" />
           </div>
           <div className="kpi-value-row">
-            <span className="kpi-telemetry-val text-[#d97706] font-numeric">{mediumCount}</span>
-            <span className="kpi-unit-label text-[#d97706] font-semibold">Watch</span>
+            <span className="kpi-telemetry-val text-[#94A3B8] font-numeric">{mediumCount}</span>
+            <span className="kpi-unit-label text-[#94A3B8] font-semibold">Watch</span>
           </div>
-          <div className="kpi-footnote text-secondary">
-            Early sensor drift under inspection
+          <div className="kpi-footnote text-[#94A3B8]">
+            Can be fixed during routine maintenance
           </div>
         </div>
       </section>
@@ -280,9 +302,9 @@ export const AlertsView: React.FC<AlertsViewProps> = ({
       {filteredAlerts.length === 0 ? (
         <div className="stitch-card p-12 text-center">
           <div className="stitch-empty-state">
-            <span className="material-symbols-outlined empty-symbol text-emerald-500">task_alt</span>
-            <h3 className="empty-title">No Active Alerts In This Category</h3>
-            <p className="empty-desc">All monitored assets are operating within acceptable thresholds.</p>
+            <span className="material-symbols-outlined empty-symbol text-emerald-400">task_alt</span>
+            <h3 className="empty-title">No Active Warnings In This Category</h3>
+            <p className="empty-desc">All monitored machines are operating safely within normal limits.</p>
           </div>
         </div>
       ) : (
@@ -297,15 +319,20 @@ export const AlertsView: React.FC<AlertsViewProps> = ({
             const temp = alert.measured_evidence?.temperature;
             const vib = alert.measured_evidence?.vibration_magnitude;
             const explanation = alert.generated_explanation;
-            const action = explanation?.recommended_actions?.[0] || 'Inspect asset mechanical bearings & thermal sensors.';
-            const conditionText = explanation?.condition_summary || explanation?.reasoning || 'Telemetry threshold exceeded.';
+            const action = getActionString(explanation?.recommended_actions?.[0]);
+            const conditionText = typeof explanation?.condition_summary === 'string' && explanation.condition_summary.trim()
+              ? explanation.condition_summary
+              : typeof explanation?.reasoning === 'string' && explanation.reasoning.trim()
+              ? explanation.reasoning
+              : 'Safety threshold exceeded.';
+            const causeText = formatCauses(explanation?.potential_causes);
 
             const alertContext: AlertContext = {
               machineId: alert.machine_id,
               severity: riskLevel,
               condition: conditionText,
               rulHours: rul,
-              diagnostics: `Temp: ${temp?.toFixed(1)}°C, Vib: ${vib?.toFixed(2)} mm/s`,
+              diagnostics: `Temp: ${temp != null ? temp.toFixed(1) : '--'}°C, Vib: ${vib != null ? vib.toFixed(2) : '--'} mm/s`,
             };
 
             return (
@@ -321,7 +348,7 @@ export const AlertsView: React.FC<AlertsViewProps> = ({
                       {riskLevel} ({priority})
                     </span>
                     <span className="alert-machine-meta">
-                      Type {m?.machine_type || alert.machine_type || 'C'} · Bay {((m?.id ?? 1) % 6) + 1}
+                      Model {m?.machine_type || alert.machine_type || 'C'} · Bay {((m?.id ?? 1) % 6) + 1}
                     </span>
                   </div>
 
@@ -329,7 +356,7 @@ export const AlertsView: React.FC<AlertsViewProps> = ({
                     {isAck && (
                       <span className="ack-status-tag">
                         <span className="material-symbols-outlined text-[14px]">check</span>
-                        <span>Acknowledged</span>
+                        <span>Checked</span>
                       </span>
                     )}
                     <span className="alert-timestamp-text font-numeric">
@@ -343,9 +370,9 @@ export const AlertsView: React.FC<AlertsViewProps> = ({
                   <span className="material-symbols-outlined alert-condition-icon">warning</span>
                   <div className="alert-condition-body">
                     <span className="alert-condition-title">{conditionText}</span>
-                    {explanation?.potential_causes && explanation.potential_causes.length > 0 && (
+                    {causeText && (
                       <p className="alert-cause-hint">
-                        Potential Cause: {explanation.potential_causes.join('; ')}
+                        Likely Reason: {causeText}
                       </p>
                     )}
                   </div>
@@ -354,21 +381,21 @@ export const AlertsView: React.FC<AlertsViewProps> = ({
                 {/* Telemetry Strip */}
                 <div className="alert-telemetry-strip">
                   <div className="telemetry-chip">
-                    <span className="chip-lbl">VIB RMS:</span>
-                    <span className={`chip-val font-numeric ${vib && vib > 4.5 ? 'text-critical font-bold' : ''}`}>
+                    <span className="chip-lbl">VIBRATION:</span>
+                    <span className={`chip-val font-numeric ${vib && vib > 4.5 ? 'text-[#EF4444] font-medium' : ''}`}>
                       {vib ? `${vib.toFixed(2)} mm/s` : '--'}
                     </span>
                   </div>
                   <div className="telemetry-chip">
-                    <span className="chip-lbl">TEMP:</span>
-                    <span className={`chip-val font-numeric ${temp && temp > 75 ? 'text-critical font-bold' : ''}`}>
+                    <span className="chip-lbl">HEAT:</span>
+                    <span className={`chip-val font-numeric ${temp && temp > 75 ? 'text-[#EF4444] font-medium' : ''}`}>
                       {temp ? `${temp.toFixed(1)} °C` : '--'}
                     </span>
                   </div>
                   <div className="telemetry-chip">
-                    <span className="chip-lbl">EST. RUL:</span>
-                    <span className={`chip-val font-numeric ${rul && rul < 24 ? 'text-critical font-bold' : ''}`}>
-                      {rul != null ? `${rul.toFixed(0)} Hours` : 'Nominal'}
+                    <span className="chip-lbl">TIME LEFT:</span>
+                    <span className={`chip-val font-numeric ${rul && rul < 24 ? 'text-[#EF4444] font-medium' : ''}`}>
+                      {rul != null ? `${rul.toFixed(0)} Hours` : 'Normal'}
                     </span>
                   </div>
                   <div className="telemetry-chip">
@@ -381,9 +408,9 @@ export const AlertsView: React.FC<AlertsViewProps> = ({
 
                 {/* Recommended Mitigation Action */}
                 <div className="alert-prescribed-action">
-                  <span className="material-symbols-outlined text-[16px] text-emerald-600">build_circle</span>
+                  <span className="material-symbols-outlined text-[16px] text-emerald-400">build_circle</span>
                   <span className="action-text">
-                    <strong>Recommended SOP:</strong> {action}
+                    <strong>Recommended Repair Step:</strong> {action}
                   </span>
                 </div>
 
@@ -395,11 +422,11 @@ export const AlertsView: React.FC<AlertsViewProps> = ({
                       <button
                         className="stitch-btn-ai-launch"
                         onClick={() => onOpenAIWithAlert(alertContext)}
-                        title={`Triage alert on ${alert.machine_id} with Resonex AI`}
+                        title={`Ask AI Assistant about ${alert.machine_id}`}
                         type="button"
                       >
                         <span className="ai-sparkle">✦</span>
-                        <span>Ask Resonex AI</span>
+                        <span>Ask AI Assistant</span>
                       </button>
                     )}
 
@@ -410,7 +437,7 @@ export const AlertsView: React.FC<AlertsViewProps> = ({
                         type="button"
                       >
                         <span className="material-symbols-outlined text-[14px]">local_shipping</span>
-                        <span>Dispatch Work Order</span>
+                        <span>Create Repair Order</span>
                       </button>
                     )}
                   </div>
@@ -424,7 +451,7 @@ export const AlertsView: React.FC<AlertsViewProps> = ({
                       <span className="material-symbols-outlined text-[14px]">
                         {isAck ? 'undo' : 'done'}
                       </span>
-                      <span>{isAck ? 'Un-Acknowledge' : 'Acknowledge'}</span>
+                      <span>{isAck ? 'Mark as Unchecked' : 'Mark as Checked'}</span>
                     </button>
 
                     <button
@@ -432,7 +459,7 @@ export const AlertsView: React.FC<AlertsViewProps> = ({
                       onClick={() => onSelectMachine(alert.machine_id)}
                       type="button"
                     >
-                      <span>Inspect Machine</span>
+                      <span>View Machine Details</span>
                       <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
                     </button>
                   </div>

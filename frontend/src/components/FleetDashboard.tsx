@@ -87,28 +87,25 @@ export const FleetDashboard: React.FC<FleetDashboardProps> = ({
         <div className="hero-left-col">
           <div className="command-matrix-tag">
             <span className="material-symbols-outlined text-[16px] text-primary">precision_manufacturing</span>
-            <span>Operational Command Matrix · Plant Alpha</span>
+            <span>Factory Command Center · Plant 1</span>
           </div>
           <h1 className="stitch-page-title">
             Good morning, Operator Jenkins
           </h1>
           <p className="stitch-page-desc">
-            Fleet Telemetry active across all lines.
+            Continuous real-time monitoring active across all production lines.
             {criticalCount > 0 ? (
-              <> <span className="font-semibold text-critical">{criticalCount} units demand intervention</span> before Shift A handoff (14:00 UTC).</>
+              <> <span className="font-bold text-critical">{criticalCount} machines need urgent attention</span> before the current shift ends (14:00 UTC).</>
             ) : (
-              <> All systems nominal with continuous vibration signature tracking.</>
+              <> All machines are running smoothly with normal vibration and temperature levels.</>
             )}
           </p>
         </div>
 
         <div className="hero-right-actions">
           <div className="stitch-sync-pill">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-            </span>
-            <span className="sync-pill-text">Live Sync · Auto-streaming</span>
+            <span className="w-2 h-2 rounded-full bg-[#22C55E]"></span>
+            <span className="sync-pill-text">Live Monitoring Active</span>
           </div>
 
           <button
@@ -117,7 +114,7 @@ export const FleetDashboard: React.FC<FleetDashboardProps> = ({
             type="button"
           >
             <span className="material-symbols-outlined text-[16px]">tune</span>
-            <span>Fleet Filters</span>
+            <span>View & Filter Machines</span>
           </button>
 
           <button
@@ -126,7 +123,7 @@ export const FleetDashboard: React.FC<FleetDashboardProps> = ({
             type="button"
           >
             <span className="material-symbols-outlined text-[16px]">download</span>
-            <span>Shift Handover Log</span>
+            <span>Download Shift Report</span>
           </button>
         </div>
       </section>
@@ -136,37 +133,37 @@ export const FleetDashboard: React.FC<FleetDashboardProps> = ({
         {/* KPI 1: Fleet Inventory */}
         <div className="stitch-kpi-card">
           <div className="kpi-card-header">
-            <span className="kpi-label-caps">Total Fleet Monitored</span>
-            <div className="kpi-icon-wrap text-primary">
+            <span className="kpi-label-caps">Total Monitored Machines</span>
+            <div className="kpi-icon-wrap text-[#94A3B8]">
               <span className="material-symbols-outlined">hub</span>
             </div>
           </div>
           <div className="kpi-value-row">
             <span className="kpi-telemetry-val font-numeric">{total}</span>
-            <span className="kpi-unit-label">Units Active</span>
+            <span className="kpi-unit-label">Active Machines</span>
           </div>
-          <div className="kpi-footnote text-secondary">
-            100% telemetry online across Lines 1–4
+          <div className="kpi-footnote text-[#94A3B8]">
+            All factory lines reporting live sensor signals
           </div>
         </div>
 
         {/* KPI 2: Critical Demanding Intervention */}
         <div className={`stitch-kpi-card ${criticalCount > 0 ? 'critical-border' : ''}`}>
           <div className="kpi-card-header">
-            <span className="kpi-label-caps text-critical">Demanding Intervention</span>
-            <div className="kpi-icon-wrap text-critical">
+            <span className="kpi-label-caps text-[#EF4444]">Urgent Attention Needed</span>
+            <div className="kpi-icon-wrap text-[#EF4444]">
               <span className="material-symbols-outlined">warning</span>
             </div>
           </div>
           <div className="kpi-value-row">
-            <span className="kpi-telemetry-val text-critical font-numeric">{criticalCount}</span>
-            <span className="kpi-unit-label text-critical font-semibold">Alarm P1</span>
+            <span className="kpi-telemetry-val text-[#EF4444] font-numeric">{criticalCount}</span>
+            <span className="kpi-unit-label text-[#EF4444] font-semibold">Critical</span>
           </div>
           <div className="kpi-footnote">
             {criticalCount > 0 ? (
-              <span className="text-critical font-medium">Critical degradation detected</span>
+              <span className="text-[#EF4444] font-medium">Severe vibration or overheating detected</span>
             ) : (
-              <span className="text-good font-medium">No critical threshold breaches</span>
+              <span className="text-[#22C55E] font-medium">All machines operating safely</span>
             )}
           </div>
         </div>
@@ -174,34 +171,34 @@ export const FleetDashboard: React.FC<FleetDashboardProps> = ({
         {/* KPI 3: Fleet Health Index */}
         <div className="stitch-kpi-card">
           <div className="kpi-card-header">
-            <span className="kpi-label-caps">Fleet Health Index</span>
-            <div className="kpi-icon-wrap text-emerald-600">
+            <span className="kpi-label-caps">Overall Machine Health</span>
+            <div className="kpi-icon-wrap text-[#94A3B8]">
               <span className="material-symbols-outlined">health_and_safety</span>
             </div>
           </div>
           <div className="kpi-value-row">
             <span className="kpi-telemetry-val font-numeric">{avgHealth.toFixed(1)}</span>
-            <span className="kpi-unit-label">/ 100</span>
+            <span className="kpi-unit-label">/ 100 Health</span>
           </div>
-          <div className="kpi-footnote text-secondary">
-            Composite sensor & ML regression score
+          <div className="kpi-footnote text-[#94A3B8]">
+            Based on live vibration & heat data
           </div>
         </div>
 
         {/* KPI 4: Mean Remaining Useful Life */}
         <div className="stitch-kpi-card">
           <div className="kpi-card-header">
-            <span className="kpi-label-caps">Mean Remaining Life</span>
-            <div className="kpi-icon-wrap text-blue-600">
+            <span className="kpi-label-caps">Estimated Time Until Failure</span>
+            <div className="kpi-icon-wrap text-[#94A3B8]">
               <span className="material-symbols-outlined">timelapse</span>
             </div>
           </div>
           <div className="kpi-value-row">
             <span className="kpi-telemetry-val font-numeric">{avgRul.toFixed(0)}</span>
-            <span className="kpi-unit-label">Hours RUL</span>
+            <span className="kpi-unit-label">Hours Left</span>
           </div>
-          <div className="kpi-footnote text-secondary">
-            Fleet maintenance horizon buffer
+          <div className="kpi-footnote text-[#94A3B8]">
+            Average time before repairs are needed
           </div>
         </div>
       </section>
@@ -209,41 +206,41 @@ export const FleetDashboard: React.FC<FleetDashboardProps> = ({
       {/* 3. Fleet Health Distribution Bar */}
       <section className="stitch-card p-space-base">
         <div className="flex-between mb-2">
-          <span className="stitch-card-title">Fleet Operational Status Breakdown</span>
-          <span className="kpi-label-caps">{total} Total Registered Assets</span>
+          <span className="stitch-card-title">Machine Health Breakdown</span>
+          <span className="kpi-label-caps">{total} Total Machines Monitored</span>
         </div>
         <div className="fleet-distribution-bar">
           <div
             className="dist-segment good"
             style={{ width: `${(good / (total || 1)) * 100}%` }}
-            title={`Good / Optimal: ${good}`}
+            title={`Healthy / Normal: ${good}`}
           />
           <div
             className="dist-segment warning"
             style={{ width: `${(warning / (total || 1)) * 100}%` }}
-            title={`Warning: ${warning}`}
+            title={`Check Soon (Warning): ${warning}`}
           />
           <div
             className="dist-segment critical"
             style={{ width: `${(critical / (total || 1)) * 100}%` }}
-            title={`Critical: ${critical}`}
+            title={`Urgent Fix (Critical): ${critical}`}
           />
         </div>
         <div className="fleet-distribution-legend">
           <div className="legend-item">
             <span className="legend-dot good" />
-            <span className="legend-label">Optimal:</span>
-            <strong className="font-numeric">{good}</strong>
+            <span className="legend-label">Healthy / Normal:</span>
+            <strong className="font-numeric text-white">{good}</strong>
           </div>
           <div className="legend-item">
             <span className="legend-dot warning" />
-            <span className="legend-label">Warning (Triage):</span>
-            <strong className="font-numeric">{warning}</strong>
+            <span className="legend-label">Check Soon (Warning):</span>
+            <strong className="font-numeric text-white">{warning}</strong>
           </div>
           <div className="legend-item">
             <span className="legend-dot critical" />
-            <span className="legend-label">Critical (Immediate):</span>
-            <strong className="font-numeric">{critical}</strong>
+            <span className="legend-label">Urgent Fix (Critical):</span>
+            <strong className="font-numeric text-white">{critical}</strong>
           </div>
         </div>
       </section>
@@ -252,9 +249,9 @@ export const FleetDashboard: React.FC<FleetDashboardProps> = ({
       <section className="stitch-card">
         <div className="stitch-card-header">
           <div>
-            <h2 className="stitch-card-title">Priority Machines Demanding Attention</h2>
+            <h2 className="stitch-card-title">Machines Needing Attention</h2>
             <p className="stitch-card-desc">
-              Ranked dynamically by failure probability, vibration anomalies, and remaining useful life.
+              Sorted by urgency: machines with high vibration, overheating, or estimated to fail soon.
             </p>
           </div>
           <button
@@ -262,36 +259,35 @@ export const FleetDashboard: React.FC<FleetDashboardProps> = ({
             onClick={() => onNavigateTab('alerts')}
             type="button"
           >
-            <span>View All in Action Center</span>
+            <span>View All Alarms</span>
             <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
           </button>
         </div>
 
         {attentionList.length === 0 ? (
           <div className="stitch-empty-state">
-            <span className="material-symbols-outlined empty-symbol text-emerald-500">check_circle</span>
-            <h3 className="empty-title">All Fleet Machines Operating Within Nominal Thresholds</h3>
-            <p className="empty-desc">No active anomalies, vibration surges, or urgent maintenance tickets detected.</p>
+            <span className="material-symbols-outlined empty-symbol text-emerald-400">check_circle</span>
+            <h3 className="empty-title">All Factory Machines Are Running Normally</h3>
+            <p className="empty-desc">No active machine warnings, unusual shaking, or urgent repairs required.</p>
           </div>
         ) : (
           <div className="stitch-table-wrapper">
             <table className="stitch-table">
               <thead>
                 <tr>
-                  <th className="th-left">Machine Asset</th>
-                  <th className="th-left">Type</th>
-                  <th className="th-center">Health State</th>
+                  <th className="th-left">Machine ID</th>
+                  <th className="th-left">Model</th>
+                  <th className="th-center">Condition</th>
                   <th className="th-center">Risk Level</th>
-                  <th className="th-right">RUL Horizon</th>
-                  <th className="th-right">Vib RMS</th>
-                  <th className="th-right">Temp</th>
+                  <th className="th-right">Hours Left (RUL)</th>
+                  <th className="th-right">Shaking (Vibration)</th>
+                  <th className="th-right">Temperature</th>
                   <th className="th-right">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {attentionList.map(({ machine, riskLevel, healthLabel, healthScore, rul, temp, vib }) => {
                   const isCrit = riskLevel === 'CRITICAL' || healthLabel === 'Critical';
-                  const isWarn = riskLevel === 'HIGH' || healthLabel === 'Warning';
                   return (
                     <tr
                       key={machine.machine_id}
@@ -302,19 +298,19 @@ export const FleetDashboard: React.FC<FleetDashboardProps> = ({
                     >
                       <td className="td-left">
                         <div className="machine-cell-id">
-                          <span className="cell-id-text font-numeric font-bold">{machine.machine_id}</span>
+                          <span className="cell-id-text font-numeric font-medium">{machine.machine_id}</span>
                           {machine.machine_name && (
                             <span className="cell-sub-text">{machine.machine_name}</span>
                           )}
                         </div>
                       </td>
-                      <td className="td-left text-secondary">
+                      <td className="td-left text-[#94A3B8]">
                         Type {machine.machine_type}
                       </td>
                       <td className="td-center">
                         <span className={`status-chip ${healthLabel.toLowerCase()}`}>
                           <span className="chip-dot" />
-                          <span>{healthLabel} ({healthScore.toFixed(0)})</span>
+                          <span>{healthLabel === 'Critical' ? 'Critical' : healthLabel === 'Warning' ? 'Warning' : 'Healthy'} ({healthScore.toFixed(0)})</span>
                         </span>
                       </td>
                       <td className="td-center">
@@ -322,18 +318,18 @@ export const FleetDashboard: React.FC<FleetDashboardProps> = ({
                           {riskLevel}
                         </span>
                       </td>
-                      <td className="td-right font-numeric font-semibold">
-                        <span className={rul < 24 ? 'text-critical' : 'text-on-surface'}>
-                          {rul < 999 ? `${rul.toFixed(0)} hrs` : 'Nominal'}
+                      <td className="td-right font-numeric font-medium">
+                        <span className={rul < 24 ? 'text-[#EF4444] font-medium' : 'text-[#F1F5F9]'}>
+                          {rul < 999 ? `${rul.toFixed(0)} hrs` : 'Normal'}
                         </span>
                       </td>
                       <td className="td-right font-numeric">
-                        <span className={vib > 4.5 ? 'text-critical font-bold' : ''}>
+                        <span className={vib > 4.5 ? 'text-[#EF4444] font-medium' : 'text-[#94A3B8]'}>
                           {vib.toFixed(2)} mm/s
                         </span>
                       </td>
                       <td className="td-right font-numeric">
-                        <span className={temp > 75 ? 'text-critical font-bold' : ''}>
+                        <span className={temp > 75 ? 'text-[#EF4444] font-medium' : 'text-[#94A3B8]'}>
                           {temp.toFixed(1)} °C
                         </span>
                       </td>
@@ -343,7 +339,7 @@ export const FleetDashboard: React.FC<FleetDashboardProps> = ({
                             <button
                               className="stitch-btn-icon-ai"
                               onClick={() => onOpenAIWithMachine(machine.machine_id)}
-                              title={`Ask Resonex AI about ${machine.machine_id}`}
+                              title={`Ask AI Assistant about ${machine.machine_id}`}
                               type="button"
                             >
                               <span className="ai-sparkle">✦</span>
@@ -354,7 +350,7 @@ export const FleetDashboard: React.FC<FleetDashboardProps> = ({
                             onClick={() => onSelectMachine(machine.machine_id)}
                             type="button"
                           >
-                            <span>Inspect</span>
+                            <span>View Details</span>
                             <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
                           </button>
                         </div>

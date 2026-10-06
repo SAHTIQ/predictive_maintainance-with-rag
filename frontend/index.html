@@ -4,118 +4,69 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/png" href="/resonex_logo.png" />
-    <title>RESONEX - Predictive Maintenance Platform</title>
-    <!-- Google Fonts: Inter and Material Symbols Outlined -->
+    <title>RESONEX · Mission Telemetry & Predictive Maintenance</title>
+    <!-- Google Fonts: Inter, JetBrains Mono, Plus Jakarta Sans and Material Symbols Outlined -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
-    <!-- Tailwind CSS with Stitch Design Tokens mapped to CSS variables for dynamic Dark Mode -->
+    <!-- Tailwind CSS mapped to Clean Industrial Dark Design Tokens -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
         darkMode: "class",
         theme: {
           extend: {
+            fontFamily: {
+              sans: ["'Inter'", "-apple-system", "BlinkMacSystemFont", "sans-serif"],
+              mono: ["'JetBrains Mono'", "monospace"],
+              "mono-telemetry": ["'JetBrains Mono'", "monospace"],
+            },
             colors: {
-              "surface-container-lowest": "var(--surface-container-lowest)",
-              "surface-container-low": "var(--surface-container-low)",
-              "surface-container": "var(--surface-container)",
-              "surface-container-high": "var(--surface-container-high)",
-              "surface-container-highest": "var(--surface-container-highest)",
-              "surface-variant": "var(--surface-variant)",
-              "surface-dim": "var(--surface-dim)",
-              "surface-bright": "var(--surface-bright)",
-              "surface-tint": "var(--surface-tint)",
-              "surface": "var(--surface)",
-              "background": "var(--background)",
-              "on-background": "var(--on-background)",
-              "on-surface": "var(--on-surface)",
-              "on-surface-variant": "var(--on-surface-variant)",
-              "secondary": "var(--secondary)",
-              "secondary-container": "var(--secondary-container)",
-              "on-secondary": "var(--on-secondary)",
-              "on-secondary-container": "var(--on-secondary-container)",
-              "secondary-fixed": "var(--secondary-fixed)",
-              "secondary-fixed-dim": "var(--secondary-fixed-dim)",
-              "on-secondary-fixed": "var(--on-secondary-fixed)",
-              "outline": "var(--outline)",
-              "outline-variant": "var(--outline-variant)",
-              "primary": "var(--primary)",
-              "primary-container": "var(--primary-container)",
-              "on-primary": "var(--on-primary)",
-              "on-primary-container": "var(--on-primary-container)",
-              "primary-fixed": "var(--primary-fixed)",
-              "primary-fixed-dim": "var(--primary-fixed-dim)",
-              "on-primary-fixed": "var(--on-primary-fixed)",
-              "tertiary": "var(--tertiary)",
-              "tertiary-container": "var(--tertiary-container)",
-              "on-tertiary": "var(--on-tertiary)",
-              "on-tertiary-container": "var(--on-tertiary-container)",
-              "tertiary-fixed": "var(--tertiary-fixed)",
-              "tertiary-fixed-dim": "var(--tertiary-fixed-dim)",
-              "on-tertiary-fixed": "var(--on-tertiary-fixed)",
-              "error": "var(--error)",
-              "error-container": "var(--error-container)",
-              "on-error": "var(--on-error)",
-              "on-error-container": "var(--on-error-container)",
+              background: "#0B1220",
+              sidebar: "#0F172A",
+              card: "#111C2E",
+              "card-hover": "#162338",
+              border: "#243247",
+              "primary-text": "#F1F5F9",
+              "secondary-text": "#94A3B8",
+              "muted-text": "#64748B",
+              accent: "#06B6D4",
+              healthy: "#22C55E",
+              warning: "#F59E0B",
+              critical: "#EF4444",
+
+              // Compatibility aliases mapped to Clean Industrial Dark palette
+              "surface-container-lowest": "#0B1220",
+              "surface-container-low": "#0F172A",
+              "surface-container": "#111C2E",
+              "surface-container-high": "#162338",
+              "surface-container-highest": "#1E2D44",
+              "surface-variant": "#162338",
+              surface: "#111C2E",
+              "on-background": "#F1F5F9",
+              "on-surface": "#F1F5F9",
+              "on-surface-variant": "#94A3B8",
+              secondary: "#94A3B8",
+              outline: "#243247",
+              "outline-variant": "#243247",
+              primary: "#06B6D4",
+              error: "#EF4444",
             },
             borderRadius: {
-              DEFAULT: "0.125rem",
-              lg: "0.25rem",
-              xl: "0.5rem",
-              full: "0.75rem",
-            },
-            spacing: {
-              "space-2xs": "0.125rem",
-              "space-xs": "0.25rem",
-              "space-sm": "0.5rem",
-              "space-md": "0.75rem",
-              "space-base": "1rem",
-              "space-lg": "1.25rem",
-              "space-xl": "1.5rem",
-              "space-2xl": "2rem",
-              "gutter": "1rem",
-              "gutter-dense": "0.5rem",
-              "margin": "1.5rem",
-              "margin-mobile": "1rem",
-            },
-            fontFamily: {
-              "title-md": ["Inter", "sans-serif"],
-              "label-md": ["Inter", "sans-serif"],
-              "label-caps": ["Inter", "sans-serif"],
-              "telemetry-xl": ["Inter", "sans-serif"],
-              "body-md": ["Inter", "sans-serif"],
-              "telemetry-md": ["Inter", "sans-serif"],
-              "headline-lg": ["Inter", "sans-serif"],
-              "headline-md": ["Inter", "sans-serif"],
-              "body-sm": ["Inter", "sans-serif"],
-              "telemetry-sm": ["Inter", "sans-serif"],
-              "body-lg": ["Inter", "sans-serif"],
-              "headline-sm": ["Inter", "sans-serif"],
-              "display-lg": ["Inter", "sans-serif"],
-            },
-            fontSize: {
-              "title-md": ["14px", { lineHeight: "20px", letterSpacing: "0em", fontWeight: "600" }],
-              "label-md": ["12px", { lineHeight: "16px", letterSpacing: "0.01em", fontWeight: "500" }],
-              "label-caps": ["11px", { lineHeight: "14px", letterSpacing: "0.05em", fontWeight: "600" }],
-              "telemetry-xl": ["28px", { lineHeight: "32px", letterSpacing: "-0.02em", fontWeight: "700" }],
-              "body-md": ["13px", { lineHeight: "18px", letterSpacing: "0em", fontWeight: "400" }],
-              "telemetry-md": ["14px", { lineHeight: "18px", letterSpacing: "0em", fontWeight: "600" }],
-              "headline-lg": ["24px", { lineHeight: "32px", letterSpacing: "-0.015em", fontWeight: "600" }],
-              "headline-md": ["20px", { lineHeight: "28px", letterSpacing: "-0.01em", fontWeight: "600" }],
-              "body-sm": ["12px", { lineHeight: "16px", letterSpacing: "0em", fontWeight: "400" }],
-              "telemetry-sm": ["12px", { lineHeight: "16px", letterSpacing: "0em", fontWeight: "500" }],
-              "body-lg": ["15px", { lineHeight: "22px", letterSpacing: "0em", fontWeight: "400" }],
-              "headline-sm": ["16px", { lineHeight: "24px", letterSpacing: "-0.005em", fontWeight: "600" }],
-              "display-lg": ["32px", { lineHeight: "40px", letterSpacing: "-0.02em", fontWeight: "600" }],
+              DEFAULT: "6px",
+              sm: "4px",
+              md: "6px",
+              lg: "8px",
+              xl: "8px",
+              full: "9999px",
             },
           },
         },
       };
     </script>
   </head>
-  <body class="bg-background font-body-md text-on-surface antialiased">
+  <body class="bg-[#0B1220] text-[#F1F5F9] font-sans antialiased">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

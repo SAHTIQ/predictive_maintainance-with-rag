@@ -119,34 +119,34 @@ export const MachinesView: React.FC<MachinesViewProps> = ({
       <div className="workspace-header-strip">
         <div className="workspace-title-group">
           <div className="flex items-center gap-2">
-            <h1 className="stitch-page-title">Machines Fleet Registry</h1>
+            <h1 className="stitch-page-title">All Factory Machines</h1>
             <span className="live-sync-tag">LIVE SYNC</span>
           </div>
           <p className="stitch-page-desc">
-            Real-time telemetry, continuous vibration health, and degradation risk for all {machines.length} operational units across shop lines.
+            Real-time health, vibration, and temperature monitoring for all {machines.length} production units across factory lines.
           </p>
         </div>
 
         {/* Quick KPI Badges Strip matching Stitch */}
         <div className="workspace-quick-kpi-row">
           <div className="kpi-pill-item total">
-            <span className="dot-indicator bg-secondary" />
-            <span className="pill-label">Total</span>
+            <span className="dot-indicator bg-[#94A3B8]" />
+            <span className="pill-label">All Machines</span>
             <span className="pill-val font-numeric">{machines.length}</span>
           </div>
           <div className="kpi-pill-item critical">
-            <span className="dot-indicator bg-error animate-pulse" />
-            <span className="pill-label">Critical</span>
+            <span className="dot-indicator bg-[#EF4444]" />
+            <span className="pill-label">Needs Urgent Fix</span>
             <span className="pill-val font-numeric">{criticalCount}</span>
           </div>
           <div className="kpi-pill-item warning">
-            <span className="dot-indicator bg-amber-500" />
-            <span className="pill-label">Warning</span>
+            <span className="dot-indicator bg-[#F59E0B]" />
+            <span className="pill-label">Check Soon</span>
             <span className="pill-val font-numeric">{warningCount}</span>
           </div>
           <div className="kpi-pill-item optimal">
-            <span className="dot-indicator bg-emerald-500" />
-            <span className="pill-label">Optimal</span>
+            <span className="dot-indicator bg-[#22C55E]" />
+            <span className="pill-label">Running Fine</span>
             <span className="pill-val font-numeric">{optimalCount}</span>
           </div>
         </div>
@@ -161,7 +161,7 @@ export const MachinesView: React.FC<MachinesViewProps> = ({
             <input
               type="text"
               className="workspace-search-input"
-              placeholder="Search machine ID, line, type, or bay..."
+              placeholder="Search machine ID, line, or model..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -176,7 +176,7 @@ export const MachinesView: React.FC<MachinesViewProps> = ({
               className={`segment-btn ${statusFilter === 'ALL' ? 'active' : ''}`}
               onClick={() => setStatusFilter('ALL')}
             >
-              All ({machines.length})
+              All Machines ({machines.length})
             </button>
             <button
               className={`segment-btn ${statusFilter === 'CRITICAL' ? 'active' : ''}`}
@@ -200,31 +200,31 @@ export const MachinesView: React.FC<MachinesViewProps> = ({
 
           {/* Type Filter Dropdown */}
           <div className="toolbar-select-wrap">
-            <label className="toolbar-select-label">Type:</label>
+            <label className="toolbar-select-label">Model:</label>
             <select
               className="toolbar-select"
               value={typeFilter}
               onChange={(e) => setTypeFilter(e.target.value)}
             >
-              <option value="ALL">All Types</option>
+              <option value="ALL">All Models</option>
               {machineTypes.map((t) => (
-                <option key={t} value={t}>Type {t}</option>
+                <option key={t} value={t}>Model {t}</option>
               ))}
             </select>
           </div>
 
           {/* Priority Filter Dropdown */}
           <div className="toolbar-select-wrap">
-            <label className="toolbar-select-label">Priority:</label>
+            <label className="toolbar-select-label">Repair Priority:</label>
             <select
               className="toolbar-select"
               value={priorityFilter}
               onChange={(e) => setPriorityFilter(e.target.value)}
             >
               <option value="ALL">All Priorities</option>
-              <option value="P1">P1 Immediate</option>
-              <option value="P2">P2 High</option>
-              <option value="P3">P3 Moderate</option>
+              <option value="P1">P1 Urgent (Today)</option>
+              <option value="P2">P2 High (48h)</option>
+              <option value="P3">P3 Routine</option>
             </select>
           </div>
         </div>
@@ -237,9 +237,9 @@ export const MachinesView: React.FC<MachinesViewProps> = ({
             <thead>
               <tr>
                 <th className="th-left sortable" onClick={() => handleHeaderSort('id')}>
-                  Machine Asset {sortBy === 'id' && (sortOrder === 'asc' ? '↑' : '↓')}
+                  Machine ID {sortBy === 'id' && (sortOrder === 'asc' ? '↑' : '↓')}
                 </th>
-                <th className="th-left">Type</th>
+                <th className="th-left">Model</th>
                 <th className="th-center sortable" onClick={() => handleHeaderSort('health')}>
                   Health Score {sortBy === 'health' && (sortOrder === 'asc' ? '↑' : '↓')}
                 </th>
@@ -247,15 +247,15 @@ export const MachinesView: React.FC<MachinesViewProps> = ({
                   Risk Level {sortBy === 'risk' && (sortOrder === 'asc' ? '↑' : '↓')}
                 </th>
                 <th className="th-right sortable" onClick={() => handleHeaderSort('rul')}>
-                  Predicted RUL {sortBy === 'rul' && (sortOrder === 'asc' ? '↑' : '↓')}
+                  Hours Left (RUL) {sortBy === 'rul' && (sortOrder === 'asc' ? '↑' : '↓')}
                 </th>
                 <th className="th-right sortable" onClick={() => handleHeaderSort('temp')}>
-                  Temp {sortBy === 'temp' && (sortOrder === 'asc' ? '↑' : '↓')}
+                  Temperature {sortBy === 'temp' && (sortOrder === 'asc' ? '↑' : '↓')}
                 </th>
                 <th className="th-right sortable" onClick={() => handleHeaderSort('vib')}>
-                  Vib RMS {sortBy === 'vib' && (sortOrder === 'asc' ? '↑' : '↓')}
+                  Shaking (Vib) {sortBy === 'vib' && (sortOrder === 'asc' ? '↑' : '↓')}
                 </th>
-                <th className="th-center">Anomaly</th>
+                <th className="th-center">Warning?</th>
                 <th className="th-center">Priority</th>
                 <th className="th-right">Actions</th>
               </tr>
@@ -294,19 +294,19 @@ export const MachinesView: React.FC<MachinesViewProps> = ({
                     >
                       <td className="td-left">
                         <div className="machine-cell-id">
-                          <span className="cell-id-text font-numeric font-bold">{m.machine_id}</span>
+                          <span className="cell-id-text font-numeric font-medium">{m.machine_id}</span>
                           <span className="cell-sub-text">
                             {m.machine_name || `Cell Bay · Line ${((m.id % 4) + 1)}`}
                           </span>
                         </div>
                       </td>
-                      <td className="td-left text-secondary">
-                        Type {m.machine_type}
+                      <td className="td-left text-[#94A3B8]">
+                        Model {m.machine_type}
                       </td>
                       <td className="td-center">
                         <span className={`status-chip ${health.toLowerCase()}`}>
                           <span className="chip-dot" />
-                          <span>{health} ({healthScore.toFixed(0)})</span>
+                          <span>{health === 'Critical' ? 'Critical' : health === 'Warning' ? 'Warning' : 'Healthy'} ({healthScore.toFixed(0)})</span>
                         </span>
                       </td>
                       <td className="td-center">
@@ -314,18 +314,18 @@ export const MachinesView: React.FC<MachinesViewProps> = ({
                           {riskLevel}
                         </span>
                       </td>
-                      <td className="td-right font-numeric font-semibold">
+                      <td className="td-right font-numeric font-medium">
                         {rul != null ? (
-                          <span className={rul < 24 ? 'text-critical font-bold' : ''}>
+                          <span className={rul < 24 ? 'text-[#EF4444] font-medium' : 'text-[#F1F5F9]'}>
                             {rul.toFixed(0)}h
                           </span>
                         ) : (
-                          <span className="text-muted">Nominal</span>
+                          <span className="text-[#64748B]">Normal</span>
                         )}
                       </td>
                       <td className="td-right font-numeric">
                         {temp != null ? (
-                          <span className={temp > 75 ? 'text-critical font-bold' : ''}>
+                          <span className={temp > 75 ? 'text-[#EF4444] font-medium' : 'text-[#94A3B8]'}>
                             {temp.toFixed(1)}°C
                           </span>
                         ) : (
@@ -334,7 +334,7 @@ export const MachinesView: React.FC<MachinesViewProps> = ({
                       </td>
                       <td className="td-right font-numeric">
                         {vib != null ? (
-                          <span className={vib > 4.5 ? 'text-critical font-bold' : ''}>
+                          <span className={vib > 4.5 ? 'text-[#EF4444] font-medium' : 'text-[#94A3B8]'}>
                             {vib.toFixed(2)} mm/s
                           </span>
                         ) : (
@@ -343,7 +343,7 @@ export const MachinesView: React.FC<MachinesViewProps> = ({
                       </td>
                       <td className="td-center">
                         {anomaly ? (
-                          <span className="anomaly-badge alarm" title="Vibration Anomaly Detected">
+                          <span className="anomaly-badge alarm" title="Unusual Shaking or Heat Detected">
                             ALARM
                           </span>
                         ) : (
@@ -361,7 +361,7 @@ export const MachinesView: React.FC<MachinesViewProps> = ({
                             <button
                               className="stitch-btn-icon-ai"
                               onClick={() => onOpenAIWithMachine(m.machine_id)}
-                              title={`Ask Resonex AI about ${m.machine_id}`}
+                              title={`Ask AI Assistant about ${m.machine_id}`}
                               type="button"
                             >
                               <span className="ai-sparkle">✦</span>
@@ -372,7 +372,7 @@ export const MachinesView: React.FC<MachinesViewProps> = ({
                             onClick={() => onSelectMachine(m.machine_id)}
                             type="button"
                           >
-                            <span>Inspect</span>
+                            <span>View Details</span>
                             <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
                           </button>
                         </div>

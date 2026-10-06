@@ -72,17 +72,17 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
         <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-space-md">
           <div className="flex flex-col gap-1">
             <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="stitch-page-title">Shift Operations & Fleet Summary Reports</h1>
+              <h1 className="stitch-page-title">Shift Summary & Machine Health Reports</h1>
               <div className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-error-container text-on-error-container font-label-caps text-label-caps font-bold">
                 <span className="w-1.5 h-1.5 rounded-full bg-error animate-pulse" />
-                <span>SHIFT A CONCLUDING</span>
+                <span>SHIFT A ENDING</span>
               </div>
               <span className="font-label-caps text-label-caps text-secondary uppercase bg-surface-container-low px-2 py-0.5 rounded">
-                06:00 – 14:00 UTC
+                06:00 – 14:00
               </span>
             </div>
             <p className="stitch-page-desc">
-              Operational fleet degradation analysis, maintenance impact logs, and cross-machine diagnostic comparisons across {machines.length} production units.
+              Summary of machine health, wear-and-tear trends, and repair updates across all {machines.length} machines on the factory floor.
             </p>
           </div>
 
@@ -93,7 +93,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
                 className={`segment-btn ${dateRange === 'SHIFT' ? 'active' : ''}`}
                 onClick={() => setDateRange('SHIFT')}
               >
-                Current Shift (8h)
+                This Shift (8h)
               </button>
               <button
                 className={`segment-btn ${dateRange === '24H' ? 'active' : ''}`}
@@ -122,7 +122,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
               type="button"
             >
               <span className="material-symbols-outlined text-[16px] text-secondary">sim_card_download</span>
-              <span>Export PDF</span>
+              <span>Print / Save PDF</span>
             </button>
 
             <button
@@ -133,7 +133,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
               <span className="material-symbols-outlined text-[16px]">
                 {signedOff ? 'verified' : 'draw'}
               </span>
-              <span>{signedOff ? 'Shift A Signed Off' : 'Generate Shift Sign-Off'}</span>
+              <span>{signedOff ? 'Shift Report Approved ✓' : 'Approve & Sign Shift Report'}</span>
             </button>
           </div>
         </div>
@@ -143,38 +143,38 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
       <section className="stitch-kpi-deck mb-space-base">
         <div className="stitch-kpi-card">
           <div className="kpi-card-header">
-            <span className="kpi-label-caps">Monitored Assets</span>
-            <span className="flex items-center gap-1 font-label-caps text-emerald-600 font-bold">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> LIVE
+            <span className="kpi-label-caps">Active Machines</span>
+            <span className="flex items-center gap-1 font-label-caps text-[#22C55E] font-medium">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#22C55E]" /> LIVE
             </span>
           </div>
           <div className="kpi-value-row">
             <span className="kpi-telemetry-val font-numeric">{machines.length}</span>
-            <span className="kpi-unit-label">Units Active</span>
+            <span className="kpi-unit-label">Running Live</span>
           </div>
-          <div className="kpi-footnote text-secondary">
-            100% telemetry online across Lines 1–4
+          <div className="kpi-footnote text-[#94A3B8]">
+            All sensors online across Lines 1 to 4
           </div>
         </div>
 
         <div className="stitch-kpi-card critical-border">
           <div className="kpi-card-header">
-            <span className="kpi-label-caps text-critical">Critical Anomalies</span>
-            <span className="px-1.5 py-0.5 rounded bg-error-container text-on-error-container font-label-caps text-[10px] font-bold">ALARM</span>
+            <span className="kpi-label-caps text-[#EF4444]">Urgent Warning Alarms</span>
+            <span className="px-1.5 py-0.5 rounded bg-[rgba(239,68,68,0.1)] text-[#EF4444] border border-[rgba(239,68,68,0.3)] font-label-caps text-[10px] font-semibold">ALARM</span>
           </div>
           <div className="kpi-value-row">
-            <span className="kpi-telemetry-val text-critical font-numeric">{critical}</span>
-            <span className="kpi-unit-label text-critical font-semibold">Breaches</span>
+            <span className="kpi-telemetry-val text-[#EF4444] font-numeric">{critical}</span>
+            <span className="kpi-unit-label text-[#EF4444] font-semibold">Urgent Issues</span>
           </div>
-          <div className="kpi-footnote text-secondary">
-            Requires immediate shift handover review
+          <div className="kpi-footnote text-[#94A3B8]">
+            Needs immediate review before next shift
           </div>
         </div>
 
         <div className="stitch-kpi-card">
           <div className="kpi-card-header">
-            <span className="kpi-label-caps">Fleet Health Index</span>
-            <span className="material-symbols-outlined text-emerald-600 text-[18px]">health_and_safety</span>
+            <span className="kpi-label-caps">Overall Health Score</span>
+            <span className="material-symbols-outlined text-[#94A3B8] text-[18px]">health_and_safety</span>
           </div>
           <div className="kpi-value-row">
             <span className="kpi-telemetry-val font-numeric">
@@ -182,15 +182,15 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
             </span>
             <span className="kpi-unit-label">/ 100</span>
           </div>
-          <div className="kpi-footnote text-secondary">
-            Composite health across 50 production units
+          <div className="kpi-footnote text-[#94A3B8]">
+            Average health score of all factory machines
           </div>
         </div>
 
         <div className="stitch-kpi-card">
           <div className="kpi-card-header">
-            <span className="kpi-label-caps">Mean RUL Horizon</span>
-            <span className="material-symbols-outlined text-blue-600 text-[18px]">timelapse</span>
+            <span className="kpi-label-caps">Average Hours Left</span>
+            <span className="material-symbols-outlined text-[#94A3B8] text-[18px]">timelapse</span>
           </div>
           <div className="kpi-value-row">
             <span className="kpi-telemetry-val font-numeric">
@@ -198,25 +198,25 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
             </span>
             <span className="kpi-unit-label">Hours</span>
           </div>
-          <div className="kpi-footnote text-secondary">
-            Projected time to critical threshold
+          <div className="kpi-footnote text-[#94A3B8]">
+            Estimated runtime left before parts need fixing
           </div>
         </div>
 
         <div className="stitch-kpi-card">
           <div className="kpi-card-header">
-            <span className="kpi-label-caps">Mean Telemetry</span>
-            <span className="material-symbols-outlined text-purple-600 text-[18px]">sensors</span>
+            <span className="kpi-label-caps">Average Sensor Readings</span>
+            <span className="material-symbols-outlined text-[#94A3B8] text-[18px]">sensors</span>
           </div>
           <div className="kpi-value-row">
             <span className="kpi-telemetry-val font-numeric">{avgVib}</span>
-            <span className="kpi-unit-label">mm/s</span>
-            <span className="text-muted mx-1">·</span>
+            <span className="kpi-unit-label">mm/s vib</span>
+            <span className="text-[#64748B] mx-1">·</span>
             <span className="kpi-telemetry-val font-numeric">{avgTemp}</span>
-            <span className="kpi-unit-label">°C</span>
+            <span className="kpi-unit-label">°C temp</span>
           </div>
-          <div className="kpi-footnote text-secondary">
-            Tri-axial vibration RMS & bearing heat
+          <div className="kpi-footnote text-[#94A3B8]">
+            Average vibration level & machine heat
           </div>
         </div>
       </section>
@@ -225,17 +225,17 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
       <section className="stitch-card p-space-base mb-space-base">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
           <div>
-            <h2 className="stitch-card-title">Shift Operational Health & Anomaly Timeline</h2>
-            <p className="stitch-card-desc">Telemetry stability, threshold excursion dips, and maintenance recovery progression.</p>
+            <h2 className="stitch-card-title">Live Shift Health & Problem Timeline</h2>
+            <p className="stitch-card-desc">How machine health changed over the 8-hour shift, showing alerts and repairs.</p>
           </div>
           <div className="flex items-center gap-3 text-secondary font-label-md text-label-md">
             <span className="flex items-center gap-1.5">
               <span className="w-3 h-1 bg-surface-container-high inline-block rounded"></span>
-              Tolerance Corridor (70-90%)
+              Normal Safe Zone (70–90%)
             </span>
             <span className="flex items-center gap-1.5">
               <span className="w-3 h-0.5 bg-primary inline-block"></span>
-              Shift A Telemetry
+              Average Health Trend
             </span>
           </div>
         </div>
@@ -264,14 +264,14 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
 
             {/* Critical Threshold Guideline (65%) */}
             <line stroke="#ef4444" strokeWidth="1.5" x1="0" x2="760" y1="145" y2="145" strokeDasharray="4 4" />
-            <text fill="#ef4444" fontFamily="Inter, sans-serif" fontSize="9" fontWeight="700" x="8" y="140">CRITICAL THRESHOLD (65%)</text>
+            <text fill="#ef4444" fontFamily="Inter, sans-serif" fontSize="9" fontWeight="700" x="8" y="140">DANGER LEVEL (65% HEALTH)</text>
           </svg>
 
           {/* Overlaid Event Callout Tags matching Stitch */}
           <div className="absolute left-[44%] top-[50%] -translate-x-1/2 flex flex-col items-center pointer-events-none">
             <div className="bg-error-container text-on-error-container text-[11px] font-bold px-2 py-0.5 rounded shadow-sm border border-error/20 flex items-center gap-1">
               <span className="material-symbols-outlined text-[12px]">trending_down</span>
-              <span>09:42 · TXM-014 Spindle Anomaly (-6.2%)</span>
+              <span>09:42 · TXM-014 Shaking Spike (-6.2%)</span>
             </div>
             <div className="w-px h-3 bg-error" />
           </div>
@@ -279,7 +279,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
           <div className="absolute left-[64%] top-[22%] -translate-x-1/2 flex flex-col items-center pointer-events-none">
             <div className="bg-tertiary-fixed text-on-tertiary-fixed text-[11px] font-bold px-2 py-0.5 rounded shadow-sm border border-tertiary/20 flex items-center gap-1">
               <span className="material-symbols-outlined text-[12px]">trending_up</span>
-              <span>11:15 · TXM-008 Lube Stabilized (+4.8%)</span>
+              <span>11:15 · TXM-008 Oil Refilled (+4.8%)</span>
             </div>
             <div className="w-px h-3 bg-tertiary" />
           </div>
@@ -290,7 +290,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
             <span>08:00</span>
             <span>10:00</span>
             <span>12:00</span>
-            <span className="text-on-surface font-bold">14:00 (Handover Staging)</span>
+            <span className="text-on-surface font-bold">14:00 (Next Shift Starts)</span>
           </div>
         </div>
 
@@ -298,9 +298,9 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
         <div className="flex flex-col sm:flex-row sm:items-center justify-between px-space-base py-space-xs bg-surface-container-low rounded-lg mt-2 font-body-sm text-body-sm border border-outline-variant/30">
           <div className="flex items-center gap-space-sm text-on-surface">
             <span className="material-symbols-outlined text-secondary text-[18px]">query_stats</span>
-            <span>Telemetry Stability Index: <strong className="font-numeric">94.2%</strong> across Shift A (2 intervention mitigations logged)</span>
+            <span>Machine Stability: <strong className="font-numeric">94.2%</strong> across Shift A (2 repairs completed)</span>
           </div>
-          <span className="font-label-caps text-label-caps text-tertiary font-bold uppercase">All Lines Stabilized for Handover</span>
+          <span className="font-label-caps text-label-caps text-tertiary font-bold uppercase">All Factory Lines Ready for Next Shift</span>
         </div>
       </section>
 
@@ -309,17 +309,17 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
         {/* Health State Breakdown */}
         <div className="stitch-card p-space-base">
           <div className="stitch-card-header mb-3">
-            <h2 className="stitch-card-title">Health State Classification (ISO 10816)</h2>
-            <span className="kpi-label-caps">{total} Registered Units</span>
+            <h2 className="stitch-card-title">Machine Health Condition</h2>
+            <span className="kpi-label-caps">{total} Total Machines</span>
           </div>
 
           <div className="report-progress-list">
             <div className="progress-bar-item">
               <div className="progress-labels">
                 <span className="flex items-center gap-1.5 text-good font-semibold">
-                  <span className="legend-dot good" /> Optimal / Good
+                  <span className="legend-dot good" /> Healthy / Running Smoothly
                 </span>
-                <span className="font-numeric font-bold">{good} units ({((good / total) * 100).toFixed(0)}%)</span>
+                <span className="font-numeric font-bold">{good} machines ({((good / total) * 100).toFixed(0)}%)</span>
               </div>
               <div className="meter-track">
                 <div className="meter-fill good" style={{ width: `${(good / total) * 100}%` }} />
@@ -329,9 +329,9 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
             <div className="progress-bar-item">
               <div className="progress-labels">
                 <span className="flex items-center gap-1.5 text-warning font-semibold">
-                  <span className="legend-dot warning" /> Warning (Precautionary)
+                  <span className="legend-dot warning" /> Check Soon (Early Wear)
                 </span>
-                <span className="font-numeric font-bold">{warning} units ({((warning / total) * 100).toFixed(0)}%)</span>
+                <span className="font-numeric font-bold">{warning} machines ({((warning / total) * 100).toFixed(0)}%)</span>
               </div>
               <div className="meter-track">
                 <div className="meter-fill warning" style={{ width: `${(warning / total) * 100}%` }} />
@@ -341,9 +341,9 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
             <div className="progress-bar-item">
               <div className="progress-labels">
                 <span className="flex items-center gap-1.5 text-critical font-semibold">
-                  <span className="legend-dot critical" /> Critical (Immediate Alarm)
+                  <span className="legend-dot critical" /> Urgent Repair Needed
                 </span>
-                <span className="font-numeric font-bold">{critical} units ({((critical / total) * 100).toFixed(0)}%)</span>
+                <span className="font-numeric font-bold">{critical} machines ({((critical / total) * 100).toFixed(0)}%)</span>
               </div>
               <div className="meter-track">
                 <div className="meter-fill critical" style={{ width: `${(critical / total) * 100}%` }} />
@@ -355,17 +355,17 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
         {/* Risk Assessment Breakdown */}
         <div className="stitch-card p-space-base">
           <div className="stitch-card-header mb-3">
-            <h2 className="stitch-card-title">Risk Assessment Matrix Distribution</h2>
-            <span className="kpi-label-caps">Composite ML Degradation</span>
+            <h2 className="stitch-card-title">Risk of Failure Breakdown</h2>
+            <span className="kpi-label-caps">Based on Sensor Wear</span>
           </div>
 
           <div className="report-progress-list">
             <div className="progress-bar-item">
               <div className="progress-labels">
                 <span className="flex items-center gap-1.5 text-secondary font-semibold">
-                  <span className="legend-dot" style={{ backgroundColor: '#64748b' }} /> Low Risk (P3)
+                  <span className="legend-dot" style={{ backgroundColor: '#64748b' }} /> Low Risk (P3 Routine)
                 </span>
-                <span className="font-numeric font-bold">{lowRisk} units</span>
+                <span className="font-numeric font-bold">{lowRisk} machines</span>
               </div>
               <div className="meter-track">
                 <div className="meter-fill" style={{ width: `${(lowRisk / total) * 100}%`, backgroundColor: '#64748b' }} />
@@ -375,9 +375,9 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
             <div className="progress-bar-item">
               <div className="progress-labels">
                 <span className="flex items-center gap-1.5 text-blue-600 font-semibold">
-                  <span className="legend-dot" style={{ backgroundColor: '#2563eb' }} /> Medium Risk (P2)
+                  <span className="legend-dot" style={{ backgroundColor: '#2563eb' }} /> Medium Risk (P2 Check 48h)
                 </span>
-                <span className="font-numeric font-bold">{medRisk} units</span>
+                <span className="font-numeric font-bold">{medRisk} machines</span>
               </div>
               <div className="meter-track">
                 <div className="meter-fill" style={{ width: `${(medRisk / total) * 100}%`, backgroundColor: '#2563eb' }} />
@@ -387,9 +387,9 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
             <div className="progress-bar-item">
               <div className="progress-labels">
                 <span className="flex items-center gap-1.5 text-[#ea580c] font-semibold">
-                  <span className="legend-dot" style={{ backgroundColor: '#ea580c' }} /> High Risk (P1)
+                  <span className="legend-dot" style={{ backgroundColor: '#ea580c' }} /> High Risk (P1 Urgent Today)
                 </span>
-                <span className="font-numeric font-bold">{highRisk} units</span>
+                <span className="font-numeric font-bold">{highRisk} machines</span>
               </div>
               <div className="meter-track">
                 <div className="meter-fill" style={{ width: `${(highRisk / total) * 100}%`, backgroundColor: '#ea580c' }} />
@@ -399,9 +399,9 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
             <div className="progress-bar-item">
               <div className="progress-labels">
                 <span className="flex items-center gap-1.5 text-critical font-semibold">
-                  <span className="legend-dot critical" /> Critical Imminent
+                  <span className="legend-dot critical" /> Critical (Fix Immediately)
                 </span>
-                <span className="font-numeric font-bold">{critRisk} units</span>
+                <span className="font-numeric font-bold">{critRisk} machines</span>
               </div>
               <div className="meter-track">
                 <div className="meter-fill critical" style={{ width: `${(critRisk / total) * 100}%` }} />
@@ -415,8 +415,8 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
       <div className="stitch-card p-space-base mb-space-base">
         <div className="stitch-card-header mb-3">
           <div>
-            <h2 className="stitch-card-title">Shop Floor Operational Outliers</h2>
-            <p className="stitch-card-desc">Extreme readings requiring immediate technician attention before Shift B begins.</p>
+            <h2 className="stitch-card-title">Machines Needing Most Attention</h2>
+            <p className="stitch-card-desc">Machines with the highest shaking, temperature, or shortest time left.</p>
           </div>
         </div>
 
@@ -425,7 +425,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
           <div className="outlier-column-box">
             <span className="outlier-col-title text-primary">
               <span className="material-symbols-outlined text-[16px]">sensors</span>
-              <span>Highest Vibration RMS</span>
+              <span>Highest Shaking (Vibration)</span>
             </span>
             <div className="outlier-items-list mt-2">
               {highestVib.map((item, idx) => (
@@ -449,7 +449,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
           <div className="outlier-column-box">
             <span className="outlier-col-title text-amber-600">
               <span className="material-symbols-outlined text-[16px]">thermostat</span>
-              <span>Highest Bearing Temp</span>
+              <span>Hottest Machines (Temperature)</span>
             </span>
             <div className="outlier-items-list mt-2">
               {highestTemp.map((item, idx) => (
@@ -473,7 +473,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
           <div className="outlier-column-box">
             <span className="outlier-col-title text-critical">
               <span className="material-symbols-outlined text-[16px]">timelapse</span>
-              <span>Lowest Predicted RUL</span>
+              <span>Fewest Hours Left (Shortest Life)</span>
             </span>
             <div className="outlier-items-list mt-2">
               {lowestRul.map((item, idx) => (
@@ -488,7 +488,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
                   <span className="font-numeric font-bold text-critical">
                     {item.current_condition?.rul_hours != null
                       ? `${item.current_condition.rul_hours.toFixed(0)} Hours`
-                      : 'Nominal'}
+                      : 'Good'}
                   </span>
                 </div>
               ))}
@@ -500,18 +500,18 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
       {/* 5. Shift Sign-Off & Verification Notes */}
       <section className="stitch-card p-space-base">
         <div className="stitch-card-header mb-2">
-          <h2 className="stitch-card-title">Operations Log & Sign-Off Verification</h2>
-          <span className="kpi-label-caps">Shift A Handoff Record</span>
+          <h2 className="stitch-card-title">Shift Handover Log & Verification</h2>
+          <span className="kpi-label-caps">Official Shift Record</span>
         </div>
         <p className="stitch-card-desc mb-3">
-          Verification generated by Lead Monitorer Mark Jenkins. Telemetry synchronized with PostgreSQL time-series store. All {critical} critical anomalies have work orders assigned.
+          Prepared by Shift Supervisor. All sensor readings verified. All urgent issues have repair tasks assigned.
         </p>
 
         <div className="sign-off-status-box">
           <div className="flex items-center gap-2">
             <span className="material-symbols-outlined text-emerald-600">verified_user</span>
             <span className="font-semibold text-on-surface">
-              {signedOff ? 'Shift A Sign-Off Formalized & Archived' : 'Awaiting Final Shift A Authorization'}
+              {signedOff ? 'Shift Report Approved & Saved' : 'Awaiting Supervisor Approval'}
             </span>
           </div>
           <span className="font-numeric text-secondary text-xs">
