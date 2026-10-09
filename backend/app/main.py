@@ -482,54 +482,207 @@ def rag_chat(req: RagChatRequest, db: Session = Depends(get_db)):
                 "failure_type": c.failure_type,
             })
 
-    # Synthesize grounded industrial response
-    doc_titles = [h["title"] for h in hits[:2]]
-    cited_docs_str = ", ".join(doc_titles) if doc_titles else "General Textile Maintenance Guidelines"
-    
-    suggested_actions = []
-    if machine_ctx and machine_ctx.get("risk_level") in ["HIGH", "CRITICAL"]:
-        suggested_actions.append(f"Execute immediate inspection for {machine_ctx['machine_id']} ({machine_ctx.get('priority', 'P1')})")
-        suggested_actions.append("Verify spindle lubrication and bearing thermal levels (SOP-BEAR-01)")
-    elif hits:
-        suggested_actions.append(f"Review procedures detailed in {hits[0]['title']}")
-        suggested_actions.append("Check drive alignment and belt tension tolerances (SOP-BELT-04)")
-    else:
-        suggested_actions.append("Conduct standard shift walkaround inspection")
+    # 1. Fetch fleet-wide context for fleet-level questions
+    critical_machines_list = []
+    fleet_summary = None
+    try:
+        # Get latest records ordered by timestamp and score, deduplicate by machine_id
+        critical_records = db.query(RiskRecord).filter(
+            RiskRecord.risk_level.in_(["CRITICAL", "HIGH"])
+        ).order_by(RiskRecord.timestamp.desc(), RiskRecord.risk_score.desc()).limit(30).all()
+        seen_ids = set()
+        for r in critical_records:
+            if r.machine_id in seen_ids:
+                continue
+            seen_ids.add(r.machine_id)
+            h = db.query(HealthRecord).filter(
+                HealthRecord.machine_id == r.machine_id
+            ).order_by(HealthRecord.timestamp.desc()).first()
+            s = db.query(SensorReading).filter(
+                SensorReading.machine_id == r.machine_id
+            ).order_by(SensorReading.timestamp.desc()).first()
+            critical_machines_list.append({
+                "machine_id": r.machine_id,
+                "risk_level": r.risk_level,
+                "risk_score": r.risk_score,
+                "priority": r.maintenance_priority,
+                "time_window": r.maintenance_window,
+                "health_score": h.health_score if h else None,
+                "rul_hours": h.rul_hours if h else None,
+                "vibration_magnitude": s.vibration_magnitude if s else None,
+                "temperature": s.temperature if s else None,
+            })
+    except Exception:
+        pass
 
-    # Generate clear, natural technical response
-    if machine_ctx:
-        resp_text = (
-            f"Based on real-time telemetry for **{machine_ctx['machine_id']}** ({machine_ctx['machine_type']}), "
-            f"the asset is currently evaluated at **{machine_ctx.get('health_score', 0):.0f}/100 health** "
-            f"({machine_ctx.get('health_state', 'Normal')}) with **{machine_ctx.get('risk_level', 'LOW')} risk** "
-            f"and estimated **{machine_ctx.get('rul_hours', 0):.1f} hours** of remaining life. "
-            f"Bearing temperature is currently {machine_ctx.get('temperature', 0):.1f}°C with vibration magnitude of {machine_ctx.get('vibration_magnitude', 0):.3f}g.\n\n"
-        )
-        if hits:
-            resp_text += (
-                f"Referencing retrieved technical documentation from **{cited_docs_str}**: \n"
-                f"{hits[0]['content'][:350]}...\n\n"
-                f"**Recommendation**: Follow {hits[0].get('section', 'standard operating procedure')} to maintain nominal tolerances."
-            )
+    # If DB was empty, fallback to dataset evaluation
+    if not critical_machines_list and not dataset_df.empty:
+        try:
+            fl_health = health_engine.evaluate_fleet(dataset_df)
+            fl_risk = risk_engine.evaluate_fleet_risk(fl_health)
+            seen_df_ids = set()
+            for r in fl_risk:
+                m_id = r.get("machine_id")
+                if not m_id or m_id in seen_df_ids:
+                    continue
+                if r.get("risk_level") in ["CRITICAL", "HIGH"]:
+                    seen_df_ids.add(m_id)
+                    hs = r.get("health_summary", {})
+                    ks = hs.get("key_sensors", {})
+                    critical_machines_list.append({
+                        "machine_id": m_id,
+                        "risk_level": r["risk_level"],
+                        "risk_score": r["risk_score"],
+                        "priority": r["maintenance_priority"],
+                        "time_window": r["estimated_maintenance_time_window"],
+                        "health_score": hs.get("health_score"),
+                        "rul_hours": hs.get("rul_hours"),
+                        "vibration_magnitude": ks.get("vibration_magnitude"),
+                        "temperature": ks.get("temperature"),
+                    })
+        except Exception:
+            pass
+
+    # Sort machines by risk_score descending
+    critical_machines_list.sort(key=lambda x: x.get("risk_score") or 0, reverse=True)
+
+    # 2. Try LLM Generation (Hugging Face / Gemini)
+    from backend.app.services.recommendation.llm_client import GroundedLLMClient
+    llm_client = GroundedLLMClient()
+    llm_result = llm_client.generate_chat_response(
+        query=req.query,
+        machine_context=machine_ctx,
+        retrieved_documents=hits,
+        fleet_overview=fleet_summary,
+        top_critical_machines=critical_machines_list,
+    )
+
+    suggested_actions = []
+
+    if llm_result:
+        resp_text = llm_result["text"]
+        model_source = llm_result["model_used"]
+        if critical_machines_list:
+            suggested_actions.append(f"Inspect {critical_machines_list[0]['machine_id']} ({critical_machines_list[0]['priority']})")
+            suggested_actions.append("Review bearing disassembly procedure (SOP-MECH-04)")
         else:
-            resp_text += "Operating parameters are within standard baseline tolerances. Continue routine shift monitoring."
+            suggested_actions.append("Conduct standard shift inspection")
     else:
-        if hits:
+        # High-Fidelity Domain Expert Reasoning Engine
+        model_source = "Industrial RAG Rule Engine"
+        q_clean = req.query.strip().lower()
+
+        # Check Intent Categories
+        is_greeting = q_clean in ["hi", "hello", "hey", "good morning", "good afternoon", "greetings", "help", "who are you", "what can you do"] or any(q_clean.startswith(w) for w in ["hi ", "hello ", "hey "])
+        is_fleet_query = any(k in q_clean for k in ["attention", "which machine", "first", "average", "urgent", "critical", "overview", "fleet", "all machines", "hours left", "status of machines", "who needs"])
+        
+        # Check if query specifically targets a machine code like TXM-xxx
+        import re
+        machine_match = re.search(r"TXM-\d{3}", req.query, re.IGNORECASE)
+        targeted_machine_id = machine_match.group(0).upper() if machine_match else None
+
+        if is_greeting:
+            crit_count = len(critical_machines_list)
+            top_m = critical_machines_list[0] if critical_machines_list else None
+            top_summary = f"**{top_m['machine_id']}** is currently highest priority ({top_m['vibration_magnitude']:.2f} mm/s vibration, {top_m['temperature']:.1f}\u00b0C)." if top_m else "All monitored machines are within baseline parameters."
+
             resp_text = (
-                f"Retrieved relevant engineering documentation from **{cited_docs_str}**:\n\n"
-                f"**{hits[0]['title']} ({hits[0]['section']})**:\n"
-                f"> {hits[0]['content'][:400]}...\n\n"
+                f"### Factory Floor Assistant Active\n\n"
+                f"Hello! I am RESONEX AI, monitoring real-time telemetry across the factory floor.\n\n"
+                f"**Current Status:**\n"
+                f"- **{crit_count} machines** currently require maintenance attention.\n"
+                f"- {top_summary}\n\n"
+                f"**Quick things you can ask me:**\n"
+                f"- *\"Which machines need attention first?\"* — see ranked priority list.\n"
+                f"- Select any machine in the dropdown above to view its health score and live telemetry.\n"
+                f"- *\"What are the safe vibration thresholds under ISO 10816?\"* — see tolerance standards.\n"
+                f"- *\"How do I replace spindle bearings?\"* — see step-by-step repair guide (SOP-MECH-04)."
+            )
+            suggested_actions = [
+                "Which machines need attention first?",
+                "What are safe vibration limits in ISO 10816?",
+                "How do I replace spindle bearings (SOP-MECH-04)?"
+            ]
+
+        elif is_fleet_query and critical_machines_list:
+            top_lines = []
+            for i, m in enumerate(critical_machines_list[:4], 1):
+                top_lines.append(
+                    f"{i}. **{m['machine_id']}** — **{m['risk_level']} ({m['priority']})**\n"
+                    f"   - **Health**: {m['health_score']:.0f}/100 | **Time Left**: ~{m['rul_hours']:.0f} hours\n"
+                    f"   - **Telemetry**: Vibration: **{m['vibration_magnitude']:.2f} mm/s** \u00b7 Temp: **{m['temperature']:.1f}\u00b0C**"
+                )
+            top_machines_str = "\n\n".join(top_lines)
+
+            resp_text = (
+                f"### Shift Maintenance Priorities\n\n"
+                f"Currently, **{len(critical_machines_list)} unique machines** require maintenance attention before the current shift ends.\n\n"
+                f"{top_machines_str}\n\n"
+                f"**Recommended Shift Actions:**\n"
+                f"1. **Primary**: Dispatch a technician to **{critical_machines_list[0]['machine_id']}** to inspect spindle bearing acoustics and lubrication (SOP-MECH-04).\n"
+                f"2. **Secondary**: Check thermal readings and airflow on **{critical_machines_list[1]['machine_id'] if len(critical_machines_list) > 1 else 'flagged units'}** to prevent thermal seizure.\n"
+                f"3. Select any machine in the context menu above for a deep-dive sensor breakdown."
+            )
+            suggested_actions = [
+                f"Dispatch technician to {critical_machines_list[0]['machine_id']} (P1 Immediate)",
+                "Review spindle bearing disassembly guide (SOP-MECH-04)",
+                "Verify cooling airflow and temperature on flagged units"
+            ]
+
+        elif machine_ctx:
+            doc_info = f"\n\n**Applicable Standard ({hits[0]['title']})**:\n> {hits[0]['content'][:300]}..." if hits else ""
+            resp_text = (
+                f"### Diagnostic Report: {machine_ctx['machine_id']} ({machine_ctx['machine_type']})\n\n"
+                f"- **Condition State**: **{machine_ctx.get('health_state', 'Normal').upper()}** (Health Score: **{machine_ctx.get('health_score', 0):.1f} / 100**)\n"
+                f"- **Operational Risk**: **{machine_ctx.get('risk_level', 'LOW')}** (Priority: **{machine_ctx.get('priority', 'P3')}**)\n"
+                f"- **Estimated Time Remaining**: **~{machine_ctx.get('rul_hours', 0):.1f} hours** until maintenance required\n"
+                f"- **Live Telemetry**: Vibration: **{machine_ctx.get('vibration_magnitude', 0):.2f} mm/s** \u00b7 Temperature: **{machine_ctx.get('temperature', 0):.1f}\u00b0C**\n"
+                f"{doc_info}\n\n"
+                f"**Recommended Technician Actions:**\n"
+                f"1. Check bearing housing for excessive heat or abnormal acoustic rattling.\n"
+                f"2. Verify grease condition and replenish using ISO VG 100 grease (SOP-LUB-02).\n"
+                f"3. If vibration exceeds 1.1 mm/s after lubrication, schedule bearing replacement (SOP-MECH-04)."
+            )
+            suggested_actions = [
+                f"Inspect bearing lubrication on {machine_ctx['machine_id']} (SOP-LUB-02)",
+                "Conduct stethoscope acoustic vibration check",
+                "Review bearing replacement guide (SOP-MECH-04)"
+            ]
+
+        elif hits and any(k in q_clean for k in ["how", "procedure", "sop", "step", "bearing", "replace", "vibration", "limit", "iso", "standard", "guide"]):
+            primary_doc = hits[0]
+            resp_text = (
+                f"### Procedure: {primary_doc['title']}\n\n"
+                f"**Source**: `{primary_doc['source_document']}` — Section: *{primary_doc['section']}*\n\n"
+                f"{primary_doc['content']}\n\n"
             )
             if len(hits) > 1:
                 resp_text += (
-                    f"**Supplementary standard from {hits[1]['title']}**:\n"
-                    f"> {hits[1]['content'][:300]}..."
+                    f"**Supplementary Specification ({hits[1]['title']})**:\n"
+                    f"{hits[1]['content'][:300]}...\n\n"
                 )
+            resp_text += "**Safety Reminder**: Always complete Lockout/Tagout (LOTO) and verify zero stored mechanical energy before maintenance."
+            suggested_actions = [
+                f"Follow procedures in {primary_doc['title']}",
+                "Review ISO 10816 vibration severity limits",
+                "Ensure Lockout/Tagout (LOTO) compliance"
+            ]
+
         else:
             resp_text = (
-                "Your inquiry was processed against the textile machinery knowledge base. "
-                "No conflicting failure modes were detected. Please specify an asset ID or specific procedure for deeper analysis."
+                f"### Resonex AI Maintenance Copilot\n\n"
+                f"I am ready to assist with real-time equipment diagnostics, maintenance scheduling, and factory repair guides.\n\n"
+                f"**You can ask me:**\n"
+                f"- *\"Which machines need attention first?\"* — see the shift's urgent machines.\n"
+                f"- *\"What are the bearing replacement steps?\"* — view standard repair procedures.\n"
+                f"- *\"What are the vibration limits under ISO 10816?\"* — inspect threshold criteria.\n\n"
+                f"You can also select any specific asset from the dropdown above to analyze its live sensor telemetry."
             )
+            suggested_actions = [
+                "Which machines need attention first?",
+                "What are safe vibration limits in ISO 10816?",
+                "Review spindle bearing disassembly guide (SOP-MECH-04)"
+            ]
 
     return RagChatResponse(
         query=req.query,
@@ -538,8 +691,8 @@ def rag_chat(req: RagChatRequest, db: Session = Depends(get_db)):
         machine_context=machine_ctx,
         cited_documents=hits,
         suggested_actions=suggested_actions,
-        confidence=0.92 if hits else 0.75,
-        source="Context-Aware RAG Engine (TF-IDF + Joblib Index)"
+        confidence=0.95 if critical_machines_list or hits else 0.85,
+        source=model_source
     )
 
 

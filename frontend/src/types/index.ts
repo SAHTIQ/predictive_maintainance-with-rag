@@ -57,6 +57,12 @@ export interface HealthRecord {
   degradation_status: string;
   degradation_rate: number | null;
   rul_hours: number | null;
+  rul_uncertainty_std?: number | null;
+  rul_confidence_lower?: number | null;
+  rul_confidence_upper?: number | null;
+  rul_uncertainty_score?: number | null;
+  fft_energy_ratio?: number | null;
+  dominant_frequency_hz?: number | null;
 }
 
 export interface RiskRecord {

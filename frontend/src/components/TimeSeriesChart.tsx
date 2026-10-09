@@ -177,12 +177,12 @@ export const TimeSeriesChart: React.FC<TimeSeriesChartProps> = ({
   const inspectionY = inspectionPoint ? getY(inspectionPoint.value) : lastY;
 
   return (
-    <div className="flex flex-col p-5 rounded-lg bg-[#111C2E] border border-[#243247] gap-4 transition-colors">
+    <div className="flex flex-col p-5 rounded-lg bg-[var(--bg-card)] border border-[var(--border-color)] gap-4 transition-colors">
       {/* Top Header: Metric Tabs & Time Filters */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         {/* Metric Selector Tabs */}
         {tabs && tabs.length > 1 ? (
-          <div className="flex items-center gap-1.5 bg-[#0F172A] p-1 rounded-md border border-[#243247]">
+          <div className="flex items-center gap-1.5 bg-[var(--bg-app)] p-1 rounded-md border border-[var(--border-color)]">
             {tabs.map((tab) => {
               const isActive = activeTabId === tab.id;
               return (
@@ -194,8 +194,8 @@ export const TimeSeriesChart: React.FC<TimeSeriesChartProps> = ({
                   }}
                   className={`px-3 py-1.5 rounded font-mono text-xs transition-colors ${
                     isActive
-                      ? 'bg-[#162338] text-[#F1F5F9] font-medium border border-[#243247]'
-                      : 'text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-[#162338]'
+                      ? 'bg-[var(--bg-card-hover)] text-[var(--text-primary)] font-medium border border-[var(--border-color)]'
+                      : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card-hover)]'
                   }`}
                   type="button"
                 >
@@ -206,34 +206,34 @@ export const TimeSeriesChart: React.FC<TimeSeriesChartProps> = ({
           </div>
         ) : (
           <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-[#06B6D4] text-[20px]">show_chart</span>
-            <span className="font-mono text-sm text-[#F1F5F9] font-semibold uppercase tracking-wider">Live Sensor Waveform & Limits</span>
+            <span className="material-symbols-outlined text-[var(--accent-blue)] text-[20px]">show_chart</span>
+            <span className="font-mono text-sm text-[var(--text-primary)] font-semibold uppercase tracking-wider">Live Sensor Waveform & Limits</span>
           </div>
         )}
 
         {/* Time Range & Summary Telemetry Quick Stats */}
         <div className="flex items-center gap-4">
-          <div className="hidden sm:flex items-center gap-4 text-[#94A3B8] font-mono text-xs pr-3 border-r border-[#243247]">
+          <div className="hidden sm:flex items-center gap-4 text-[var(--text-secondary)] font-mono text-xs pr-3 border-r border-[var(--border-color)]">
             <div>
-              Peak: <strong className={peakValue >= threshold ? 'text-[#EF4444] font-medium' : 'text-[#F1F5F9]'}>{peakValue.toFixed(2)} {unit}</strong>
+              Peak: <strong className={peakValue >= threshold ? 'text-[#EF4444] font-medium' : 'text-[var(--text-primary)]'}>{peakValue.toFixed(2)} {unit}</strong>
             </div>
             <div>
-              Average: <strong className="text-[#F1F5F9] font-medium">{meanValue.toFixed(2)} {unit}</strong>
+              Average: <strong className="text-[var(--text-primary)] font-medium">{meanValue.toFixed(2)} {unit}</strong>
             </div>
             <div>
               Danger: <span className="font-medium text-[#EF4444]">{threshold.toFixed(2)} {unit}</span>
             </div>
           </div>
 
-          <div className="flex items-center gap-1 bg-[#0F172A] p-1 rounded-md border border-[#243247] font-mono">
+          <div className="flex items-center gap-1 bg-[var(--bg-app)] p-1 rounded-md border border-[var(--border-color)] font-mono">
             {(['24h', '7d', '30d', 'Custom'] as const).map((r) => (
               <button
                 key={r}
                 onClick={() => setTimeRange(r)}
                 className={`px-2.5 py-1 rounded text-xs transition-colors ${
                   timeRange === r
-                    ? 'bg-[#162338] text-[#F1F5F9] font-medium border border-[#243247]'
-                    : 'text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-[#162338]'
+                    ? 'bg-[var(--bg-card-hover)] text-[var(--text-primary)] font-medium border border-[var(--border-color)]'
+                    : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card-hover)]'
                 }`}
                 type="button"
               >
@@ -247,26 +247,26 @@ export const TimeSeriesChart: React.FC<TimeSeriesChartProps> = ({
       {/* Chart Legend Strip */}
       <div className="flex flex-wrap items-center gap-6 pt-1 text-xs">
         <div className="flex items-center gap-2">
-          <span className={`w-2.5 h-2.5 rounded-full ${isAlarming ? 'bg-[#EF4444]' : 'bg-[#06B6D4]'}`}></span>
-          <span className="font-medium text-[#F1F5F9]">Live Sensor Reading</span>
+          <span className={`w-2.5 h-2.5 rounded-full ${isAlarming ? 'bg-[#EF4444]' : 'bg-[var(--accent-blue)]'}`}></span>
+          <span className="font-medium text-[var(--text-primary)]">Live Sensor Reading</span>
         </div>
         <div className="flex items-center gap-2">
-          <span className="w-4 h-0.5" style={{ borderTop: '2px dashed #64748B' }}></span>
-          <span className="text-[#94A3B8] font-normal">Normal 30-Day Average</span>
+          <span className="w-4 h-0.5" style={{ borderTop: '2px dashed var(--text-muted)' }}></span>
+          <span className="text-[var(--text-secondary)] font-normal">Normal 30-Day Average</span>
         </div>
         <div className="flex items-center gap-2">
           <span className="w-2.5 h-2.5 rounded bg-[rgba(34,197,94,0.15)] border border-[rgba(34,197,94,0.4)]"></span>
-          <span className="text-[#94A3B8] font-normal">Safe Range ({corridorMin.toFixed(1)} – {corridorMax.toFixed(1)} {unit})</span>
+          <span className="text-[var(--text-secondary)] font-normal">Safe Range ({corridorMin.toFixed(1)} – {corridorMax.toFixed(1)} {unit})</span>
         </div>
         <div className="flex items-center gap-2">
           <span className="w-4 h-0.5" style={{ borderTop: '2px dashed #EF4444' }}></span>
-          <span className="text-[#94A3B8] font-normal">Danger Limit ({threshold.toFixed(2)} {unit})</span>
+          <span className="text-[var(--text-secondary)] font-normal">Danger Limit ({threshold.toFixed(2)} {unit})</span>
         </div>
       </div>
 
       {/* High-Precision SVG Telemetry Chart Container */}
       <div
-        className="relative w-full rounded-lg bg-[#0F172A] border border-[#243247] overflow-hidden select-none"
+        className="relative w-full rounded-lg bg-[var(--bg-app)] border border-[var(--border-color)] overflow-hidden select-none"
         style={{ height }}
       >
         <svg
@@ -286,7 +286,7 @@ export const TimeSeriesChart: React.FC<TimeSeriesChartProps> = ({
                 x2={width}
                 y1={y}
                 y2={y}
-                stroke="#243247"
+                stroke="var(--border-color)"
                 strokeWidth="1"
                 strokeDasharray={idx === 1 ? '4 4' : undefined}
               />
@@ -329,7 +329,7 @@ export const TimeSeriesChart: React.FC<TimeSeriesChartProps> = ({
           <path
             d={baselineD}
             fill="none"
-            stroke="#64748B"
+            stroke="var(--text-muted)"
             strokeDasharray="4 4"
             strokeWidth="1.5"
             opacity="0.8"
@@ -342,7 +342,7 @@ export const TimeSeriesChart: React.FC<TimeSeriesChartProps> = ({
           <path
             d={pathD}
             fill="none"
-            stroke={isAlarming ? '#EF4444' : '#06B6D4'}
+            stroke={isAlarming ? '#EF4444' : 'var(--accent-blue)'}
             strokeLinecap="round"
             strokeLinejoin="round"
             strokeWidth="2"
@@ -356,16 +356,16 @@ export const TimeSeriesChart: React.FC<TimeSeriesChartProps> = ({
                 x2={inspectionX}
                 y1={padTop}
                 y2={svgHeight - padBottom}
-                stroke="#64748B"
+                stroke="var(--text-muted)"
                 strokeDasharray="3 3"
                 strokeWidth="1"
               />
-              <circle cx={inspectionX} cy={inspectionY} r="4" fill="#F1F5F9" stroke="#0F172A" strokeWidth="2" />
+              <circle cx={inspectionX} cy={inspectionY} r="4" fill="var(--text-primary)" stroke="var(--bg-app)" strokeWidth="2" />
             </>
           )}
 
           {/* Current Live Sensor Node (at the rightmost point) */}
-          <circle cx={lastX} cy={lastY} r="4" fill={isAlarming ? '#EF4444' : '#06B6D4'} />
+          <circle cx={lastX} cy={lastY} r="4" fill={isAlarming ? '#EF4444' : 'var(--accent-blue)'} />
 
           {/* Hover interactive trigger overlay across X-axis columns */}
           {chartData.map((d, idx) => {
@@ -389,7 +389,7 @@ export const TimeSeriesChart: React.FC<TimeSeriesChartProps> = ({
         {/* Interactive Callout Tooltip pinned above inspection point */}
         {inspectionPoint && (
           <div
-            className="absolute p-3 rounded-md bg-[#111C2E] text-[#F1F5F9] border border-[#243247] pointer-events-none flex flex-col gap-1 min-w-[240px] font-mono text-xs"
+            className="absolute p-3 rounded-md bg-[var(--bg-card)] text-[var(--text-primary)] border border-[var(--border-color)] pointer-events-none flex flex-col gap-1 min-w-[240px] font-mono text-xs shadow-lg"
             style={{
               left: `${Math.min(84, Math.max(16, (inspectionX / width) * 100))}%`,
               top: '12%',
@@ -397,18 +397,18 @@ export const TimeSeriesChart: React.FC<TimeSeriesChartProps> = ({
             }}
           >
             <div className="flex items-center justify-between gap-2 text-[10px] uppercase font-semibold">
-              <span className={`flex items-center gap-1.5 ${inspectionPoint.value >= threshold ? 'text-[#EF4444]' : 'text-[#06B6D4]'}`}>
-                <span className={`w-1.5 h-1.5 rounded-full ${inspectionPoint.value >= threshold ? 'bg-[#EF4444]' : 'bg-[#06B6D4]'}`}></span>
+              <span className={`flex items-center gap-1.5 ${inspectionPoint.value >= threshold ? 'text-[#EF4444]' : 'text-[var(--accent-blue)]'}`}>
+                <span className={`w-1.5 h-1.5 rounded-full ${inspectionPoint.value >= threshold ? 'bg-[#EF4444]' : 'bg-[var(--accent-blue)]'}`}></span>
                 {inspectionPoint.value >= threshold ? 'Danger Limit Exceeded' : 'Normal Reading'}
               </span>
-              <span className="text-[#94A3B8] font-normal">
+              <span className="text-[var(--text-secondary)] font-normal">
                 {new Date(inspectionPoint.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
               </span>
             </div>
-            <div className="text-sm font-semibold text-[#F1F5F9] font-mono">
-              {machineId} · <span className="text-[#06B6D4]">{inspectionPoint.value.toFixed(2)}</span> {unit}
+            <div className="text-sm font-semibold text-[var(--text-primary)] font-mono">
+              {machineId} · <span className="text-[var(--accent-blue)]">{inspectionPoint.value.toFixed(2)}</span> {unit}
             </div>
-            <div className="text-xs text-[#94A3B8]">
+            <div className="text-xs text-[var(--text-secondary)]">
               {inspectionPoint.value >= threshold ? (
                 <span className="text-[#EF4444] font-medium">
                   Exceeded danger limit ({threshold.toFixed(2)} {unit}) by +
@@ -422,7 +422,7 @@ export const TimeSeriesChart: React.FC<TimeSeriesChartProps> = ({
         )}
 
         {/* X-Axis Timestamps */}
-        <div className="absolute bottom-1.5 left-0 right-0 px-4 flex justify-between font-mono text-[10px] text-[#64748B] font-normal uppercase tracking-wider">
+        <div className="absolute bottom-1.5 left-0 right-0 px-4 flex justify-between font-mono text-[10px] text-[var(--text-muted)] font-normal uppercase tracking-wider">
           <span>24h Ago (10:00)</span>
           <span className="hidden sm:inline">18h Ago (16:00)</span>
           <span>12h Ago (22:00)</span>

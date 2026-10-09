@@ -5,12 +5,13 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-  "build": "tsc -b && vite build",
-  "test": "vitest run"
+    "build": "tsc -b && vite build",
+    "test": "vitest run"
   },
   "dependencies": {
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "react-router-dom": "^7.18.4"
   },
   "devDependencies": {
     "@types/react": "^19.0.0",

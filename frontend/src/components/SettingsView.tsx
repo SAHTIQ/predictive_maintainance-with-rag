@@ -48,7 +48,7 @@ export const SettingsView: React.FC = () => {
           <div className="flex flex-col gap-1">
             <div className="flex items-center gap-2">
               <h1 className="stitch-page-title">Settings & System Configuration</h1>
-              <span className="px-2 py-0.5 rounded bg-[#162338] text-[#94A3B8] border border-[#243247] font-label-caps text-label-caps font-semibold tracking-wider uppercase flex items-center gap-1.5">
+              <span className="px-2 py-0.5 rounded bg-[var(--accent-blue-light)] text-[var(--accent-blue)] border border-[var(--border-color)] font-label-caps text-label-caps font-semibold tracking-wider uppercase flex items-center gap-1.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#22C55E]" />
                 Connected & Synced
               </span>

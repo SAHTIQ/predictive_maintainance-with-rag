@@ -103,6 +103,12 @@ class DatabasePipelineService:
             degradation_status=health_res["degradation_status"],
             degradation_rate=health_res["degradation_rate"],
             rul_hours=health_res["rul_hours"],
+            rul_uncertainty_std=health_res.get("rul_uncertainty_std"),
+            rul_confidence_lower=health_res.get("rul_confidence_lower"),
+            rul_confidence_upper=health_res.get("rul_confidence_upper"),
+            rul_uncertainty_score=health_res.get("rul_uncertainty_score"),
+            fft_energy_ratio=health_res.get("fft_energy_ratio"),
+            dominant_frequency_hz=health_res.get("dominant_frequency_hz"),
         )
         db.add(health_rec)
 

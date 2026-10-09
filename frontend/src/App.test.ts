@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { api } from './services/api';
 import { MOCK_MACHINES, MOCK_RECOMMENDATIONS, MOCK_FLEET_OVERVIEW, generateMockSensorHistory } from './services/mockData';
+import { routesConfig } from './app/routesConfig';
 
 describe('Resonex API Service Definition', () => {
   it('defines all required endpoints', () => {
@@ -47,5 +48,25 @@ describe('Resonex Fallback & Telemetry Simulation', () => {
     expect(MOCK_FLEET_OVERVIEW.health_states.Critical).toBe(2);
     expect(MOCK_FLEET_OVERVIEW.health_states.Warning).toBe(6);
     expect(MOCK_FLEET_OVERVIEW.health_states.Good).toBe(42);
+  });
+});
+
+describe('Resonex Multi-Page Routing Architecture', () => {
+  it('registers all required application routes in layout hierarchy', () => {
+    const rootRoute = routesConfig[0];
+    expect(rootRoute.path).toBe('/');
+    expect(rootRoute.children).toBeDefined();
+
+    const childPaths = rootRoute.children?.map((c) => c.path ?? 'index') || [];
+    expect(childPaths).toContain('index');
+    expect(childPaths).toContain('overview');
+    expect(childPaths).toContain('machines');
+    expect(childPaths).toContain('machines/:machineId');
+    expect(childPaths).toContain('alerts');
+    expect(childPaths).toContain('maintenance');
+    expect(childPaths).toContain('reports');
+    expect(childPaths).toContain('settings');
+    expect(childPaths).toContain('assistant');
+    expect(childPaths).toContain('*');
   });
 });

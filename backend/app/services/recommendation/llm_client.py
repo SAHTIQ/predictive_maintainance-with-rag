@@ -1,31 +1,136 @@
+import os
 import json
-from typing import Any, Dict, Optional
+import logging
+from typing import Any, Dict, Optional, List
+
+logger = logging.getLogger(__name__)
 
 class GroundedLLMClient:
     """
-    Pluggable LLM interface supporting strict grounding instructions.
-    Can connect to Google Gemini, local models, or mock clients.
+    Pluggable, resilient Industrial LLM client for predictive maintenance & conversational RAG.
+    Supports:
+    1. Hugging Face Inference API / InferenceClient (e.g. Qwen/Qwen2.5-7B-Instruct, mistralai/Mistral-7B-Instruct-v0.3)
+    2. Google Gemini API (gemini-1.5-flash / gemini-2.0-flash) via google-genai
+    3. Self-contained deterministic expert reasoning fallback if no external API token is active.
     """
-    def __init__(self, api_key: Optional[str] = None, model_name: str = "gemini-1.5-flash"):
-        self.api_key = api_key
-        self.model_name = model_name
+    def __init__(
+        self,
+        hf_token: Optional[str] = None,
+        hf_model: str = "Qwen/Qwen2.5-7B-Instruct",
+        gemini_api_key: Optional[str] = None,
+        gemini_model: str = "gemini-1.5-flash",
+    ):
+        self.hf_token = hf_token or os.getenv("HF_TOKEN") or os.getenv("HUGGINGFACE_API_KEY")
+        self.hf_model = os.getenv("HF_MODEL_NAME", hf_model)
+        self.gemini_api_key = gemini_api_key or os.getenv("GEMINI_API_KEY")
+        self.gemini_model = gemini_model
+        
+        self.hf_client = None
+        if self.hf_token:
+            try:
+                from huggingface_hub import InferenceClient
+                self.hf_client = InferenceClient(model=self.hf_model, token=self.hf_token)
+            except Exception as e:
+                logger.warning(f"Could not initialize HuggingFace InferenceClient: {e}")
 
-    def build_grounded_prompt(self, rag_context: Dict[str, Any]) -> str:
+    def generate_chat_response(
+        self,
+        query: str,
+        machine_context: Optional[Dict[str, Any]] = None,
+        retrieved_documents: Optional[List[Dict[str, Any]]] = None,
+        fleet_overview: Optional[Dict[str, Any]] = None,
+        top_critical_machines: Optional[List[Dict[str, Any]]] = None,
+    ) -> Optional[Dict[str, Any]]:
         """
-        Builds a strictly constrained system and user prompt ensuring:
-        - No invented specifications
-        - Citations of retrieved documents
-        - Explicit declaration if evidence is insufficient
+        Generates a natural, expert response grounded in machine telemetry and documents.
         """
+        system_prompt = (
+            "You are RESONEX AI, a practical and sharp predictive maintenance copilot for factory operators and reliability engineers. "
+            "Your job is to provide clear, actionable, shop-floor guidance that any technician can understand and execute immediately. "
+            "\n"
+            "STRICT COMMUNICATION RULES:\n"
+            "1. NO THEORETICAL JARGON OR ROBOTIC FILLER: Never say phrases like 'Your inquiry was processed against the plant knowledge base and real-time telemetry stream' or 'No immediate anomalies were matched for this phrase'. Speak like a helpful chief plant engineer.\n"
+            "2. GREETINGS & INTRODUCTIONS: If the user says 'hi', 'hello', or asks what you do, welcome them briefly and give an immediate 2-line factory snapshot (how many machines need attention, top critical machine).\n"
+            "3. CLARITY & BREVITY: Use short bullet points, bold key machine IDs (e.g. **TXM-032**) and numerical values (e.g. **1.44 mm/s**, **85 °C**). Avoid long dense paragraphs.\n"
+            "4. PRACTICAL ACTIONS: Give physical, technician-oriented next steps (e.g., check grease levels, measure vibration at bearing 1, inspect cooling fan, check belt tension).\n"
+            "5. EVIDENCE & GROUNDING: Always ground recommendations in live sensor readings and cite the applicable SOP (e.g., SOP-MECH-04, SOP-LUB-02, ISO 10816-3)."
+        )
+
+        user_content_parts = [f"User Question: {query}\n"]
+        if machine_context:
+            user_content_parts.append(f"--- FOCUSED ASSET TELEMETRY ---\n{json.dumps(machine_context, indent=2)}\n")
+        if top_critical_machines:
+            user_content_parts.append(f"--- URGENT / CRITICAL MACHINES REQUIRING ATTENTION ---\n{json.dumps(top_critical_machines[:5], indent=2)}\n")
+        if fleet_overview:
+            user_content_parts.append(f"--- FLEET OVERVIEW ---\n{json.dumps(fleet_overview, indent=2)}\n")
+        if retrieved_documents:
+            docs_summary = [
+                {
+                    "title": d.get("title"),
+                    "source": d.get("source_document"),
+                    "section": d.get("section"),
+                    "excerpt": d.get("content", "")[:350]
+                }
+                for d in retrieved_documents[:3]
+            ]
+            user_content_parts.append(f"--- RETRIEVED KNOWLEDGE BASE EXCERPTS ---\n{json.dumps(docs_summary, indent=2)}\n")
+
+        prompt = "\n".join(user_content_parts)
+
+        # 1. Try Hugging Face Inference if token is configured
+        if self.hf_client:
+            try:
+                messages = [
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": prompt}
+                ]
+                response = self.hf_client.chat_completion(
+                    messages=messages,
+                    max_tokens=600,
+                    temperature=0.3,
+                )
+                generated_text = response.choices[0].message.content
+                return {
+                    "text": generated_text,
+                    "model_used": f"HuggingFace ({self.hf_model})"
+                }
+            except Exception as e:
+                logger.warning(f"Hugging Face inference error: {e}. Falling back...")
+
+        # 2. Try Gemini if API key configured
+        if self.gemini_api_key:
+            try:
+                from google import genai
+                client = genai.Client(api_key=self.gemini_api_key)
+                full_content = f"{system_prompt}\n\n{prompt}"
+                res = client.models.generate_content(
+                    model=self.gemini_model,
+                    contents=full_content
+                )
+                return {
+                    "text": res.text,
+                    "model_used": f"Google Gemini ({self.gemini_model})"
+                }
+            except Exception as e:
+                logger.warning(f"Gemini API call failed: {e}. Falling back...")
+
+        return None
+
+    def generate(self, rag_context: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """
+        Executes structured JSON recommendation decision generation for Stage 9.
+        Returns structured dict if external model succeeds, else None to trigger deterministic fallback.
+        """
+        if not (self.hf_client or self.gemini_api_key):
+            return None
+
         prompt = f"""You are an industrial reliability engineer. Analyze the following machine evidence and generate a structured maintenance decision.
 
 STRICT GROUNDING INSTRUCTIONS:
 1. Use ONLY the supplied Measured Telemetry, Calculated ML Evidence, and Retrieved Documentary Excerpts.
 2. DO NOT invent machine tolerances, failure modes, or repair steps.
-3. DO NOT override measured sensor values.
-4. For every cause and recommended action, you MUST cite the retrieved document source or SOP code.
-5. If the retrieved evidence is empty or insufficient to diagnose the root cause, you MUST explicitly state that the cause cannot be determined from available documentary evidence.
-6. Output MUST be valid JSON conforming strictly to the requested schema.
+3. For every cause and recommended action, you MUST cite the retrieved document source or SOP code.
+4. Output MUST be valid JSON.
 
 --- MACHINE EVIDENCE ---
 Machine ID: {rag_context.get('machine_id')}
@@ -35,7 +140,7 @@ Sensor ML Evidence: {json.dumps(rag_context.get('sensor_ml_evidence', {}), inden
 --- RETRIEVED DOCUMENTARY EVIDENCE ---
 {json.dumps(rag_context.get('retrieved_documentary_evidence', []), indent=2)}
 
-Respond with JSON format:
+Respond with JSON:
 {{
   "potential_causes": [
     {{"cause": "...", "component": "...", "cited_source": "..."}}
@@ -47,19 +152,35 @@ Respond with JSON format:
   "confidence": 0.85
 }}
 """
-        return prompt
+        # Try HF
+        if self.hf_client:
+            try:
+                res = self.hf_client.chat_completion(
+                    messages=[{"role": "user", "content": prompt}],
+                    max_tokens=600,
+                    response_format={"type": "json_object"}
+                )
+                text = res.choices[0].message.content
+                return json.loads(text)
+            except Exception:
+                pass
 
-    def generate(self, rag_context: Dict[str, Any]) -> Optional[Dict[str, Any]]:
-        """
-        Executes LLM call. If API is not configured, returns None to trigger deterministic fallback.
-        """
-        # In this self-contained environment, if no external API key is provided, return None
-        if not self.api_key:
-            return None
-            
-        # Placeholder for external SDK call when API key is present
-        try:
-            # External call logic would go here
-            return None
-        except Exception:
-            return None
+        # Try Gemini
+        if self.gemini_api_key:
+            try:
+                from google import genai
+                client = genai.Client(api_key=self.gemini_api_key)
+                res = client.models.generate_content(
+                    model=self.gemini_model,
+                    contents=prompt
+                )
+                text = res.text.strip()
+                if text.startswith("```json"):
+                    text = text[7:-3].strip()
+                elif text.startswith("```"):
+                    text = text[3:-3].strip()
+                return json.loads(text)
+            except Exception:
+                pass
+
+        return None

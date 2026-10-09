@@ -23,35 +23,35 @@
               "mono-telemetry": ["'JetBrains Mono'", "monospace"],
             },
             colors: {
-              background: "#0B1220",
-              sidebar: "#0F172A",
-              card: "#111C2E",
-              "card-hover": "#162338",
-              border: "#243247",
-              "primary-text": "#F1F5F9",
-              "secondary-text": "#94A3B8",
-              "muted-text": "#64748B",
-              accent: "#06B6D4",
+              background: "var(--background)",
+              sidebar: "var(--bg-sidebar)",
+              card: "var(--bg-card)",
+              "card-hover": "var(--bg-card-hover)",
+              border: "var(--border-color)",
+              "primary-text": "var(--text-primary)",
+              "secondary-text": "var(--text-secondary)",
+              "muted-text": "var(--text-muted)",
+              accent: "var(--accent-blue)",
               healthy: "#22C55E",
               warning: "#F59E0B",
               critical: "#EF4444",
 
-              // Compatibility aliases mapped to Clean Industrial Dark palette
-              "surface-container-lowest": "#0B1220",
-              "surface-container-low": "#0F172A",
-              "surface-container": "#111C2E",
-              "surface-container-high": "#162338",
-              "surface-container-highest": "#1E2D44",
-              "surface-variant": "#162338",
-              surface: "#111C2E",
-              "on-background": "#F1F5F9",
-              "on-surface": "#F1F5F9",
-              "on-surface-variant": "#94A3B8",
-              secondary: "#94A3B8",
-              outline: "#243247",
-              "outline-variant": "#243247",
-              primary: "#06B6D4",
-              error: "#EF4444",
+              // Compatibility aliases mapped to design tokens
+              "surface-container-lowest": "var(--surface-container-lowest)",
+              "surface-container-low": "var(--surface-container-low)",
+              "surface-container": "var(--surface-container)",
+              "surface-container-high": "var(--surface-container-high)",
+              "surface-container-highest": "var(--surface-container-highest)",
+              "surface-variant": "var(--surface-variant)",
+              surface: "var(--surface)",
+              "on-background": "var(--on-background)",
+              "on-surface": "var(--on-surface)",
+              "on-surface-variant": "var(--on-surface-variant)",
+              secondary: "var(--secondary)",
+              outline: "var(--outline)",
+              "outline-variant": "var(--outline-variant)",
+              primary: "var(--primary)",
+              error: "var(--error)",
             },
             borderRadius: {
               DEFAULT: "6px",
@@ -66,7 +66,7 @@
       };
     </script>
   </head>
-  <body class="bg-[#0B1220] text-[#F1F5F9] font-sans antialiased">
+  <body class="font-sans antialiased">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

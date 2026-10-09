@@ -185,7 +185,7 @@ export const MaintenanceView: React.FC<MaintenanceViewProps> = ({
         <div className="stitch-kpi-card">
           <div className="kpi-card-header">
             <span className="kpi-label-caps">ACTIVE REPAIR TASKS</span>
-            <span className="px-2 py-0.5 rounded-full bg-[#162338] text-[#94A3B8] border border-[#243247] font-label-caps text-[10px] font-semibold uppercase">
+            <span className="px-2 py-0.5 rounded-full bg-[var(--accent-blue-light)] text-[var(--accent-blue)] border border-[var(--border-color)] font-label-caps text-[10px] font-semibold uppercase">
               {workOrders.length} SCHEDULED
             </span>
           </div>

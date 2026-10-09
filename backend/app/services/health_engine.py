@@ -22,8 +22,8 @@ class AdaptiveHealthEngine:
     - Random Forest Health Classifier (Good / Warning / Critical) with class probabilities
     - Continuous 0-100 Adaptive Health Index
     - Isolation Forest Anomaly Detection
-    - Chronological Degradation Trend Analysis
-    - RUL Regressor
+    - Chronological Degradation Trend Analysis (Time-domain + FFT spectral energy)
+    - Uncertainty-Aware Remaining Useful Life (RUL) Regressor
     """
     def __init__(self, models_dir: Path = MODELS_DIR):
         self.models_dir = models_dir
@@ -52,7 +52,7 @@ class AdaptiveHealthEngine:
         Base score: P(Good)*100 + P(Warning)*50 + P(Critical)*0
         Penalized adaptively by:
         - High anomaly scores (unusual vibration/temperature patterns)
-        - Active degradation status (rate of condition decline)
+        - Active degradation status (rate of condition decline and spectral FFT growth)
         """
         p_good = health_probs[0]
         p_warning = health_probs[1] if len(health_probs) > 1 else 0.0
@@ -73,6 +73,33 @@ class AdaptiveHealthEngine:
         
         final_score = base_score - deg_penalty - ano_penalty
         return float(np.clip(round(final_score, 1), 0.0, 100.0))
+
+    def predict_rul_with_uncertainty(self, X_input: pd.DataFrame) -> Dict[str, float]:
+        """
+        Computes uncertainty-aware Remaining Useful Life (RUL) prediction:
+        - Mean predicted hours across trees in the ensemble
+        - Prediction variance and standard deviation (sigma)
+        - 80% confidence prediction interval [lower_bound, upper_bound]
+        - Uncertainty score [0.0 to 1.0] normalized
+        """
+        # Collect individual estimator tree predictions
+        tree_preds = np.array([tree.predict(X_input.values)[0] for tree in self.rul_reg.estimators_])
+        mean_hours = float(np.mean(tree_preds))
+        std_hours = float(np.std(tree_preds))
+        lower_80 = float(max(0.0, np.percentile(tree_preds, 10)))
+        upper_80 = float(max(0.0, np.percentile(tree_preds, 90)))
+        
+        # Normalize relative uncertainty: coefficient of variation or standard error relative to mean
+        rel_uncertainty = std_hours / max(mean_hours, 10.0)
+        uncertainty_score = float(np.clip(round(rel_uncertainty, 3), 0.05, 0.95))
+
+        return {
+            "rul_hours": max(0.0, round(mean_hours, 1)),
+            "rul_uncertainty_std": round(std_hours, 2),
+            "rul_confidence_lower": round(lower_80, 1),
+            "rul_confidence_upper": round(upper_80, 1),
+            "rul_uncertainty_score": uncertainty_score,
+        }
 
     def evaluate_machine(self, machine_history_df: pd.DataFrame) -> Dict[str, Any]:
         """
@@ -112,12 +139,11 @@ class AdaptiveHealthEngine:
         # Higher score = more anomalous
         anomaly_score = float(-self.anomaly_det.score_samples(X_latest_scaled)[0])
         
-        # 4. Degradation Analysis
+        # 4. Degradation Analysis (Statistical & FFT spectral ratios)
         degradation_metrics = compute_degradation_metrics(df_sorted)
         
-        # 5. RUL Prediction
-        rul_pred = float(self.rul_reg.predict(X_latest)[0])
-        rul_hours = max(0.0, round(rul_pred, 1))
+        # 5. Uncertainty-Aware RUL Prediction
+        rul_uncertainty_dict = self.predict_rul_with_uncertainty(X_latest)
         
         # 6. Adaptive Health Score (0 - 100)
         health_score = self.calculate_health_index(
@@ -145,7 +171,13 @@ class AdaptiveHealthEngine:
             "degradation_status": degradation_metrics["degradation_status"],
             "degradation_rate": degradation_metrics["degradation_rate"],
             "vibration_severity_ratio": degradation_metrics["vibration_severity_ratio"],
-            "rul_hours": rul_hours,
+            "fft_energy_ratio": degradation_metrics.get("fft_energy_ratio", 1.0),
+            "dominant_frequency_hz": degradation_metrics.get("dominant_frequency_hz", 0.0),
+            "rul_hours": rul_uncertainty_dict["rul_hours"],
+            "rul_uncertainty_std": rul_uncertainty_dict["rul_uncertainty_std"],
+            "rul_confidence_lower": rul_uncertainty_dict["rul_confidence_lower"],
+            "rul_confidence_upper": rul_uncertainty_dict["rul_confidence_upper"],
+            "rul_uncertainty_score": rul_uncertainty_dict["rul_uncertainty_score"],
             "key_sensors": {
                 "vibration_x": round(vib_x, 4),
                 "vibration_y": round(vib_y, 4),

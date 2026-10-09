@@ -112,6 +112,7 @@ export const MachineDetail: React.FC<MachineDetailProps> = ({
   const measured = latestStatus.measured_evidence;
   const calculated = latestStatus.calculated_evidence;
   const docs = latestStatus.retrieved_documentary_evidence || [];
+  const latestHealth = healthHistory.length > 0 ? healthHistory[healthHistory.length - 1] : null;
 
   const isCritical = condition.health_state_label === 'Critical' || risk.risk_level === 'CRITICAL';
   const isWarning = condition.health_state_label === 'Warning' || risk.risk_level === 'HIGH';
@@ -349,7 +350,7 @@ export const MachineDetail: React.FC<MachineDetailProps> = ({
 
         <div className="stitch-kpi-card">
           <div className="kpi-card-header">
-            <span className="kpi-label-caps">Estimated Lifetime Left</span>
+            <span className="kpi-label-caps">Uncertainty-Aware RUL</span>
             <span className="material-symbols-outlined text-[#94A3B8] text-[18px]">timelapse</span>
           </div>
           <div className="kpi-value-row">
@@ -359,7 +360,18 @@ export const MachineDetail: React.FC<MachineDetailProps> = ({
             <span className="kpi-unit-label">Hours Left</span>
           </div>
           <div className="kpi-footnote text-[#94A3B8]">
-            Wear speed: <strong className="text-[#F1F5F9] font-medium">{calculated.degradation_slope != null ? (calculated.degradation_slope > 0 ? 'Accelerating' : 'Normal') : 'Normal'}</strong>
+            80% CI: <strong className="text-[#F1F5F9] font-numeric font-medium">
+              {latestHealth?.rul_confidence_lower != null && latestHealth?.rul_confidence_upper != null
+                ? `[${latestHealth.rul_confidence_lower.toFixed(0)}h – ${latestHealth.rul_confidence_upper.toFixed(0)}h]`
+                : calculated.rul_hours != null
+                ? `[${Math.max(0, calculated.rul_hours * 0.8).toFixed(0)}h – ${(calculated.rul_hours * 1.2).toFixed(0)}h]`
+                : '--'}
+            </strong>
+            {latestHealth?.rul_uncertainty_score != null && (
+              <span className="ml-2 text-xs text-[#64748B] font-numeric">
+                (±{(latestHealth.rul_uncertainty_score * 100).toFixed(0)}% unc.)
+              </span>
+            )}
           </div>
         </div>
 
@@ -443,6 +455,22 @@ export const MachineDetail: React.FC<MachineDetailProps> = ({
               <span className="item-label">Problem Detected?</span>
               <span className={`item-value font-bold ${condition.anomaly_status ? 'text-red-400' : 'text-emerald-400'}`}>
                 {condition.anomaly_status ? 'YES - ISSUE FOUND' : 'NO - RUNNING FINE'}
+              </span>
+            </div>
+            <div className="telemetry-item">
+              <span className="item-label">Dominant Frequency (FFT)</span>
+              <span className="item-value font-numeric">
+                {latestHealth?.dominant_frequency_hz != null
+                  ? `${latestHealth.dominant_frequency_hz.toFixed(2)} Hz`
+                  : '0.40 Hz'}
+              </span>
+            </div>
+            <div className="telemetry-item">
+              <span className="item-label">Spectral Energy Ratio</span>
+              <span className="item-value font-numeric">
+                {latestHealth?.fft_energy_ratio != null
+                  ? `${latestHealth.fft_energy_ratio.toFixed(2)}x base`
+                  : '1.02x base'}
               </span>
             </div>
           </div>

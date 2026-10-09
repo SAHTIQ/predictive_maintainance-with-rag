@@ -44,6 +44,12 @@ class HealthRecordResponse(BaseModel):
     degradation_status: str
     degradation_rate: Optional[float] = None
     rul_hours: Optional[float] = None
+    rul_uncertainty_std: Optional[float] = None
+    rul_confidence_lower: Optional[float] = None
+    rul_confidence_upper: Optional[float] = None
+    rul_uncertainty_score: Optional[float] = None
+    fft_energy_ratio: Optional[float] = None
+    dominant_frequency_hz: Optional[float] = None
 
     class Config:
         from_attributes = True

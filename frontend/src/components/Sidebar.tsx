@@ -1,42 +1,39 @@
 import React from 'react';
+import { NavLink } from 'react-router-dom';
 
-export type NavTab = 'dashboard' | 'machines' | 'alerts' | 'maintenance' | 'reports' | 'settings';
+export type NavTab = 'dashboard' | 'machines' | 'alerts' | 'maintenance' | 'reports' | 'settings' | 'assistant';
 
-interface SidebarProps {
-  activeTab: NavTab;
-  onNavigate: (tab: NavTab) => void;
+export interface SidebarProps {
   totalMachines: number;
   alertCount: number;
-  selectedMachineId: string | null;
+  selectedMachineId?: string | null;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
-  activeTab,
-  onNavigate,
   totalMachines,
   alertCount,
-  selectedMachineId,
 }) => {
-  const navItems: { id: NavTab; label: string; icon: string; count?: number; isAlert?: boolean }[] = [
-    { id: 'dashboard', label: 'Overview', icon: 'dashboard' },
-    { id: 'machines', label: 'All Machines', icon: 'precision_manufacturing', count: totalMachines },
-    { id: 'alerts', label: 'Alerts & Warnings', icon: 'warning', count: alertCount > 0 ? alertCount : undefined, isAlert: true },
-    { id: 'maintenance', label: 'Maintenance & Repairs', icon: 'build' },
-    { id: 'reports', label: 'Shift Reports', icon: 'assessment' },
-    { id: 'settings', label: 'Settings', icon: 'settings' },
+  const navItems = [
+    { to: '/overview', label: 'Overview', icon: 'dashboard' },
+    { to: '/machines', label: 'All Machines', icon: 'precision_manufacturing', count: totalMachines },
+    { to: '/alerts', label: 'Alerts & Warnings', icon: 'warning', count: alertCount > 0 ? alertCount : undefined, isAlert: true },
+    { to: '/maintenance', label: 'Maintenance & Repairs', icon: 'build' },
+    { to: '/reports', label: 'Shift Reports', icon: 'assessment' },
+    { to: '/settings', label: 'Settings', icon: 'settings' },
+    { to: '/assistant', label: 'Resonex AI', icon: 'smart_toy', isAi: true },
   ];
 
   return (
     <aside className="app-sidebar">
       <div className="sidebar-top-section">
         {/* Brand Header */}
-        <div className="sidebar-brand" onClick={() => onNavigate('dashboard')} role="button" tabIndex={0}>
+        <NavLink to="/overview" className="sidebar-brand no-underline">
           <img src="/resonex_logo.png" alt="Resonex Logo" className="brand-logo-img" />
           <div className="brand-titles">
             <span className="brand-name">RESONEX</span>
             <span className="brand-subline">Smart Machine Monitor</span>
           </div>
-        </div>
+        </NavLink>
 
         {/* Machine Sync Status Strip */}
         <div className="sidebar-connected-pill">
@@ -46,25 +43,23 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
         {/* Navigation Rail */}
         <nav className="sidebar-nav-menu" aria-label="Main Navigation">
-          {navItems.map((item) => {
-            const isActive = !selectedMachineId && activeTab === item.id;
-            return (
-              <button
-                key={item.id}
-                className={`nav-button ${isActive ? 'active' : ''}`}
-                onClick={() => onNavigate(item.id)}
-                aria-current={isActive ? 'page' : undefined}
-              >
-                <span className="material-symbols-outlined nav-symbol-icon">{item.icon}</span>
-                <span className="nav-btn-label">{item.label}</span>
-                {item.count !== undefined && (
-                  <span className={`nav-badge ${item.isAlert ? 'nav-alert-badge' : 'nav-count-badge'}`}>
-                    {item.count}
-                  </span>
-                )}
-              </button>
-            );
-          })}
+          {navItems.map((item) => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              className={({ isActive }) => `nav-button no-underline ${isActive ? 'active' : ''}`}
+            >
+              <span className={`material-symbols-outlined nav-symbol-icon ${item.isAi ? 'text-[#06B6D4]' : ''}`}>
+                {item.icon}
+              </span>
+              <span className="nav-btn-label">{item.label}</span>
+              {item.count !== undefined && (
+                <span className={`nav-badge ${item.isAlert ? 'nav-alert-badge' : 'nav-count-badge'}`}>
+                  {item.count}
+                </span>
+              )}
+            </NavLink>
+          ))}
         </nav>
       </div>
 

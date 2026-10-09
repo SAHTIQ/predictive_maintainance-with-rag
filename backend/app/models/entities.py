@@ -67,6 +67,12 @@ class HealthRecord(Base):
     degradation_status = Column(String(50), nullable=False)
     degradation_rate = Column(Float, nullable=True)
     rul_hours = Column(Float, nullable=True)
+    rul_uncertainty_std = Column(Float, nullable=True)
+    rul_confidence_lower = Column(Float, nullable=True)
+    rul_confidence_upper = Column(Float, nullable=True)
+    rul_uncertainty_score = Column(Float, nullable=True)
+    fft_energy_ratio = Column(Float, nullable=True)
+    dominant_frequency_hz = Column(Float, nullable=True)
     created_at = Column(DateTime(timezone=True), default=utc_now, nullable=False)
 
     machine = relationship("Machine", back_populates="health_records")
