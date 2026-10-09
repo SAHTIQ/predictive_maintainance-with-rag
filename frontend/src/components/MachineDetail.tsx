@@ -41,6 +41,8 @@ export const MachineDetail: React.FC<MachineDetailProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [isPinned, setIsPinned] = useState<boolean>(false);
   const [isWatchlist, setIsWatchlist] = useState<boolean>(false);
+  const [uploadingCsv, setUploadingCsv] = useState<boolean>(false);
+  const [csvStatusMsg, setCsvStatusMsg] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
   const loadMachineData = async () => {
     setLoading(true);
@@ -55,23 +57,52 @@ export const MachineDetail: React.FC<MachineDetailProps> = ({
         api.getMaintenanceHistory(machineId),
       ]);
 
+      const isAwaiting = m.monitoring_readiness === 'Awaiting Data' || (m.total_readings ?? 0) === 0;
+
       setMachine(m);
       setLatestStatus(status);
-      setSensorHistory(sensors.length > 0 ? sensors : generateMockSensorHistory(machineId, status.measured_evidence?.vibration_magnitude || 3.5, status.measured_evidence?.temperature || 70));
-      setHealthHistory(health.length > 0 ? health : generateMockHealthHistory(machineId, status.current_condition?.health_score || 80, status.current_condition?.rul_hours || 120));
+      setSensorHistory(sensors.length > 0 ? sensors : (isAwaiting ? [] : generateMockSensorHistory(machineId, status.measured_evidence?.vibration_magnitude || 3.5, status.measured_evidence?.temperature || 70)));
+      setHealthHistory(health.length > 0 ? health : (isAwaiting ? [] : generateMockHealthHistory(machineId, status.current_condition?.health_score || 80, status.current_condition?.rul_hours || 120)));
       setRiskHistory(risk);
-      setMaintenanceHistory(maint.length > 0 ? maint : getMockMaintenanceHistory(machineId));
+      setMaintenanceHistory(maint.length > 0 ? maint : (isAwaiting ? [] : getMockMaintenanceHistory(machineId)));
     } catch {
-      // Graceful fallback to offline plant cache
-      const fallbackRec = MOCK_RECOMMENDATIONS.find((r) => r.machine_id === machineId) || MOCK_RECOMMENDATIONS[0];
-      const fallbackMachine = MOCK_MACHINES.find((m) => m.machine_id === machineId) || MOCK_MACHINES[0];
-      setMachine(fallbackMachine);
-      setLatestStatus(fallbackRec);
-      setSensorHistory(generateMockSensorHistory(machineId, fallbackRec.measured_evidence?.vibration_magnitude || 4.2, fallbackRec.measured_evidence?.temperature || 75));
-      setHealthHistory(generateMockHealthHistory(machineId, fallbackRec.current_condition?.health_score || 70, fallbackRec.current_condition?.rul_hours || 80));
-      setMaintenanceHistory(getMockMaintenanceHistory(machineId));
+      // Graceful fallback to offline plant cache if pre-seeded machine
+      const fallbackMachine = MOCK_MACHINES.find((m) => m.machine_id === machineId);
+      if (fallbackMachine) {
+        const fallbackRec = MOCK_RECOMMENDATIONS.find((r) => r.machine_id === machineId) || MOCK_RECOMMENDATIONS[0];
+        setMachine(fallbackMachine);
+        setLatestStatus(fallbackRec);
+        setSensorHistory(generateMockSensorHistory(machineId, fallbackRec.measured_evidence?.vibration_magnitude || 4.2, fallbackRec.measured_evidence?.temperature || 75));
+        setHealthHistory(generateMockHealthHistory(machineId, fallbackRec.current_condition?.health_score || 70, fallbackRec.current_condition?.rul_hours || 80));
+        setMaintenanceHistory(getMockMaintenanceHistory(machineId));
+      } else {
+        setError(`Unable to connect or load telemetry for machine ${machineId}.`);
+      }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleCsvUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingCsv(true);
+    setCsvStatusMsg(null);
+    try {
+      const res = await api.importMachineSensorCsv(machineId, file);
+      setCsvStatusMsg({
+        type: 'success',
+        message: `Imported ${res.imported_readings} sensor readings successfully! ${res.pipeline_executed ? 'Predictive analytics pipeline executed.' : 'Ready for analysis.'}`,
+      });
+      await loadMachineData();
+    } catch (err: any) {
+      setCsvStatusMsg({
+        type: 'error',
+        message: err.message || 'Failed to import CSV sensor data.',
+      });
+    } finally {
+      setUploadingCsv(false);
     }
   };
 
@@ -114,8 +145,10 @@ export const MachineDetail: React.FC<MachineDetailProps> = ({
   const docs = latestStatus.retrieved_documentary_evidence || [];
   const latestHealth = healthHistory.length > 0 ? healthHistory[healthHistory.length - 1] : null;
 
-  const isCritical = condition.health_state_label === 'Critical' || risk.risk_level === 'CRITICAL';
-  const isWarning = condition.health_state_label === 'Warning' || risk.risk_level === 'HIGH';
+  const isAwaiting = condition.health_state_label === 'Awaiting Data' || machine?.monitoring_readiness === 'Awaiting Data' || (machine?.total_readings ?? 0) === 0;
+
+  const isCritical = !isAwaiting && (condition.health_state_label === 'Critical' || risk.risk_level === 'CRITICAL');
+  const isWarning = !isAwaiting && (condition.health_state_label === 'Warning' || risk.risk_level === 'HIGH');
 
   const chartTabs: ChartTab[] = [
     {
@@ -211,11 +244,13 @@ export const MachineDetail: React.FC<MachineDetailProps> = ({
         <div className="flex items-center gap-2">
           <div className="stitch-sync-pill">
             <span className="relative flex h-2 w-2">
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+              <span className={`relative inline-flex rounded-full h-2 w-2 ${isAwaiting ? 'bg-cyan-400 animate-pulse' : 'bg-emerald-500'}`}></span>
             </span>
-            <span className="sync-pill-text">Telemetry Node: Synced (100Hz)</span>
+            <span className="sync-pill-text">{isAwaiting ? 'Telemetry Node: Provisioned (Awaiting Stream)' : 'Telemetry Node: Synced (100Hz)'}</span>
           </div>
-          <span className="detail-bay-tag">Shift A · Line {((machine?.id ?? 0) % 4) + 1}</span>
+          <span className="detail-bay-tag">
+            {machine?.production_line ? `${machine.production_line} · ${machine.location || 'Bay'}` : `Shift A · Line ${((machine?.id ?? 0) % 4) + 1}`}
+          </span>
         </div>
       </div>
 
@@ -225,18 +260,27 @@ export const MachineDetail: React.FC<MachineDetailProps> = ({
           <div className="hero-info-group">
             <div className="hero-title-row">
               <h1 className="hero-machine-id font-numeric">{machine?.machine_id}</h1>
-              <span className={`status-chip ${condition.health_state_label.toLowerCase()} text-[13px] py-1 px-3`}>
-                <span className="chip-dot" />
-                <span className="font-semibold uppercase">
-                  {condition.health_state_label} ({risk.maintenance_priority || 'P3'})
+              {isAwaiting ? (
+                <span className="status-chip awaiting text-[13px] py-1 px-3">
+                  <span className="chip-dot" />
+                  <span className="font-semibold uppercase">Awaiting Data</span>
                 </span>
-              </span>
+              ) : (
+                <span className={`status-chip ${condition.health_state_label.toLowerCase()} text-[13px] py-1 px-3`}>
+                  <span className="chip-dot" />
+                  <span className="font-semibold uppercase">
+                    {condition.health_state_label} ({risk.maintenance_priority || 'P3'})
+                  </span>
+                </span>
+              )}
               <span className="machine-type-tag">
                 Type {machine?.machine_type} · {machine?.machine_name || 'Production Unit'}
               </span>
             </div>
             <p className="hero-meta-desc">
-              Asset Tag: <strong className="text-on-surface">TX-ASSET-{(machine?.id ?? 1).toString().padStart(4, '0')}</strong> • Commissioned: {machine?.created_at ? new Date(machine.created_at).toLocaleDateString() : 'Nominal'} • Location: Machining Bay {((machine?.id ?? 0) % 6) + 1}
+              Asset Tag: <strong className="text-on-surface">TX-ASSET-{(machine?.id ?? 1).toString().padStart(4, '0')}</strong> • Commissioned: {machine?.created_at ? new Date(machine.created_at).toLocaleDateString() : 'Nominal'} • Location: {machine?.location || `Machining Bay ${((machine?.id ?? 0) % 6) + 1}`}
+              {machine?.manufacturer ? ` • Manufacturer: ${machine.manufacturer}` : ''}
+              {machine?.serial_number ? ` • S/N: ${machine.serial_number}` : ''}
             </p>
           </div>
 
@@ -290,30 +334,45 @@ export const MachineDetail: React.FC<MachineDetailProps> = ({
         </div>
 
         {/* 3. Plain-English Condition Callout Banner */}
-        <div className={`detail-callout-banner ${isCritical ? 'critical' : isWarning ? 'warning' : 'nominal'} mt-4`}>
+        <div className={`detail-callout-banner ${isAwaiting ? 'awaiting' : isCritical ? 'critical' : isWarning ? 'warning' : 'nominal'} mt-4`}>
           <span className="material-symbols-outlined callout-icon" style={{ fontVariationSettings: "'FILL' 1" }}>
-            {isCritical ? 'warning' : isWarning ? 'report_problem' : 'check_circle'}
+            {isAwaiting ? 'cloud_upload' : isCritical ? 'warning' : isWarning ? 'report_problem' : 'check_circle'}
           </span>
           <div className="callout-content">
             <div className="callout-header-row">
               <span className="callout-title">
-                {isCritical
+                {isAwaiting
+                  ? 'REGISTERED ASSET · Awaiting Initial Sensor Telemetry Feed'
+                  : isCritical
                   ? 'URGENT ATTENTION NEEDED · Overheating or High Shaking Detected'
                   : isWarning
                   ? 'WARNING · Early Signs of Machine Wear Detected'
                   : 'ALL CLEAR · Machine Running Normally Within Safe Limits'}
               </span>
-              {calculated.rul_hours != null && (
+              {isAwaiting ? (
+                <span className="callout-countdown-pill font-numeric text-cyan-400">
+                  Ready for Data Ingestion
+                </span>
+              ) : calculated.rul_hours != null && (
                 <span className="callout-countdown-pill font-numeric">
                   ~{calculated.rul_hours.toFixed(0)} Hours Left Before Repair Needed
                 </span>
               )}
             </div>
             <p className="callout-text">
-              {explanation?.condition_summary || explanation?.reasoning || 'All machine sensor readings are within normal safe limits.'}
+              {isAwaiting
+                ? `Asset ${machine?.machine_id} is registered in the Resonex platform. No sensor data has been streamed yet. Upload a historical telemetry CSV or activate the edge gateway to initiate predictive health calculations and RUL tracking.`
+                : explanation?.condition_summary || explanation?.reasoning || 'All machine sensor readings are within normal safe limits.'}
             </p>
           </div>
         </div>
+
+        {csvStatusMsg && (
+          <div className={`mt-3 p-3 rounded text-xs flex items-center gap-2 ${csvStatusMsg.type === 'success' ? 'bg-emerald-950/60 border border-emerald-500/50 text-emerald-300' : 'bg-red-950/60 border border-red-500/50 text-red-300'}`}>
+            <span className="material-symbols-outlined text-sm">{csvStatusMsg.type === 'success' ? 'check_circle' : 'error'}</span>
+            <span>{csvStatusMsg.message}</span>
+          </div>
+        )}
       </div>
 
       {/* 4. High-Density Bento Metric Grid */}
@@ -399,13 +458,51 @@ export const MachineDetail: React.FC<MachineDetailProps> = ({
 
       {/* 5. Interactive Native SVG TimeSeriesChart */}
       <section className="stitch-card p-space-base mb-space-base">
-        <div className="flex-between mb-3">
+        <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
           <div>
             <h2 className="stitch-card-title">Live Sensor Waveform & History</h2>
-            <p className="stitch-card-desc">Real-time shaking, heat levels, and health trends over the last 24 hours.</p>
+            <p className="stitch-card-desc">
+              {sensorHistory.length > 0
+                ? 'Real-time shaking, heat levels, and health trends over recent monitoring windows.'
+                : 'Awaiting sensor stream. You can upload an initial CSV reading dataset to kickstart analytics.'}
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <label className="flex items-center gap-1.5 px-3 py-1.5 bg-cyan-950/40 hover:bg-cyan-900/60 border border-cyan-500/40 text-cyan-300 text-xs font-semibold rounded cursor-pointer transition-colors shadow-sm">
+              <span className="material-symbols-outlined text-[16px]">upload_file</span>
+              <span>{uploadingCsv ? 'Importing CSV...' : 'Import Telemetry CSV'}</span>
+              <input
+                type="file"
+                accept=".csv"
+                className="hidden"
+                disabled={uploadingCsv}
+                onChange={handleCsvUpload}
+              />
+            </label>
           </div>
         </div>
-        <TimeSeriesChart tabs={chartTabs} height={260} />
+        {sensorHistory.length > 0 ? (
+          <TimeSeriesChart tabs={chartTabs} height={260} />
+        ) : (
+          <div className="p-8 border border-dashed border-cyan-500/30 rounded-lg text-center bg-cyan-950/10 my-2">
+            <span className="material-symbols-outlined text-4xl text-cyan-400 mb-2">sensors_off</span>
+            <h3 className="text-sm font-semibold text-[#F1F5F9]">No Historical Telemetry Stream Ingested Yet</h3>
+            <p className="text-xs text-[#94A3B8] max-w-md mx-auto mt-1 mb-4 leading-relaxed">
+              To calculate Health Score, Remaining Useful Life (RUL), and FFT vibration harmonics for {machine?.machine_id}, upload a sensor readings CSV file with <code>temperature</code> and <code>vibration_magnitude</code> columns.
+            </p>
+            <label className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white text-xs font-semibold rounded-lg shadow-md cursor-pointer transition-all">
+              <span className="material-symbols-outlined text-sm">cloud_upload</span>
+              <span>{uploadingCsv ? 'Ingesting...' : 'Select Sensor CSV File'}</span>
+              <input
+                type="file"
+                accept=".csv"
+                className="hidden"
+                disabled={uploadingCsv}
+                onChange={handleCsvUpload}
+              />
+            </label>
+          </div>
+        )}
       </section>
 
       {/* 6. Diagnostics Breakdown & RAG Documentary Evidence Grid */}
@@ -537,6 +634,63 @@ export const MachineDetail: React.FC<MachineDetailProps> = ({
           )}
         </div>
       </div>
+
+      {/* 6.5. Asset Profile & Engineering Specifications */}
+      {(machine?.manufacturer || machine?.serial_number || machine?.specifications || machine?.operational_settings || machine?.description) && (
+        <section className="stitch-card p-space-base mb-space-base">
+          <div className="stitch-card-header mb-3">
+            <div className="flex items-center gap-2">
+              <span className="material-symbols-outlined text-primary text-[20px]">tune</span>
+              <h2 className="stitch-card-title">Asset Profile & Engineering Specifications</h2>
+            </div>
+            <span className="kpi-label-caps">Machine Blueprint</span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
+            <div className="p-2.5 rounded bg-surface-container-high/40 border border-outline-variant/50">
+              <span className="text-[#94A3B8] block text-[11px] uppercase tracking-wider">Manufacturer & Model</span>
+              <span className="text-[#F1F5F9] font-medium block mt-1">
+                {machine?.manufacturer || 'Standard Textile OEM'} · {machine?.model_number || `Series-${machine?.machine_type}`}
+              </span>
+              <span className="text-[#64748B] block mt-0.5">S/N: {machine?.serial_number || 'N/A'}</span>
+            </div>
+
+            <div className="p-2.5 rounded bg-surface-container-high/40 border border-outline-variant/50">
+              <span className="text-[#94A3B8] block text-[11px] uppercase tracking-wider">Facility & Line</span>
+              <span className="text-[#F1F5F9] font-medium block mt-1">
+                {machine?.plant || 'Plant Alpha'} · {machine?.production_line || 'Weaving Line 1'}
+              </span>
+              <span className="text-[#64748B] block mt-0.5">Bay: {machine?.location || 'Floor Bay 01'}</span>
+            </div>
+
+            <div className="p-2.5 rounded bg-surface-container-high/40 border border-outline-variant/50">
+              <span className="text-[#94A3B8] block text-[11px] uppercase tracking-wider">Operational Thresholds</span>
+              <span className="text-[#F1F5F9] font-numeric block mt-1">
+                Vib Limit: {machine?.operational_settings?.vibration_critical ?? 4.5} mm/s
+              </span>
+              <span className="text-[#64748B] block mt-0.5">
+                Temp Limit: {machine?.operational_settings?.critical_temp ?? 85}°C
+              </span>
+            </div>
+
+            <div className="p-2.5 rounded bg-surface-container-high/40 border border-outline-variant/50">
+              <span className="text-[#94A3B8] block text-[11px] uppercase tracking-wider">Monitoring Readiness</span>
+              <span className="text-cyan-400 font-semibold block mt-1">
+                {machine?.monitoring_readiness || (machine?.total_readings ? 'Monitoring Active' : 'Awaiting Data')}
+              </span>
+              <span className="text-[#64748B] block mt-0.5 font-numeric">
+                {machine?.total_readings ?? 0} total readings ingested
+              </span>
+            </div>
+          </div>
+
+          {machine?.description && (
+            <p className="mt-3 text-xs text-[#94A3B8] italic border-t border-hairline pt-2">
+              Note: {machine.description}
+            </p>
+          )}
+        </section>
+      )}
 
       {/* 7. Maintenance History Log */}
       <section className="stitch-card p-space-base">

@@ -55,6 +55,37 @@ export const api = {
     return fetchJson<Machine>(`/api/v1/machines/${encodeURIComponent(machineId)}`);
   },
 
+  checkMachineId: (machineId: string): Promise<import('../types').MachineIdCheckResponse> => {
+    return fetchJson<import('../types').MachineIdCheckResponse>(`/api/v1/machines/check-id/${encodeURIComponent(machineId)}`);
+  },
+
+  createMachine: (payload: import('../types').MachineCreateInput): Promise<Machine> => {
+    return fetchJson<Machine>('/api/v1/machines', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  },
+
+  importMachineSensorCsv: (machineId: string, file: File): Promise<import('../types').MachineImportCsvResponse> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const url = `${API_BASE_URL}/api/v1/machines/${encodeURIComponent(machineId)}/import-readings-csv`;
+    return fetch(url, {
+      method: 'POST',
+      body: formData,
+    }).then(async (response) => {
+      if (!response.ok) {
+        let errorDetail = `HTTP ${response.status}: ${response.statusText}`;
+        try {
+          const errorJson = await response.json();
+          if (errorJson.detail) errorDetail = errorJson.detail;
+        } catch {}
+        throw new Error(errorDetail);
+      }
+      return response.json();
+    });
+  },
+
   getLatestMachineStatus: (machineId: string): Promise<RecommendationDecision> => {
     return fetchJson<RecommendationDecision>(`/api/v1/machines/${encodeURIComponent(machineId)}/latest`);
   },

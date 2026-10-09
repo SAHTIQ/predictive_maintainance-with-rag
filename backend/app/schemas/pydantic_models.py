@@ -3,18 +3,59 @@ from typing import Any, Dict, List, Optional
 from pydantic import BaseModel, Field
 
 class MachineBase(BaseModel):
-    machine_id: str
-    machine_type: str
+    machine_id: str = Field(..., min_length=2, max_length=50, description="Unique machine identifier or asset tag")
+    machine_type: str = Field(..., min_length=1, max_length=50, description="Machine category/type code")
+    machine_name: Optional[str] = Field(None, max_length=100)
+    installation_date: Optional[datetime] = None
+    status: str = Field("Awaiting Data", max_length=30)
+    
+    # Extended Industry Metadata
+    manufacturer: Optional[str] = Field(None, max_length=100)
+    model_number: Optional[str] = Field(None, max_length=100)
+    serial_number: Optional[str] = Field(None, max_length=100)
+    plant: Optional[str] = Field(None, max_length=100)
+    production_line: Optional[str] = Field(None, max_length=100)
+    location: Optional[str] = Field(None, max_length=150)
+    description: Optional[str] = None
+    
+    specifications: Optional[Dict[str, Any]] = None
+    operational_settings: Optional[Dict[str, Any]] = None
+    sensor_config: Optional[Dict[str, Any]] = None
+
+class MachineCreate(MachineBase):
+    initial_maintenance_history: Optional[List[Dict[str, Any]]] = None
+    initial_maintenance_records: Optional[List[Dict[str, Any]]] = None
+
+class MachineUpdate(BaseModel):
+    machine_type: Optional[str] = None
     machine_name: Optional[str] = None
-    status: str = "active"
+    installation_date: Optional[datetime] = None
+    status: Optional[str] = None
+    manufacturer: Optional[str] = None
+    model_number: Optional[str] = None
+    serial_number: Optional[str] = None
+    plant: Optional[str] = None
+    production_line: Optional[str] = None
+    location: Optional[str] = None
+    description: Optional[str] = None
+    specifications: Optional[Dict[str, Any]] = None
+    operational_settings: Optional[Dict[str, Any]] = None
+    sensor_config: Optional[Dict[str, Any]] = None
 
 class MachineResponse(MachineBase):
     id: int
     created_at: datetime
     updated_at: datetime
+    total_readings: Optional[int] = 0
+    monitoring_readiness: Optional[str] = "Awaiting Data"
 
     class Config:
         from_attributes = True
+
+class MachineIdCheckResponse(BaseModel):
+    machine_id: str
+    available: bool
+    message: str
 
 class SensorReadingResponse(BaseModel):
     id: int

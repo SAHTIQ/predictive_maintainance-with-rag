@@ -27,8 +27,61 @@ export interface Machine {
   machine_type: string;
   machine_name: string | null;
   status: string;
+  installation_date?: string | null;
+  manufacturer?: string | null;
+  model_number?: string | null;
+  serial_number?: string | null;
+  plant?: string | null;
+  production_line?: string | null;
+  location?: string | null;
+  description?: string | null;
+  specifications?: Record<string, any> | null;
+  operational_settings?: Record<string, any> | null;
+  sensor_config?: Record<string, any> | null;
+  total_readings?: number;
+  monitoring_readiness?: string;
   created_at: string;
   updated_at: string;
+}
+
+export interface MachineCreateInput {
+  machine_id: string;
+  machine_type: string;
+  machine_name?: string;
+  installation_date?: string | null;
+  status?: string;
+  manufacturer?: string;
+  model_number?: string;
+  serial_number?: string;
+  plant?: string;
+  production_line?: string;
+  location?: string;
+  description?: string;
+  specifications?: Record<string, any>;
+  operational_settings?: Record<string, any>;
+  sensor_config?: Record<string, any>;
+  initial_maintenance_history?: Array<{
+    maintenance_date: string;
+    maintenance_type: string;
+    component: string;
+    description: string;
+    action_taken: string;
+    sop_code?: string;
+    technician_notes?: string;
+  }>;
+}
+
+export interface MachineIdCheckResponse {
+  machine_id: string;
+  available: boolean;
+  message: string;
+}
+
+export interface MachineImportCsvResponse {
+  machine_id: string;
+  imported_readings: number;
+  pipeline_executed: boolean;
+  monitoring_status: string;
 }
 
 export interface SensorReading {

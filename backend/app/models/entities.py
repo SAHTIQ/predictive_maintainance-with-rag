@@ -18,7 +18,22 @@ class Machine(Base):
     machine_type = Column(String(50), nullable=False)
     machine_name = Column(String(100), nullable=True)
     installation_date = Column(DateTime(timezone=True), nullable=True)
-    status = Column(String(20), default="active", nullable=False)
+    status = Column(String(30), default="Awaiting Data", nullable=False)
+    
+    # Extended Industry & Facility Metadata
+    manufacturer = Column(String(100), nullable=True)
+    model_number = Column(String(100), nullable=True)
+    serial_number = Column(String(100), nullable=True)
+    plant = Column(String(100), nullable=True)
+    production_line = Column(String(100), nullable=True)
+    location = Column(String(150), nullable=True)
+    description = Column(Text, nullable=True)
+    
+    # JSON Config Blocks for Specifications, Operations & Sensor Configuration
+    specifications = Column(JSON, nullable=True)
+    operational_settings = Column(JSON, nullable=True)
+    sensor_config = Column(JSON, nullable=True)
+
     created_at = Column(DateTime(timezone=True), default=utc_now, nullable=False)
     updated_at = Column(DateTime(timezone=True), default=utc_now, onupdate=utc_now, nullable=False)
 

@@ -31,13 +31,14 @@ export const MachineTable: React.FC<MachineTableProps> = ({
         </thead>
         <tbody>
           {machines.map((machine) => {
+            const isAwaiting = machine.monitoring_readiness === 'Awaiting Data' || machine.total_readings === 0;
             const rec = recsByMachine[machine.machine_id];
-            const riskLevel = rec?.risk_assessment?.risk_level || 'LOW';
-            const healthLabel = rec?.current_condition?.health_state_label || 'Good';
-            const healthScore = rec?.current_condition?.health_score ?? 100;
-            const rul = rec?.current_condition?.rul_hours ?? 999;
-            const vib = rec?.measured_evidence?.vibration_magnitude ?? 1.2;
-            const temp = rec?.measured_evidence?.temperature ?? 65;
+            const riskLevel = isAwaiting ? 'PENDING' : (rec?.risk_assessment?.risk_level || 'LOW');
+            const healthLabel = isAwaiting ? 'Awaiting Data' : (rec?.current_condition?.health_state_label || 'Good');
+            const healthScore = isAwaiting ? null : (rec?.current_condition?.health_score ?? 100);
+            const rul = isAwaiting ? null : rec?.current_condition?.rul_hours;
+            const vib = isAwaiting ? null : rec?.measured_evidence?.vibration_magnitude;
+            const temp = isAwaiting ? null : rec?.measured_evidence?.temperature;
 
             return (
               <tr
@@ -57,10 +58,17 @@ export const MachineTable: React.FC<MachineTableProps> = ({
                   Type {machine.machine_type}
                 </td>
                 <td className="td-center">
-                  <span className={`status-chip ${healthLabel.toLowerCase()}`}>
-                    <span className="chip-dot" />
-                    <span>{healthLabel} ({healthScore.toFixed(0)})</span>
-                  </span>
+                  {isAwaiting ? (
+                    <span className="status-chip awaiting">
+                      <span className="chip-dot" />
+                      <span>Awaiting Data</span>
+                    </span>
+                  ) : (
+                    <span className={`status-chip ${healthLabel.toLowerCase()}`}>
+                      <span className="chip-dot" />
+                      <span>{healthLabel} ({healthScore?.toFixed(0)})</span>
+                    </span>
+                  )}
                 </td>
                 <td className="td-center">
                   <span className={`risk-pill ${riskLevel.toLowerCase()}`}>
@@ -68,19 +76,31 @@ export const MachineTable: React.FC<MachineTableProps> = ({
                   </span>
                 </td>
                 <td className="td-right font-numeric font-medium">
-                  <span className={rul < 24 ? 'text-[#EF4444] font-medium' : 'text-[#F1F5F9]'}>
-                    {rul < 999 ? `${rul.toFixed(0)} hrs` : 'Normal'}
-                  </span>
+                  {isAwaiting ? (
+                    <span className="text-[#64748B] text-xs italic">Pending</span>
+                  ) : (
+                    <span className={rul != null && rul < 24 ? 'text-[#EF4444] font-medium' : 'text-[#F1F5F9]'}>
+                      {rul != null ? `${rul.toFixed(0)} hrs` : 'Normal'}
+                    </span>
+                  )}
                 </td>
                 <td className="td-right font-numeric">
-                  <span className={vib > 4.5 ? 'text-[#EF4444] font-medium' : 'text-[#94A3B8]'}>
-                    {vib.toFixed(2)} mm/s
-                  </span>
+                  {vib != null ? (
+                    <span className={vib > 4.5 ? 'text-[#EF4444] font-medium' : 'text-[#94A3B8]'}>
+                      {vib.toFixed(2)} mm/s
+                    </span>
+                  ) : (
+                    <span className="text-[#64748B]">--</span>
+                  )}
                 </td>
                 <td className="td-right font-numeric">
-                  <span className={temp > 75 ? 'text-[#EF4444] font-medium' : 'text-[#94A3B8]'}>
-                    {temp.toFixed(1)} °C
-                  </span>
+                  {temp != null ? (
+                    <span className={temp > 75 ? 'text-[#EF4444] font-medium' : 'text-[#94A3B8]'}>
+                      {temp.toFixed(1)} °C
+                    </span>
+                  ) : (
+                    <span className="text-[#64748B]">--</span>
+                  )}
                 </td>
                 <td className="td-right" onClick={(e) => e.stopPropagation()}>
                   <div className="flex items-center justify-end gap-1.5">

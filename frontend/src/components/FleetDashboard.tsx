@@ -1,5 +1,6 @@
 import React from 'react';
 import { FleetOverview, RecommendationDecision, Machine } from '../types';
+import { FleetHealthMatrix } from './FleetHealthMatrix';
 
 interface FleetDashboardProps {
   overview: FleetOverview | null;
@@ -203,47 +204,13 @@ export const FleetDashboard: React.FC<FleetDashboardProps> = ({
         </div>
       </section>
 
-      {/* 3. Fleet Health Distribution Bar */}
-      <section className="stitch-card p-space-base">
-        <div className="flex-between mb-2">
-          <span className="stitch-card-title">Machine Health Breakdown</span>
-          <span className="kpi-label-caps">{total} Total Machines Monitored</span>
-        </div>
-        <div className="fleet-distribution-bar">
-          <div
-            className="dist-segment good"
-            style={{ width: `${(good / (total || 1)) * 100}%` }}
-            title={`Healthy / Normal: ${good}`}
-          />
-          <div
-            className="dist-segment warning"
-            style={{ width: `${(warning / (total || 1)) * 100}%` }}
-            title={`Check Soon (Warning): ${warning}`}
-          />
-          <div
-            className="dist-segment critical"
-            style={{ width: `${(critical / (total || 1)) * 100}%` }}
-            title={`Urgent Fix (Critical): ${critical}`}
-          />
-        </div>
-        <div className="fleet-distribution-legend">
-          <div className="legend-item">
-            <span className="legend-dot good" />
-            <span className="legend-label">Healthy / Normal:</span>
-            <strong className="font-numeric text-white">{good}</strong>
-          </div>
-          <div className="legend-item">
-            <span className="legend-dot warning" />
-            <span className="legend-label">Check Soon (Warning):</span>
-            <strong className="font-numeric text-white">{warning}</strong>
-          </div>
-          <div className="legend-item">
-            <span className="legend-dot critical" />
-            <span className="legend-label">Urgent Fix (Critical):</span>
-            <strong className="font-numeric text-white">{critical}</strong>
-          </div>
-        </div>
-      </section>
+      {/* 3. Fleet Health Matrix & Condition Overview (All 1 to 50+ machines graph/heatmap) */}
+      <FleetHealthMatrix
+        machines={machines}
+        recsByMachine={recsByMachine}
+        onSelectMachine={onSelectMachine}
+        onOpenAIWithMachine={onOpenAIWithMachine}
+      />
 
       {/* 4. Priority Attention Machines Matrix */}
       <section className="stitch-card">

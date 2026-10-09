@@ -1242,6 +1242,17 @@ body {
   background-color: var(--status-critical-dot);
 }
 
+.status-chip.awaiting, .status-chip.pending {
+  background-color: rgba(56, 189, 248, 0.1);
+  color: #38bdf8;
+  border: 1px dashed rgba(56, 189, 248, 0.4);
+}
+
+.status-chip.awaiting .chip-dot, .status-chip.pending .chip-dot {
+  background-color: #38bdf8;
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
 .chip-dot {
   width: 6px;
   height: 6px;
@@ -1256,6 +1267,12 @@ body {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.04em;
+}
+
+.risk-pill.pending, .risk-pill.awaiting {
+  background-color: rgba(148, 163, 184, 0.1);
+  color: #94a3b8;
+  border: 1px dashed rgba(148, 163, 184, 0.3);
 }
 
 .risk-pill.low {

@@ -1,8 +1,7 @@
 import os
 from typing import Any, Dict, List, Optional
 from datetime import datetime
-from fastapi import FastAPI, HTTPException, Depends, Query
-
+from fastapi import FastAPI, HTTPException, Depends, Query, UploadFile, File, status
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 import pandas as pd
@@ -21,7 +20,10 @@ from backend.app.models.entities import (
     RecommendationRecord,
 )
 from backend.app.schemas.pydantic_models import (
+    MachineCreate,
+    MachineUpdate,
     MachineResponse,
+    MachineIdCheckResponse,
     SensorReadingResponse,
     HealthRecordResponse,
     RiskRecordResponse,
@@ -223,11 +225,258 @@ def get_fleet_recommendations(db: Session = Depends(get_db)) -> List[Dict[str, A
 # Stage 10: PostgreSQL Database-Backed Persistence Endpoints
 # ---------------------------------------------------------
 
+@app.get("/api/v1/machines/check-id/{machine_id}", response_model=MachineIdCheckResponse)
+def check_machine_id_availability(machine_id: str, db: Session = Depends(get_db)):
+    """Check if a machine identifier is unique and available for registration."""
+    mid = machine_id.strip()
+    if not mid:
+        raise HTTPException(status_code=400, detail="Machine ID cannot be empty.")
+    
+    existing = db.query(Machine).filter(Machine.machine_id == mid).first()
+    if existing:
+        return MachineIdCheckResponse(
+            machine_id=mid,
+            available=False,
+            message=f"Machine ID '{mid}' is already registered in the system."
+        )
+    return MachineIdCheckResponse(
+        machine_id=mid,
+        available=True,
+        message=f"Machine ID '{mid}' is available."
+    )
+
 @app.get("/api/v1/machines", response_model=List[MachineResponse])
 def list_machines(db: Session = Depends(get_db)):
-    """List all registered machines in the database."""
+    """List all registered machines in the database with monitoring readiness summary."""
     machines = db.query(Machine).order_by(Machine.machine_id).all()
-    return machines
+    results = []
+    for m in machines:
+        # Determine actual monitoring readiness
+        reading_count = db.query(SensorReading).filter(SensorReading.machine_id == m.machine_id).count()
+        if m.status in ["inactive", "Inactive", "Under Maintenance"]:
+            readiness = "Inactive"
+        elif reading_count >= 10:
+            readiness = "Monitoring Active"
+        elif reading_count > 0:
+            readiness = "Ready for Analysis"
+        else:
+            readiness = "Awaiting Data"
+            
+        res = MachineResponse.from_orm(m)
+        res.total_readings = reading_count
+        res.monitoring_readiness = readiness
+        results.append(res)
+    return results
+
+@app.post("/api/v1/machines", response_model=MachineResponse, status_code=status.HTTP_201_CREATED)
+def register_machine(payload: MachineCreate, db: Session = Depends(get_db)):
+    """
+    Register and onboard a new industrial machine.
+    Enforces unique machine ID, validates technical and operational parameters,
+    and initializes machine metadata transactionally.
+    """
+    clean_id = payload.machine_id.strip().upper()
+    if not clean_id:
+        raise HTTPException(status_code=422, detail="Machine ID cannot be empty.")
+    
+    # 1. Uniqueness check
+    existing = db.query(Machine).filter(Machine.machine_id == clean_id).first()
+    if existing:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"Machine with ID '{clean_id}' already exists in the system."
+        )
+
+    # 2. Check serial number uniqueness if provided
+    if payload.serial_number and payload.serial_number.strip():
+        sn = payload.serial_number.strip()
+        existing_sn = db.query(Machine).filter(Machine.serial_number == sn).first()
+        if existing_sn:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f"A machine with serial number '{sn}' is already registered ({existing_sn.machine_id})."
+            )
+
+    try:
+        # 3. Create machine record with appropriate onboarding status
+        new_machine = Machine(
+            machine_id=clean_id,
+            machine_type=payload.machine_type.strip(),
+            machine_name=payload.machine_name.strip() if payload.machine_name else f"{payload.machine_type} {clean_id}",
+            installation_date=payload.installation_date,
+            status=payload.status or "Awaiting Data",
+            manufacturer=payload.manufacturer.strip() if payload.manufacturer else None,
+            model_number=payload.model_number.strip() if payload.model_number else None,
+            serial_number=payload.serial_number.strip() if payload.serial_number else None,
+            plant=payload.plant.strip() if payload.plant else None,
+            production_line=payload.production_line.strip() if payload.production_line else None,
+            location=payload.location.strip() if payload.location else None,
+            description=payload.description.strip() if payload.description else None,
+            specifications=payload.specifications or {},
+            operational_settings=payload.operational_settings or {},
+            sensor_config=payload.sensor_config or {},
+        )
+        db.add(new_machine)
+        db.flush()
+
+        # 4. Save any initial maintenance history records provided during wizard
+        maint_list = payload.initial_maintenance_history or payload.initial_maintenance_records
+        if maint_list:
+            for item in maint_list:
+                m_date_raw = item.get("maintenance_date")
+                if m_date_raw:
+                    try:
+                        m_date = datetime.fromisoformat(str(m_date_raw))
+                    except Exception:
+                        m_date = datetime.now()
+                else:
+                    m_date = datetime.now()
+
+                m_rec = MaintenanceRecord(
+                    machine_id=clean_id,
+                    maintenance_date=m_date,
+                    maintenance_type=item.get("maintenance_type", "PREVENTIVE"),
+                    component=item.get("component", "General System"),
+                    description=item.get("description", "Commissioning baseline recorded during machine registration."),
+                    action_taken=item.get("action_taken", "Inspection and verification"),
+                    sop_code=item.get("sop_code", "SOP-COMMISSIONING-01"),
+                    technician_notes=item.get("technician_notes"),
+                )
+                db.add(m_rec)
+
+        db.commit()
+        db.refresh(new_machine)
+
+        # Invalidate fleet-level overview caches so new machine reflects immediately
+        invalidate_fleet_caches()
+
+        response = MachineResponse.from_orm(new_machine)
+        response.total_readings = 0
+        response.monitoring_readiness = "Awaiting Data"
+        return response
+
+    except HTTPException:
+        db.rollback()
+        raise
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to register machine: {str(e)}"
+        )
+
+@app.put("/api/v1/machines/{machine_id}", response_model=MachineResponse)
+def update_machine(machine_id: str, payload: MachineUpdate, db: Session = Depends(get_db)):
+    """Update metadata and technical configuration for an existing machine."""
+    machine = db.query(Machine).filter(Machine.machine_id == machine_id).first()
+    if not machine:
+        raise HTTPException(status_code=404, detail=f"Machine {machine_id} not found in database.")
+
+    for field, val in payload.dict(exclude_unset=True).items():
+        if val is not None:
+            setattr(machine, field, val)
+
+    machine.updated_at = datetime.utcnow()
+    db.commit()
+    db.refresh(machine)
+    invalidate_fleet_caches()
+    return machine
+
+@app.post("/api/v1/machines/{machine_id}/import-readings-csv")
+async def import_machine_sensor_csv(
+    machine_id: str,
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db)
+):
+    """
+    Import historical sensor telemetry CSV for a registered machine.
+    Validates CSV schema (timestamp, vibration, temperature) and populates sensor_readings.
+    Triggers predictive health pipeline once data threshold is satisfied.
+    """
+    machine = db.query(Machine).filter(Machine.machine_id == machine_id).first()
+    if not machine:
+        raise HTTPException(status_code=404, detail=f"Machine {machine_id} not found.")
+
+    if not file.filename.endswith(".csv"):
+        raise HTTPException(status_code=422, detail="Only CSV files are supported.")
+
+    try:
+        import io
+        contents = await file.read()
+        df = pd.read_csv(io.BytesIO(contents))
+        
+        # Check required columns
+        required_cols = {"temperature", "vibration_magnitude"}
+        if not required_cols.issubset(set(df.columns)):
+            # Check for alternative vibration columns (e.g. vibration_x, y, z)
+            if not ("vibration_x" in df.columns or "vibration" in df.columns):
+                raise HTTPException(
+                    status_code=422,
+                    detail=f"CSV is missing required sensor columns. Required: temperature and vibration_magnitude (or vibration_x)."
+                )
+
+        imported_count = 0
+        for _, row in df.iterrows():
+            ts_val = row.get("timestamp")
+            if pd.isna(ts_val):
+                ts = datetime.utcnow()
+            else:
+                try:
+                    ts = datetime.fromisoformat(str(ts_val))
+                except Exception:
+                    ts = datetime.utcnow()
+
+            temp = float(row.get("temperature", 65.0))
+            vx = float(row.get("vibration_x", 0.0))
+            vy = float(row.get("vibration_y", 0.0))
+            vz = float(row.get("vibration_z", 0.0))
+            vm = float(row.get("vibration_magnitude", (vx**2 + vy**2 + vz**2)**0.5 if (vx or vy or vz) else 1.2))
+
+            reading = SensorReading(
+                machine_id=machine_id,
+                timestamp=ts,
+                temperature=temp,
+                vibration_x=vx,
+                vibration_y=vy,
+                vibration_z=vz,
+                vibration_magnitude=vm,
+                load_percent=float(row.get("load_percent", 75.0)) if "load_percent" in row and not pd.isna(row["load_percent"]) else None,
+                rotational_speed=float(row.get("rotational_speed", 1450.0)) if "rotational_speed" in row and not pd.isna(row["rotational_speed"]) else None,
+                operating_hours=float(row.get("operating_hours", 100.0 + imported_count)),
+            )
+            db.add(reading)
+            imported_count += 1
+
+        db.commit()
+
+        # Update machine status to Active/Monitoring
+        machine.status = "active"
+        db.commit()
+
+        # If we have at least 10 readings, automatically run predictive analysis pipeline
+        pipeline_executed = False
+        try:
+            if imported_count >= 10:
+                db_pipeline_service.process_and_persist_machine_decision(db, machine_id)
+                pipeline_executed = True
+        except Exception:
+            pass
+
+        invalidate_fleet_caches()
+
+        return {
+            "machine_id": machine_id,
+            "imported_readings": imported_count,
+            "pipeline_executed": pipeline_executed,
+            "monitoring_status": "Monitoring Active" if pipeline_executed else "Ready for Analysis",
+        }
+
+    except HTTPException:
+        db.rollback()
+        raise
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Failed to parse and import CSV: {str(e)}")
 
 @app.get("/api/v1/machines/{machine_id}", response_model=MachineResponse)
 def get_machine(machine_id: str, db: Session = Depends(get_db)):
@@ -235,7 +484,12 @@ def get_machine(machine_id: str, db: Session = Depends(get_db)):
     machine = db.query(Machine).filter(Machine.machine_id == machine_id).first()
     if not machine:
         raise HTTPException(status_code=404, detail=f"Machine {machine_id} not found in database.")
-    return machine
+    
+    reading_count = db.query(SensorReading).filter(SensorReading.machine_id == machine_id).count()
+    res = MachineResponse.from_orm(machine)
+    res.total_readings = reading_count
+    res.monitoring_readiness = "Monitoring Active" if reading_count >= 10 else "Ready for Analysis" if reading_count > 0 else "Awaiting Data"
+    return res
 
 @app.get("/api/v1/machines/{machine_id}/sensor-history", response_model=List[SensorReadingResponse])
 def get_sensor_history(
@@ -316,6 +570,63 @@ def get_machine_latest_status(machine_id: str, db: Session = Depends(get_db)) ->
     if not machine:
         raise HTTPException(status_code=404, detail=f"Machine {machine_id} not found in database.")
     
+    reading_count = db.query(SensorReading).filter(SensorReading.machine_id == machine_id).count()
+    if reading_count == 0:
+        return {
+            "machine_id": machine.machine_id,
+            "machine_type": machine.machine_type,
+            "timestamp": datetime.utcnow().isoformat(),
+            "monitoring_readiness": "Awaiting Data",
+            "current_condition": {
+                "health_score": 100.0,
+                "health_state": None,
+                "health_state_label": "Awaiting Data",
+                "anomaly_status": False,
+                "anomaly_score": None,
+                "degradation_status": "Insufficient history",
+                "degradation_rate": None,
+                "rul_hours": None,
+                "temperature_mean": None,
+                "vibration_magnitude_mean": None,
+            },
+            "risk_assessment": {
+                "risk_score": 0.0,
+                "risk_level": "PENDING",
+                "maintenance_priority": "None",
+                "maintenance_time_window": "Awaiting initial readings",
+                "risk_factors": {},
+            },
+            "measured_evidence": {
+                "temperature": None,
+                "vibration_x": None,
+                "vibration_y": None,
+                "vibration_z": None,
+                "vibration_magnitude": None,
+                "operational_hours": 0.0,
+                "load_percent": None,
+                "rotational_speed": None,
+            },
+            "calculated_evidence": {
+                "health_score": 100.0,
+                "health_state_label": "Awaiting Data",
+                "anomaly_detected": False,
+                "anomaly_score": None,
+                "degradation_status": "Insufficient history",
+                "degradation_slope": None,
+                "rul_hours": None,
+                "risk_score": 0.0,
+                "risk_level": "PENDING",
+                "maintenance_priority": "None",
+                "estimated_maintenance_time_window": "Awaiting telemetry",
+            },
+            "retrieved_documentary_evidence": [],
+            "generated_explanation": {
+                "summary": f"Machine {machine.machine_id} ({machine.machine_type}) is registered and awaiting initial sensor telemetry.",
+                "key_findings": ["No telemetry stream ingested yet. Machine is in initial provisioning."],
+                "recommended_action": "Attach telemetry streaming sensors or upload a baseline CSV to initiate real-time predictive monitoring.",
+            }
+        }
+
     try:
         decision = db_pipeline_service.process_and_persist_machine_decision(db, machine_id)
         invalidate_fleet_caches()

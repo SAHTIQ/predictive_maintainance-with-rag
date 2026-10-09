@@ -33,6 +33,7 @@ interface FleetContextValue {
   setActiveAlertContext: (ctx: AlertContextType | null) => void;
   openAIWithMachine: (machineId: string) => void;
   openAIWithAlert: (ctx: AlertContextType) => void;
+  registerNewMachine: (newMachine: Machine) => void;
 }
 
 const FleetContext = createContext<FleetContextValue | undefined>(undefined);
@@ -153,6 +154,18 @@ export const FleetProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setIsAIDrawerOpen(true);
   };
 
+  const registerNewMachine = (newMachine: Machine) => {
+    setMachines((prev) => {
+      const exists = prev.some((m) => m.machine_id === newMachine.machine_id);
+      if (exists) {
+        return prev.map((m) => (m.machine_id === newMachine.machine_id ? newMachine : m));
+      }
+      return [newMachine, ...prev];
+    });
+    // Trigger global refresh in background to sync overview KPIs
+    fetchGlobalData();
+  };
+
   return (
     <FleetContext.Provider
       value={{
@@ -176,6 +189,7 @@ export const FleetProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         setActiveAlertContext,
         openAIWithMachine,
         openAIWithAlert,
+        registerNewMachine,
       }}
     >
       {children}

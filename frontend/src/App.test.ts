@@ -9,6 +9,9 @@ describe('Resonex API Service Definition', () => {
     expect(typeof api.getMachines).toBe('function');
     expect(typeof api.getFleetRecommendations).toBe('function');
     expect(typeof api.getMachine).toBe('function');
+    expect(typeof api.checkMachineId).toBe('function');
+    expect(typeof api.createMachine).toBe('function');
+    expect(typeof api.importMachineSensorCsv).toBe('function');
     expect(typeof api.getLatestMachineStatus).toBe('function');
     expect(typeof api.getSensorHistory).toBe('function');
     expect(typeof api.getHealthHistory).toBe('function');
