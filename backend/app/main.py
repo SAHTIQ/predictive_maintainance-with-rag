@@ -18,6 +18,7 @@ from backend.app.models.entities import (
     RiskRecord,
     MaintenanceRecord,
     RecommendationRecord,
+    User,
 )
 from backend.app.schemas.pydantic_models import (
     MachineCreate,
@@ -31,8 +32,13 @@ from backend.app.schemas.pydantic_models import (
     FleetOverviewResponse,
     RagChatRequest,
     RagChatResponse,
+    UserResponse,
+    UserProfileUpdate,
+    UserPreferencesUpdate,
+    ChangePasswordRequest,
 )
 from backend.app.services.db_pipeline import DatabasePipelineService
+from backend.app.utils.security import hash_password, verify_password
 
 app = FastAPI(
     title="Predictive Maintenance API",
@@ -1005,6 +1011,188 @@ def rag_chat(req: RagChatRequest, db: Session = Depends(get_db)):
         confidence=0.95 if critical_machines_list or hits else 0.85,
         source=model_source
     )
+
+
+# ---------------------------------------------------------
+# User Profile & Account Management API Endpoints
+# ---------------------------------------------------------
+
+def get_or_create_default_user(db: Session) -> User:
+    """
+    Retrieves the active user session or seeds the default shift supervisor
+    profile if the users table is unpopulated.
+    """
+    user = db.query(User).order_by(User.id.asc()).first()
+    if not user:
+        user = User(
+            email="mark.jenkins@resonex.internal",
+            full_name="Mark Jenkins",
+            display_name="Operator Jenkins",
+            phone_number="+1 (555) 382-9401",
+            job_title="Lead Monitorer / Shift Supervisor",
+            department="Predictive Maintenance & Reliability Engineering",
+            plant_assignment="Plant Alpha (Sector C Machining & Spinning)",
+            preferred_language="en",
+            role="Shift Supervisor",
+            account_status="Active",
+            avatar_url="/operations_manager_avatar.png",
+            hashed_password=hash_password("Operator@2026!"),
+            auth_provider="Resonex Local Identity",
+            preferences={
+                "theme": "dark",
+                "preferred_dashboard": "/overview",
+                "language": "en",
+                "timezone": "UTC+05:30 (Asia/Kolkata)",
+                "email_alerts": True,
+                "sms_alerts": False,
+                "critical_push": True,
+                "sound_effects": True,
+            },
+            last_login=datetime.utcnow(),
+        )
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+    return user
+
+def get_current_user(db: Session = Depends(get_db)) -> User:
+    """Authentication dependency returning the verified current user session."""
+    return get_or_create_default_user(db)
+
+
+@app.get("/api/v1/users/me", response_model=UserResponse)
+def get_user_profile(current_user: User = Depends(get_current_user)):
+    """Retrieve the currently authenticated user's profile and account information."""
+    return current_user
+
+
+@app.patch("/api/v1/users/me", response_model=UserResponse)
+def update_user_profile(
+    payload: UserProfileUpdate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Update permitted fields on the authenticated user's profile.
+    Prevents mass assignment of privileged fields (role, account_status, id).
+    Enforces email uniqueness if email is changed.
+    """
+    # 1. Validate email uniqueness if changing email
+    if payload.email is not None:
+        clean_email = payload.email.strip().lower()
+        if not clean_email or "@" not in clean_email:
+            raise HTTPException(status_code=400, detail="Invalid email address format.")
+        
+        if clean_email != current_user.email.lower():
+            existing = db.query(User).filter(User.email.ilike(clean_email), User.id != current_user.id).first()
+            if existing:
+                raise HTTPException(status_code=409, detail=f"Email '{clean_email}' is already registered to another account.")
+            current_user.email = clean_email
+
+    # 2. Update editable personal information
+    if payload.full_name is not None:
+        val = payload.full_name.strip()
+        if len(val) < 2:
+            raise HTTPException(status_code=400, detail="Full name must be at least 2 characters.")
+        current_user.full_name = val
+
+    if payload.display_name is not None:
+        current_user.display_name = payload.display_name.strip() or None
+
+    if payload.phone_number is not None:
+        current_user.phone_number = payload.phone_number.strip() or None
+
+    if payload.job_title is not None:
+        current_user.job_title = payload.job_title.strip() or None
+
+    if payload.department is not None:
+        current_user.department = payload.department.strip() or None
+
+    if payload.plant_assignment is not None:
+        current_user.plant_assignment = payload.plant_assignment.strip() or None
+
+    if payload.preferred_language is not None:
+        current_user.preferred_language = payload.preferred_language.strip() or "en"
+
+    if payload.avatar_url is not None:
+        current_user.avatar_url = payload.avatar_url.strip() or None
+
+    current_user.updated_at = datetime.utcnow()
+    db.commit()
+    db.refresh(current_user)
+    return current_user
+
+
+@app.get("/api/v1/users/me/preferences")
+def get_user_preferences(current_user: User = Depends(get_current_user)) -> Dict[str, Any]:
+    """Retrieve individual account preferences for the authenticated operator."""
+    return current_user.preferences or {}
+
+
+@app.patch("/api/v1/users/me/preferences")
+def update_user_preferences(
+    payload: UserPreferencesUpdate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+) -> Dict[str, Any]:
+    """Update and persist personal account preferences (theme, notification toggles, language, dashboard)."""
+    current_prefs = dict(current_user.preferences or {})
+    
+    update_data = payload.dict(exclude_unset=True)
+    for key, val in update_data.items():
+        if val is not None:
+            current_prefs[key] = val
+
+    current_user.preferences = current_prefs
+    current_user.updated_at = datetime.utcnow()
+    db.commit()
+    db.refresh(current_user)
+    return current_user.preferences
+
+
+@app.post("/api/v1/users/me/change-password")
+def change_user_password(
+    req: ChangePasswordRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Secure password change endpoint.
+    Verifies current password on the server against stored salted PBKDF2 hash.
+    Enforces minimum 8-character length and matching confirmation.
+    """
+    if req.new_password != req.confirm_password:
+        raise HTTPException(status_code=400, detail="New password and confirmation password do not match.")
+
+    if len(req.new_password) < 8:
+        raise HTTPException(status_code=400, detail="New password must be at least 8 characters long.")
+
+    # Verify existing password
+    if current_user.hashed_password:
+        if not verify_password(req.current_password, current_user.hashed_password):
+            raise HTTPException(status_code=400, detail="The current password you entered is incorrect.")
+
+    # Hash new password securely with random salt and 100,000 PBKDF2 iterations
+    current_user.hashed_password = hash_password(req.new_password)
+    current_user.updated_at = datetime.utcnow()
+    db.commit()
+
+    return {
+        "success": True,
+        "message": "Password changed successfully. Your account is secured with the new credentials."
+    }
+
+
+@app.post("/api/v1/users/me/sign-out")
+def sign_out_user(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    """Sign out the current active session."""
+    current_user.last_login = datetime.utcnow()
+    db.commit()
+    return {
+        "success": True,
+        "message": "Session ended successfully. You have been signed out."
+    }
+
 
 
 

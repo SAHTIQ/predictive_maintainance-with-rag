@@ -1,5 +1,7 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useFleet } from '../context/FleetContext';
+import { UserMenu } from './UserMenu';
 
 interface TopBarProps {
   totalMachines: number;
@@ -27,6 +29,15 @@ export const TopBar: React.FC<TopBarProps> = ({
   const navigate = useNavigate();
   const location = useLocation();
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const { currentUser } = useFleet();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const getInitials = (name: string) => {
+    if (!name) return 'OP';
+    const parts = name.trim().split(/\s+/);
+    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  };
 
   // Keyboard shortcut '/' to focus search input
   useEffect(() => {
@@ -212,23 +223,85 @@ export const TopBar: React.FC<TopBarProps> = ({
         {/* Vertical Divider */}
         <div className="topbar-v-divider" />
 
-        {/* Operator Profile Capsule */}
-        <div className="topbar-user-profile" title="Operator: Mark Jenkins (Shift Supervisor)">
-          <div className="profile-avatar-wrap">
-            <img
-              src="/operations_manager_avatar.png"
-              alt="Mark Jenkins"
-              className="profile-avatar-img"
-              onError={(e) => {
-                e.currentTarget.style.display = 'none';
+        {/* Operator Profile Capsule & User Menu */}
+        <div style={{ position: 'relative' }}>
+          <button
+            type="button"
+            className="topbar-user-profile"
+            onClick={() => setIsMenuOpen((prev) => !prev)}
+            aria-haspopup="true"
+            aria-expanded={isMenuOpen}
+            title={`Operator: ${currentUser.full_name} (${currentUser.job_title})`}
+            style={{
+              background: isMenuOpen ? 'var(--bg-card-hover)' : 'transparent',
+              border: 'none',
+              font: 'inherit',
+              color: 'inherit',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+            }}
+          >
+            <div className="profile-avatar-wrap">
+              {currentUser.avatar_url ? (
+                <img
+                  src={currentUser.avatar_url}
+                  alt={currentUser.full_name}
+                  className="profile-avatar-img"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                  }}
+                />
+              ) : (
+                <div
+                  style={{
+                    width: '32px',
+                    height: '32px',
+                    borderRadius: '50%',
+                    backgroundColor: 'rgba(6, 182, 212, 0.15)',
+                    border: '1px solid rgba(6, 182, 212, 0.4)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '0.72rem',
+                    fontWeight: 700,
+                    color: '#06B6D4',
+                  }}
+                >
+                  {getInitials(currentUser.full_name)}
+                </div>
+              )}
+              <span
+                className="profile-status-dot"
+                style={{
+                  backgroundColor: currentUser.account_status === 'ACTIVE' ? '#22C55E' : '#EAB308',
+                }}
+              />
+            </div>
+            <div className="profile-info-col">
+              <span className="profile-user-name">{currentUser.full_name || 'Operator'}</span>
+              <span className="profile-user-role">{currentUser.job_title || currentUser.role}</span>
+            </div>
+            <span
+              className="material-symbols-outlined"
+              style={{
+                fontSize: '16px',
+                color: 'var(--text-muted)',
+                marginLeft: '4px',
+                transform: isMenuOpen ? 'rotate(180deg)' : 'none',
+                transition: 'transform 0.15s ease',
               }}
-            />
-            <span className="profile-status-dot" />
-          </div>
-          <div className="profile-info-col">
-            <span className="profile-user-name">Mark Jenkins</span>
-            <span className="profile-user-role">Shift Supervisor</span>
-          </div>
+            >
+              expand_more
+            </span>
+          </button>
+
+          <UserMenu
+            user={currentUser}
+            isOpen={isMenuOpen}
+            onClose={() => setIsMenuOpen(false)}
+            onProfileClick={() => navigate('/profile')}
+          />
         </div>
       </div>
     </header>

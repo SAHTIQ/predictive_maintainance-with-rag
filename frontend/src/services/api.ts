@@ -116,4 +116,40 @@ export const api = {
       body: JSON.stringify({ query, machine_id: machineId, top_k: 4 }),
     });
   },
+
+  // User Profile & Account Management
+  getUserProfile: (): Promise<import('../types').UserProfile> => {
+    return fetchJson<import('../types').UserProfile>('/api/v1/users/me');
+  },
+
+  updateUserProfile: (payload: import('../types').UserProfileUpdateInput): Promise<import('../types').UserProfile> => {
+    return fetchJson<import('../types').UserProfile>('/api/v1/users/me', {
+      method: 'PATCH',
+      body: JSON.stringify(payload),
+    });
+  },
+
+  getUserPreferences: (): Promise<import('../types').UserPreferences> => {
+    return fetchJson<import('../types').UserPreferences>('/api/v1/users/me/preferences');
+  },
+
+  updateUserPreferences: (prefs: import('../types').UserPreferencesUpdateInput): Promise<import('../types').UserPreferences> => {
+    return fetchJson<import('../types').UserPreferences>('/api/v1/users/me/preferences', {
+      method: 'PATCH',
+      body: JSON.stringify(prefs),
+    });
+  },
+
+  changePassword: (payload: import('../types').ChangePasswordInput): Promise<{ success: boolean; message: string }> => {
+    return fetchJson<{ success: boolean; message: string }>('/api/v1/users/me/change-password', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  },
+
+  signOut: (): Promise<{ success: boolean; message: string }> => {
+    return fetchJson<{ success: boolean; message: string }>('/api/v1/users/me/sign-out', {
+      method: 'POST',
+    });
+  },
 };

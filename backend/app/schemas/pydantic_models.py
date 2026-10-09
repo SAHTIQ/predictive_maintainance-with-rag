@@ -155,3 +155,58 @@ class RagChatResponse(BaseModel):
     suggested_actions: List[str]
     confidence: float
     source: str
+
+
+# ---------------------------------------------------------
+# User Profile & Account Management Schemas
+# ---------------------------------------------------------
+
+class UserResponse(BaseModel):
+    id: int
+    email: str
+    full_name: str
+    display_name: Optional[str] = None
+    phone_number: Optional[str] = None
+    job_title: Optional[str] = None
+    department: Optional[str] = None
+    plant_assignment: Optional[str] = None
+    preferred_language: str = "en"
+    role: str
+    account_status: str
+    avatar_url: Optional[str] = None
+    preferences: Optional[Dict[str, Any]] = None
+    auth_provider: str = "Resonex Local Identity"
+    last_login: Optional[datetime] = None
+    created_at: datetime
+    updated_at: datetime
+
+    model_config = {"from_attributes": True}
+
+
+class UserProfileUpdate(BaseModel):
+    full_name: Optional[str] = Field(None, min_length=2, max_length=100)
+    display_name: Optional[str] = Field(None, max_length=100)
+    email: Optional[str] = Field(None, max_length=120)
+    phone_number: Optional[str] = Field(None, max_length=50)
+    job_title: Optional[str] = Field(None, max_length=100)
+    department: Optional[str] = Field(None, max_length=100)
+    plant_assignment: Optional[str] = Field(None, max_length=100)
+    preferred_language: Optional[str] = Field(None, max_length=20)
+    avatar_url: Optional[str] = None
+
+
+class UserPreferencesUpdate(BaseModel):
+    theme: Optional[str] = None
+    preferred_dashboard: Optional[str] = None
+    language: Optional[str] = None
+    timezone: Optional[str] = None
+    email_alerts: Optional[bool] = None
+    sms_alerts: Optional[bool] = None
+    critical_push: Optional[bool] = None
+    sound_effects: Optional[bool] = None
+
+
+class ChangePasswordRequest(BaseModel):
+    current_password: str
+    new_password: str = Field(..., min_length=8)
+    confirm_password: str

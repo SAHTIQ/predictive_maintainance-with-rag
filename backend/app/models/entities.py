@@ -163,3 +163,26 @@ class RecommendationRecord(Base):
     __table_args__ = (
         Index("idx_rec_machine_ts", "machine_id", "timestamp"),
     )
+
+
+class User(Base):
+    __tablename__ = "users"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    email = Column(String(120), unique=True, nullable=False, index=True)
+    full_name = Column(String(100), nullable=False)
+    display_name = Column(String(100), nullable=True)
+    phone_number = Column(String(50), nullable=True)
+    job_title = Column(String(100), default="Lead Monitorer / Shift Supervisor", nullable=True)
+    department = Column(String(100), default="Predictive Maintenance & Reliability", nullable=True)
+    plant_assignment = Column(String(100), default="Plant Alpha - Weaving & Spinning", nullable=True)
+    preferred_language = Column(String(20), default="en", nullable=False)
+    role = Column(String(50), default="Lead Monitorer / Shift Supervisor", nullable=False)
+    account_status = Column(String(30), default="Active", nullable=False)
+    avatar_url = Column(String(255), nullable=True)
+    hashed_password = Column(String(255), nullable=True)
+    preferences = Column(JSON, nullable=True)
+    auth_provider = Column(String(50), default="Resonex Local Identity", nullable=False)
+    last_login = Column(DateTime(timezone=True), default=utc_now, nullable=True)
+    created_at = Column(DateTime(timezone=True), default=utc_now, nullable=False)
+    updated_at = Column(DateTime(timezone=True), default=utc_now, onupdate=utc_now, nullable=False)

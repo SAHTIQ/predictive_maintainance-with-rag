@@ -19,6 +19,12 @@ describe('Resonex API Service Definition', () => {
     expect(typeof api.getMaintenanceHistory).toBe('function');
     expect(typeof api.getRagContext).toBe('function');
     expect(typeof api.sendRagChat).toBe('function');
+    expect(typeof api.getUserProfile).toBe('function');
+    expect(typeof api.updateUserProfile).toBe('function');
+    expect(typeof api.getUserPreferences).toBe('function');
+    expect(typeof api.updateUserPreferences).toBe('function');
+    expect(typeof api.changePassword).toBe('function');
+    expect(typeof api.signOut).toBe('function');
   });
 });
 
@@ -69,6 +75,7 @@ describe('Resonex Multi-Page Routing Architecture', () => {
     expect(childPaths).toContain('maintenance');
     expect(childPaths).toContain('reports');
     expect(childPaths).toContain('settings');
+    expect(childPaths).toContain('profile');
     expect(childPaths).toContain('assistant');
     expect(childPaths).toContain('*');
   });

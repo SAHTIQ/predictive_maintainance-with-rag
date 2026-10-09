@@ -7,6 +7,7 @@ import { AlertsPage } from '../pages/AlertsPage';
 import { MaintenancePage } from '../pages/MaintenancePage';
 import { ReportsPage } from '../pages/ReportsPage';
 import { SettingsPage } from '../pages/SettingsPage';
+import { ProfilePage } from '../pages/ProfilePage';
 import { AssistantPage } from '../pages/AssistantPage';
 import { NotFoundPage } from '../pages/NotFoundPage';
 import { Navigate } from 'react-router-dom';
@@ -47,6 +48,10 @@ export const routesConfig: RouteObject[] = [
       {
         path: 'settings',
         element: <SettingsPage />,
+      },
+      {
+        path: 'profile',
+        element: <ProfilePage />,
       },
       {
         path: 'assistant',

@@ -20,6 +20,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { to: '/maintenance', label: 'Maintenance & Repairs', icon: 'build' },
     { to: '/reports', label: 'Shift Reports', icon: 'assessment' },
     { to: '/settings', label: 'Settings', icon: 'settings' },
+    { to: '/profile', label: 'Operator Profile', icon: 'account_circle' },
     { to: '/assistant', label: 'Resonex AI', icon: 'smart_toy', isAi: true },
   ];
 

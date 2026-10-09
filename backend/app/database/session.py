@@ -26,7 +26,7 @@ Base = declarative_base()
 
 def init_db():
     """Create all database tables."""
-    from backend.app.models.entities import Machine, SensorReading, HealthRecord, RiskRecord, MaintenanceRecord, RecommendationRecord
+    from backend.app.models.entities import Machine, SensorReading, HealthRecord, RiskRecord, MaintenanceRecord, RecommendationRecord, User
     Base.metadata.create_all(bind=engine)
 
 def get_db():

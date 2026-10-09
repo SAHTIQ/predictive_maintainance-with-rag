@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { FleetOverview, Machine, RecommendationDecision } from '../types';
+import { FleetOverview, Machine, RecommendationDecision, UserProfile, UserProfileUpdateInput, UserPreferencesUpdateInput, UserPreferences } from '../types';
 import { api } from '../services/api';
 import { MOCK_FLEET_OVERVIEW, MOCK_MACHINES, MOCK_RECOMMENDATIONS } from '../services/mockData';
 
@@ -10,6 +10,35 @@ export interface AlertContextType {
   rulHours?: number | null;
   diagnostics?: string;
 }
+
+export const DEFAULT_USER_PROFILE: UserProfile = {
+  id: 1,
+  email: 'mark.jenkins@resonex.internal',
+  full_name: 'Mark Jenkins',
+  display_name: 'Operator Jenkins',
+  phone_number: '+1 (555) 382-9401',
+  job_title: 'Lead Monitorer / Shift Supervisor',
+  department: 'Predictive Maintenance & Reliability Engineering',
+  plant_assignment: 'Plant Alpha (Sector C Machining & Spinning)',
+  preferred_language: 'en',
+  role: 'Shift Supervisor',
+  account_status: 'Active',
+  avatar_url: '/operations_manager_avatar.png',
+  auth_provider: 'Resonex Local Identity',
+  last_login: new Date().toISOString(),
+  preferences: {
+    theme: 'dark',
+    preferred_dashboard: '/overview',
+    language: 'en',
+    timezone: 'UTC+05:30 (Asia/Kolkata)',
+    email_alerts: true,
+    sms_alerts: false,
+    critical_push: true,
+    sound_effects: true,
+  },
+  created_at: '2026-01-15T08:00:00Z',
+  updated_at: new Date().toISOString(),
+};
 
 interface FleetContextValue {
   overview: FleetOverview;
@@ -26,6 +55,11 @@ interface FleetContextValue {
   toggleTheme: () => void;
   searchQuery: string;
   setSearchQuery: (q: string) => void;
+  // User Profile
+  currentUser: UserProfile;
+  updateCurrentUser: (updates: UserProfileUpdateInput) => Promise<UserProfile>;
+  updateUserPreferences: (prefs: UserPreferencesUpdateInput) => Promise<UserPreferences>;
+  refreshCurrentUser: () => Promise<void>;
   // Quick AI drawer support across all pages
   isAIDrawerOpen: boolean;
   setIsAIDrawerOpen: (open: boolean) => void;
@@ -39,6 +73,7 @@ interface FleetContextValue {
 const FleetContext = createContext<FleetContextValue | undefined>(undefined);
 
 export const FleetProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [currentUser, setCurrentUser] = useState<UserProfile>(DEFAULT_USER_PROFILE);
   const [overview, setOverview] = useState<FleetOverview>(MOCK_FLEET_OVERVIEW);
   const [machines, setMachines] = useState<Machine[]>(MOCK_MACHINES);
   const [recommendations, setRecommendations] = useState<RecommendationDecision[]>(MOCK_RECOMMENDATIONS);
@@ -87,9 +122,53 @@ export const FleetProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       })
       .catch(() => {});
 
-    await Promise.allSettled([p1, p2, p3]);
+    const p4 = api.getUserProfile()
+      .then((user) => {
+        if (user && user.id) {
+          setCurrentUser(user);
+          if (user.preferences?.theme && (user.preferences.theme === 'light' || user.preferences.theme === 'dark')) {
+            setTheme(user.preferences.theme);
+          }
+          anySuccess = true;
+        }
+      })
+      .catch(() => {});
+
+    await Promise.allSettled([p1, p2, p3, p4]);
     setIsOffline(!anySuccess);
     setLoading(false);
+  };
+
+  const refreshCurrentUser = async () => {
+    try {
+      const user = await api.getUserProfile();
+      if (user && user.id) {
+        setCurrentUser(user);
+        if (user.preferences?.theme) {
+          setTheme(user.preferences.theme);
+        }
+      }
+    } catch (err) {
+      console.warn('Failed to refresh current user:', err);
+    }
+  };
+
+  const updateCurrentUser = async (updates: UserProfileUpdateInput): Promise<UserProfile> => {
+    const updated = await api.updateUserProfile(updates);
+    setCurrentUser(updated);
+    return updated;
+  };
+
+  const updateUserPreferences = async (prefs: UserPreferencesUpdateInput): Promise<UserPreferences> => {
+    const updatedPrefs = await api.updateUserPreferences(prefs);
+    setCurrentUser((prev) => ({
+      ...prev,
+      preferences: updatedPrefs,
+    }));
+    if (updatedPrefs.theme) {
+      setTheme(updatedPrefs.theme);
+    }
+    return updatedPrefs;
   };
 
   useEffect(() => {
@@ -183,6 +262,11 @@ export const FleetProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         toggleTheme,
         searchQuery,
         setSearchQuery,
+        // User Profile
+        currentUser,
+        updateCurrentUser,
+        updateUserPreferences,
+        refreshCurrentUser,
         isAIDrawerOpen,
         setIsAIDrawerOpen,
         activeAlertContext,

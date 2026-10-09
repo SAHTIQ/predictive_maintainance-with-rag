@@ -258,3 +258,63 @@ export interface RagChatResponse {
   source: string;
 }
 
+export interface UserPreferences {
+  theme?: 'dark' | 'light';
+  preferred_dashboard?: string;
+  language?: string;
+  timezone?: string;
+  email_alerts?: boolean;
+  sms_alerts?: boolean;
+  critical_push?: boolean;
+  sound_effects?: boolean;
+}
+
+export interface UserProfile {
+  id: number;
+  email: string;
+  full_name: string;
+  display_name?: string | null;
+  phone_number?: string | null;
+  job_title?: string | null;
+  department?: string | null;
+  plant_assignment?: string | null;
+  preferred_language?: string;
+  role: string;
+  account_status: string;
+  avatar_url?: string | null;
+  preferences?: UserPreferences | null;
+  auth_provider: string;
+  last_login?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface UserProfileUpdateInput {
+  full_name?: string;
+  display_name?: string;
+  email?: string;
+  phone_number?: string;
+  job_title?: string;
+  department?: string;
+  plant_assignment?: string;
+  preferred_language?: string;
+  avatar_url?: string;
+}
+
+export interface UserPreferencesUpdateInput {
+  theme?: string;
+  preferred_dashboard?: string;
+  language?: string;
+  timezone?: string;
+  email_alerts?: boolean;
+  sms_alerts?: boolean;
+  critical_push?: boolean;
+  sound_effects?: boolean;
+}
+
+export interface ChangePasswordInput {
+  current_password: string;
+  new_password: string;
+  confirm_password: string;
+}
+
