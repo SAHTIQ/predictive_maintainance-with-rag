@@ -10,3 +10,5 @@ scikit-learn
 joblib
 pytest
 httpx
+python-multipart
+huggingface-hub

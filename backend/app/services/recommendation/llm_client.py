@@ -3,14 +3,24 @@ import json
 import logging
 from typing import Any, Dict, Optional, List
 
+from pathlib import Path
+from dotenv import load_dotenv
+
+backend_env = Path(__file__).resolve().parents[3] / ".env"
+root_env = Path(__file__).resolve().parents[4] / ".env"
+if backend_env.exists():
+    load_dotenv(backend_env)
+elif root_env.exists():
+    load_dotenv(root_env)
+
 logger = logging.getLogger(__name__)
 
 class GroundedLLMClient:
     """
     Pluggable, resilient Industrial LLM client for predictive maintenance & conversational RAG.
     Supports:
-    1. Hugging Face Inference API / InferenceClient (e.g. Qwen/Qwen2.5-7B-Instruct, mistralai/Mistral-7B-Instruct-v0.3)
-    2. Google Gemini API (gemini-1.5-flash / gemini-2.0-flash) via google-genai
+    1. Google Gemini API (gemini-3.5-flash / gemini-2.5-flash) via google-genai
+    2. Hugging Face Inference API / InferenceClient
     3. Self-contained deterministic expert reasoning fallback if no external API token is active.
     """
     def __init__(
@@ -18,12 +28,12 @@ class GroundedLLMClient:
         hf_token: Optional[str] = None,
         hf_model: str = "Qwen/Qwen2.5-7B-Instruct",
         gemini_api_key: Optional[str] = None,
-        gemini_model: str = "gemini-1.5-flash",
+        gemini_model: str = "gemini-3.5-flash",
     ):
         self.hf_token = hf_token or os.getenv("HF_TOKEN") or os.getenv("HUGGINGFACE_API_KEY")
         self.hf_model = os.getenv("HF_MODEL_NAME", hf_model)
         self.gemini_api_key = gemini_api_key or os.getenv("GEMINI_API_KEY")
-        self.gemini_model = gemini_model
+        self.gemini_model = os.getenv("GEMINI_MODEL", gemini_model)
         
         self.hf_client = None
         if self.hf_token:
@@ -77,7 +87,27 @@ class GroundedLLMClient:
 
         prompt = "\n".join(user_content_parts)
 
-        # 1. Try Hugging Face Inference if token is configured
+        # 1. Try Gemini first if API key configured (fast, reliable)
+        if self.gemini_api_key:
+            candidate_models = list(dict.fromkeys([self.gemini_model, "gemini-3.5-flash-lite", "gemini-3.5-flash"]))
+            for model_name in candidate_models:
+                try:
+                    from google import genai
+                    client = genai.Client(api_key=self.gemini_api_key)
+                    full_content = f"{system_prompt}\n\n{prompt}"
+                    res = client.models.generate_content(
+                        model=model_name,
+                        contents=full_content
+                    )
+                    if res and res.text:
+                        return {
+                            "text": res.text,
+                            "model_used": f"Google Gemini ({model_name})"
+                        }
+                except Exception as e:
+                    logger.warning(f"Gemini API call ({model_name}) failed: {e}. Trying next...")
+
+        # 2. Try Hugging Face Inference if token is configured
         if self.hf_client:
             try:
                 messages = [
@@ -96,23 +126,6 @@ class GroundedLLMClient:
                 }
             except Exception as e:
                 logger.warning(f"Hugging Face inference error: {e}. Falling back...")
-
-        # 2. Try Gemini if API key configured
-        if self.gemini_api_key:
-            try:
-                from google import genai
-                client = genai.Client(api_key=self.gemini_api_key)
-                full_content = f"{system_prompt}\n\n{prompt}"
-                res = client.models.generate_content(
-                    model=self.gemini_model,
-                    contents=full_content
-                )
-                return {
-                    "text": res.text,
-                    "model_used": f"Google Gemini ({self.gemini_model})"
-                }
-            except Exception as e:
-                logger.warning(f"Gemini API call failed: {e}. Falling back...")
 
         return None
 
@@ -152,7 +165,27 @@ Respond with JSON:
   "confidence": 0.85
 }}
 """
-        # Try HF
+        # 1. Try Gemini
+        if self.gemini_api_key:
+            candidate_models = list(dict.fromkeys([self.gemini_model, "gemini-3.5-flash-lite", "gemini-3.5-flash"]))
+            for model_name in candidate_models:
+                try:
+                    from google import genai
+                    client = genai.Client(api_key=self.gemini_api_key)
+                    res = client.models.generate_content(
+                        model=model_name,
+                        contents=prompt
+                    )
+                    text = res.text.strip()
+                    if text.startswith("```json"):
+                        text = text[7:-3].strip()
+                    elif text.startswith("```"):
+                        text = text[3:-3].strip()
+                    return json.loads(text)
+                except Exception as e:
+                    logger.warning(f"Gemini recommendation generation ({model_name}) failed: {e}. Trying next...")
+
+        # 2. Try HF
         if self.hf_client:
             try:
                 res = self.hf_client.chat_completion(
@@ -162,25 +195,7 @@ Respond with JSON:
                 )
                 text = res.choices[0].message.content
                 return json.loads(text)
-            except Exception:
-                pass
-
-        # Try Gemini
-        if self.gemini_api_key:
-            try:
-                from google import genai
-                client = genai.Client(api_key=self.gemini_api_key)
-                res = client.models.generate_content(
-                    model=self.gemini_model,
-                    contents=prompt
-                )
-                text = res.text.strip()
-                if text.startswith("```json"):
-                    text = text[7:-3].strip()
-                elif text.startswith("```"):
-                    text = text[3:-3].strip()
-                return json.loads(text)
-            except Exception:
-                pass
+            except Exception as e:
+                logger.warning(f"Hugging Face recommendation generation failed: {e}. Falling back...")
 
         return None

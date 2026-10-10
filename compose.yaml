@@ -1,0 +1,41 @@
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    environment:
+      PYTHONPATH: /app
+      DATABASE_URL: sqlite:////app/backend/predictive_maintenance.db
+      CORS_ORIGINS: http://localhost:8080,http://127.0.0.1:8080
+    env_file:
+      - path: ./backend/.env
+        required: false
+    volumes:
+      - ./backend/predictive_maintenance.db:/app/backend/predictive_maintenance.db
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=5)"
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+      args:
+        VITE_API_BASE_URL: ""
+    ports:
+      - "8080:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
