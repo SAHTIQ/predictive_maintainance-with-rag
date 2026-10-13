@@ -1,10 +1,42 @@
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+from backend.app.services.rag.document_loader import MarkdownKnowledgeBaseLoader
 from backend.app.services.rag.query_builder import ContextAwareQueryBuilder
 from backend.app.services.rag.vector_store import LocalVectorStore
 
 INDEX_PATH = Path(__file__).resolve().parents[4] / "backend" / "ml" / "models" / "rag_index.joblib"
+KB_DIR = Path(__file__).resolve().parents[4] / "data" / "knowledge_base"
+
+_cached_store: Optional[LocalVectorStore] = None
+
+
+def _get_or_init_store() -> Optional[LocalVectorStore]:
+    global _cached_store
+    if _cached_store is not None and _cached_store.is_indexed:
+        return _cached_store
+
+    if INDEX_PATH.exists():
+        try:
+            _cached_store = LocalVectorStore.load(INDEX_PATH)
+            return _cached_store
+        except Exception:
+            pass
+
+    if KB_DIR.exists():
+        try:
+            loader = MarkdownKnowledgeBaseLoader(KB_DIR)
+            chunks = loader.load_documents()
+            if chunks:
+                store = LocalVectorStore(index_path=INDEX_PATH)
+                store.build_index(chunks)
+                _cached_store = store
+                return _cached_store
+        except Exception:
+            pass
+
+    return None
+
 
 class ContextAwareRetriever:
     """
@@ -14,10 +46,8 @@ class ContextAwareRetriever:
     def __init__(self, vector_store: Optional[LocalVectorStore] = None):
         if vector_store is not None:
             self.store = vector_store
-        elif INDEX_PATH.exists():
-            self.store = LocalVectorStore.load(INDEX_PATH)
         else:
-            self.store = None
+            self.store = _get_or_init_store()
 
     def retrieve_evidence_for_machine(
         self,

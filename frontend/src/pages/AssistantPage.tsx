@@ -3,6 +3,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useFleet } from '../context/FleetContext';
 import { RagChatResponse, RagDocumentHit } from '../types';
 import { api } from '../services/api';
+import { generateLocalRagResponse } from '../services/localRagEngine';
 import { MarkdownMessage } from '../components/MarkdownMessage';
 
 interface AssistantMessage {
@@ -29,7 +30,7 @@ const DEFAULT_SUGGESTIONS = [
 ];
 
 export const AssistantPage: React.FC = () => {
-  const { machines, overview } = useFleet();
+  const { machines, recommendations, overview } = useFleet();
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
 
@@ -130,44 +131,25 @@ export const AssistantPage: React.FC = () => {
 
       setMessages((prev) => [...prev, assistantMsg]);
     } catch (err: any) {
-      // Local synthesis fallback using real fleet context
-      let fallbackText = `### Resonex AI Decision Explanation (Telemetry Grounded)\n\n`;
-      let actions = ['Verify sensor cabling and run acoustic stethoscope check'];
-
-      const qLower = query.toLowerCase();
-      if (selectedMachineId) {
-        fallbackText += `Machine **${selectedMachineId}** is monitored under ISO 10816-3 criteria.\n\n` +
-          `**Diagnostic Checklist:**\n` +
-          `1. Check lubrication schedule (SOP-LUB-02).\n` +
-          `2. Inspect spindle bearing outer and inner raceways for mechanical wear (SOP-MECH-04).\n` +
-          `3. Record high-frequency FFT readings to verify harmonic peaks.`;
-        actions = [
-          `Inspect ${selectedMachineId} bearing vibration (SOP-MECH-04)`,
-          `Replenish polyurea grease (SOP-LUB-02)`,
-        ];
-      } else if (qLower.includes('attention') || qLower.includes('critical') || qLower.includes('first')) {
-        fallbackText += `**Factory Maintenance Priorities:**\n\n` +
-          `- Overall monitored fleet: **${overview.total_machines} machines**\n` +
-          `- Critical machines requiring intervention: **${overview.health_states?.Critical || 0}**\n` +
-          `- Warning state machines: **${overview.health_states?.Warning || 0}**\n\n` +
-          `**Top Recommendation:** Prioritize emergency bearing servicing on flagged P1 units before end of shift.`;
-        actions = [
-          'Dispatch technician to highest vibration asset',
-          'Review bearing disassembly SOP-MECH-04',
-        ];
-      } else {
-        fallbackText += `Inquiry evaluated: "${query}".\n\n` +
-          `All factory units operate under active vibration thresholds (4.5 mm/s alarm limit) and temperature limits (75°C alarm limit). Refer to SOP-MECH-04 and ISO 10816 standards for operational tolerance.`;
-      }
+      const localResp = generateLocalRagResponse({
+        query,
+        selectedMachineId: selectedMachineId || undefined,
+        machines,
+        recommendations,
+        overview,
+      });
 
       const assistantMsg: AssistantMessage = {
         id: String(Date.now() + 1),
         sender: 'assistant',
-        text: fallbackText,
+        text: localResp.response,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        suggestedActions: actions,
-        confidence: 0.92,
-        source: 'Resonex Local Decision Engine',
+        machineId: localResp.machine_id || selectedMachineId || undefined,
+        telemetryContext: localResp.machine_context,
+        sources: localResp.cited_documents,
+        suggestedActions: localResp.suggested_actions,
+        confidence: localResp.confidence,
+        source: localResp.source,
       };
       setMessages((prev) => [...prev, assistantMsg]);
     } finally {

@@ -7,20 +7,34 @@ from sqlalchemy.orm import declarative_base, sessionmaker
 
 
 ENV_FILE = Path(__file__).resolve().parents[2] / ".env"
-load_dotenv(ENV_FILE)
+load_dotenv(ENV_FILE, override=False)
 
-DATABASE_URL = os.getenv("DATABASE_URL", "")
+DEFAULT_SQLITE_PATH = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
+    "predictive_maintenance.db"
+)
+DEFAULT_SQLITE_URL = f"sqlite:///{DEFAULT_SQLITE_PATH}"
 
-if not DATABASE_URL:
-    # Use robust local SQLite database when PostgreSQL URL is not provided in environment
-    db_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "predictive_maintenance.db")
-    DATABASE_URL = f"sqlite:///{db_path}"
+DATABASE_URL = os.getenv("DATABASE_URL", "") or DEFAULT_SQLITE_URL
 
-connect_args = {}
-if DATABASE_URL.startswith("sqlite"):
-    connect_args = {"check_same_thread": False}
 
-engine = create_engine(DATABASE_URL, pool_pre_ping=True, connect_args=connect_args)
+def _build_engine(db_url: str):
+    c_args = {"check_same_thread": False} if db_url.startswith("sqlite") else {"connect_timeout": 3}
+    return create_engine(db_url, pool_pre_ping=True, connect_args=c_args)
+
+
+engine = _build_engine(DATABASE_URL)
+
+# If a remote/local PostgreSQL URL is configured but unreachable in the current deployment,
+# gracefully fall back to the bundled SQLite database so API endpoints never fail with 500.
+if not DATABASE_URL.startswith("sqlite"):
+    try:
+        with engine.connect() as conn:
+            pass
+    except Exception:
+        DATABASE_URL = DEFAULT_SQLITE_URL
+        engine = _build_engine(DATABASE_URL)
+
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
 Base = declarative_base()
 

@@ -9,9 +9,9 @@ from dotenv import load_dotenv
 backend_env = Path(__file__).resolve().parents[3] / ".env"
 root_env = Path(__file__).resolve().parents[4] / ".env"
 if backend_env.exists():
-    load_dotenv(backend_env)
+    load_dotenv(backend_env, override=False)
 elif root_env.exists():
-    load_dotenv(root_env)
+    load_dotenv(root_env, override=False)
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +19,7 @@ class GroundedLLMClient:
     """
     Pluggable, resilient Industrial LLM client for predictive maintenance & conversational RAG.
     Supports:
-    1. Google Gemini API (gemini-3.5-flash / gemini-2.5-flash) via google-genai
+    1. Google Gemini API (gemini-3.8-flash / gemini-3.5-flash) via google-genai
     2. Hugging Face Inference API / InferenceClient
     3. Self-contained deterministic expert reasoning fallback if no external API token is active.
     """
@@ -28,7 +28,7 @@ class GroundedLLMClient:
         hf_token: Optional[str] = None,
         hf_model: str = "Qwen/Qwen2.5-7B-Instruct",
         gemini_api_key: Optional[str] = None,
-        gemini_model: str = "gemini-3.5-flash",
+        gemini_model: str = "gemini-3.8-flash",
     ):
         self.hf_token = hf_token or os.getenv("HF_TOKEN") or os.getenv("HUGGINGFACE_API_KEY")
         self.hf_model = os.getenv("HF_MODEL_NAME", hf_model)
@@ -39,7 +39,7 @@ class GroundedLLMClient:
         if self.hf_token:
             try:
                 from huggingface_hub import InferenceClient
-                self.hf_client = InferenceClient(model=self.hf_model, token=self.hf_token)
+                self.hf_client = InferenceClient(model=self.hf_model, token=self.hf_token, timeout=8)
             except Exception as e:
                 logger.warning(f"Could not initialize HuggingFace InferenceClient: {e}")
 
@@ -56,21 +56,21 @@ class GroundedLLMClient:
         """
         system_prompt = (
             "You are RESONEX AI, a practical and sharp predictive maintenance copilot for factory operators and reliability engineers. "
-            "Your job is to provide clear, actionable, shop-floor guidance that any technician can understand and execute immediately. "
+            "Your job is to directly and accurately answer the operator's exact question using live sensor telemetry, ML health/RUL diagnostics, and factory SOP manuals.\n"
             "\n"
             "STRICT COMMUNICATION RULES:\n"
-            "1. NO THEORETICAL JARGON OR ROBOTIC FILLER: Never say phrases like 'Your inquiry was processed against the plant knowledge base and real-time telemetry stream' or 'No immediate anomalies were matched for this phrase'. Speak like a helpful chief plant engineer.\n"
-            "2. GREETINGS & INTRODUCTIONS: If the user says 'hi', 'hello', or asks what you do, welcome them briefly and give an immediate 2-line factory snapshot (how many machines need attention, top critical machine).\n"
-            "3. CLARITY & BREVITY: Use short bullet points, bold key machine IDs (e.g. **TXM-032**) and numerical values (e.g. **1.44 mm/s**, **85 °C**). Avoid long dense paragraphs.\n"
-            "4. PRACTICAL ACTIONS: Give physical, technician-oriented next steps (e.g., check grease levels, measure vibration at bearing 1, inspect cooling fan, check belt tension).\n"
-            "5. EVIDENCE & GROUNDING: Always ground recommendations in live sensor readings and cite the applicable SOP (e.g., SOP-MECH-04, SOP-LUB-02, ISO 10816-3)."
+            "1. ANSWER THE EXACT QUESTION DIRECTLY: Do NOT repeat or echo the user's question back (never say 'Inquiry evaluated: ...'). Address what they asked in the very first sentence.\n"
+            "2. GREETINGS & INTRODUCTIONS: If the user says 'hi', 'hello', or asks what you do, welcome them warmly, give a concise 2-line live factory snapshot (how many machines need attention and the top critical machine), and suggest 3 specific questions they can ask.\n"
+            "3. CLARITY & BREVITY: Use clean markdown headings and short bullet points. Bold key machine IDs (e.g. **TXM-014**) and numerical values (e.g. **5.82 mm/s**, **86.4 °C**).\n"
+            "4. PRACTICAL ACTIONS: When asked how to perform a check or repair (e.g., sensor cabling check, acoustic stethoscope test, bearing replacement, lubrication, alignment), provide the exact step-by-step technician procedure.\n"
+            "5. EVIDENCE & GROUNDING: Ground every diagnostic answer in the supplied sensor readings and cite the applicable SOP or standard (e.g., SOP-MECH-04, SOP-LUB-02, SOP-ALIGN-02, SOP-THERM-02, ISO 10816-3)."
         )
 
-        user_content_parts = [f"User Question: {query}\n"]
+        user_content_parts = [f"Operator Question: {query}\n"]
         if machine_context:
             user_content_parts.append(f"--- FOCUSED ASSET TELEMETRY ---\n{json.dumps(machine_context, indent=2)}\n")
         if top_critical_machines:
-            user_content_parts.append(f"--- URGENT / CRITICAL MACHINES REQUIRING ATTENTION ---\n{json.dumps(top_critical_machines[:5], indent=2)}\n")
+            user_content_parts.append(f"--- URGENT / CRITICAL MACHINES REQUIRING ATTENTION ---\n{json.dumps(top_critical_machines[:6], indent=2)}\n")
         if fleet_overview:
             user_content_parts.append(f"--- FLEET OVERVIEW ---\n{json.dumps(fleet_overview, indent=2)}\n")
         if retrieved_documents:
@@ -79,9 +79,9 @@ class GroundedLLMClient:
                     "title": d.get("title"),
                     "source": d.get("source_document"),
                     "section": d.get("section"),
-                    "excerpt": d.get("content", "")[:350]
+                    "excerpt": d.get("content", "")[:500]
                 }
-                for d in retrieved_documents[:3]
+                for d in retrieved_documents[:4]
             ]
             user_content_parts.append(f"--- RETRIEVED KNOWLEDGE BASE EXCERPTS ---\n{json.dumps(docs_summary, indent=2)}\n")
 
@@ -89,11 +89,18 @@ class GroundedLLMClient:
 
         # 1. Try Gemini first if API key configured (fast, reliable)
         if self.gemini_api_key:
-            candidate_models = list(dict.fromkeys([self.gemini_model, "gemini-3.5-flash-lite", "gemini-3.5-flash"]))
+            candidate_models = list(dict.fromkeys([self.gemini_model, "gemini-3.8-flash"]))
             for model_name in candidate_models:
                 try:
                     from google import genai
-                    client = genai.Client(api_key=self.gemini_api_key)
+                    from google.genai import types
+                    client = genai.Client(
+                        api_key=self.gemini_api_key,
+                        http_options=types.HttpOptions(
+                            timeout=10000,
+                            retry_options=types.HttpRetryOptions(attempts=1),
+                        )
+                    )
                     full_content = f"{system_prompt}\n\n{prompt}"
                     res = client.models.generate_content(
                         model=model_name,
@@ -108,7 +115,7 @@ class GroundedLLMClient:
                     logger.warning(f"Gemini API call ({model_name}) failed: {e}. Trying next...")
 
         # 2. Try Hugging Face Inference if token is configured
-        if self.hf_client:
+        if self.hf_client and self.hf_model != "Qwen/Qwen2.5-7B-Instruct":
             try:
                 messages = [
                     {"role": "system", "content": system_prompt},
@@ -167,11 +174,18 @@ Respond with JSON:
 """
         # 1. Try Gemini
         if self.gemini_api_key:
-            candidate_models = list(dict.fromkeys([self.gemini_model, "gemini-3.5-flash-lite", "gemini-3.5-flash"]))
+            candidate_models = list(dict.fromkeys([self.gemini_model, "gemini-3.8-flash"]))
             for model_name in candidate_models:
                 try:
                     from google import genai
-                    client = genai.Client(api_key=self.gemini_api_key)
+                    from google.genai import types
+                    client = genai.Client(
+                        api_key=self.gemini_api_key,
+                        http_options=types.HttpOptions(
+                            timeout=10000,
+                            retry_options=types.HttpRetryOptions(attempts=1),
+                        )
+                    )
                     res = client.models.generate_content(
                         model=model_name,
                         contents=prompt

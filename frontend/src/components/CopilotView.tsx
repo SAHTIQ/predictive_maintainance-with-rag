@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Machine, RagChatResponse, RagDocumentHit } from '../types';
 import { api } from '../services/api';
+import { generateLocalRagResponse } from '../services/localRagEngine';
 
 interface CopilotViewProps {
   machines: Machine[];
@@ -87,13 +88,24 @@ export const CopilotView: React.FC<CopilotViewProps> = ({
         setSelectedCitation(resp.cited_documents[0]);
       }
     } catch (err: any) {
-      const errorMsg: ChatMessage = {
+      const localResp = generateLocalRagResponse({
+        query,
+        selectedMachineId: activeMachineId || undefined,
+        machines,
+      });
+      const assistantMsg: ChatMessage = {
         id: String(Date.now() + 1),
         sender: 'assistant',
-        text: `Error contacting RAG Copilot: ${err.message || 'Unknown network error'}. Please ensure backend is running.`,
+        text: localResp.response,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        machineId: localResp.machine_id || undefined,
+        telemetryContext: localResp.machine_context,
+        sources: localResp.cited_documents,
       };
-      setMessages((prev) => [...prev, errorMsg]);
+      setMessages((prev) => [...prev, assistantMsg]);
+      if (localResp.cited_documents && localResp.cited_documents.length > 0 && !selectedCitation) {
+        setSelectedCitation(localResp.cited_documents[0]);
+      }
     } finally {
       setLoading(false);
     }

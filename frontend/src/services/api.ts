@@ -33,6 +33,11 @@ async function fetchJson<T>(endpoint: string, options?: RequestInit): Promise<T>
     throw new Error(errorDetail);
   }
 
+  const contentType = response.headers.get('content-type') || '';
+  if (!contentType.includes('application/json')) {
+    throw new Error('API endpoint returned non-JSON response');
+  }
+
   return response.json();
 }
 

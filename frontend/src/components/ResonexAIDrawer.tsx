@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { NavTab } from './Sidebar';
 import { Machine, RagChatResponse, RagDocumentHit } from '../types';
 import { api } from '../services/api';
+import { generateLocalRagResponse } from '../services/localRagEngine';
 import { MarkdownMessage } from './MarkdownMessage';
 
 export interface AlertContext {
@@ -201,44 +202,22 @@ export const ResonexAIDrawer: React.FC<ResonexAIDrawerProps> = ({
 
       setMessages((prev) => [...prev, assistantMsg]);
     } catch (err: any) {
-      // Offline / Local Telemetry Intelligent Synthesis Fallback
-      let fallbackText = `### Resonex AI (Local Diagnostic Cache)\n\n`;
-      let fallbackActions = ['Conduct standard shift walkaround inspection'];
-
-      const qLower = query.toLowerCase();
-      if (drawerMachineId) {
-        fallbackText += `Based on telemetry cache for **${drawerMachineId}**, the asset is evaluated with continuous health tracking. Telemetry readings remain recorded in the local mission cache.\n\n` +
-          `**Reference Guide**: Review SOP-MECH-04 for bearing replacement procedures or SOP-LUB-02 for lubrication schedules.`;
-        fallbackActions = [
-          `Inspect physical vibration on ${drawerMachineId}`,
-          'Check bearing lubrication levels (SOP-LUB-02)'
-        ];
-      } else if (qLower.includes('attention') || qLower.includes('first') || qLower.includes('which machine') || qLower.includes('urgent')) {
-        fallbackText += `**Fleet Attention Summary (Plant 1):**\n\n` +
-          `- **TXM-014**: CRITICAL Risk (P1) | Health: 34.2/100 | RUL: ~9h | Vib: 5.82 mm/s | Temp: 86.4°C\n` +
-          `- **TXM-028**: CRITICAL Risk (P1) | Health: 34.0/100 | RUL: ~9h | Vib: 5.82 mm/s | Temp: 85.0°C\n` +
-          `- **TXM-008**: HIGH Risk (P2) | Health: 58.6/100 | RUL: ~21h | Vib: 4.12 mm/s | Temp: 78.2°C\n\n` +
-          `**Immediate Actions:**\n` +
-          `1. Dispatch technician to **TXM-014** for spindle bearing replacement (SOP-MECH-04).\n` +
-          `2. Check thermal levels on **TXM-028** to avoid bearing seizure.\n` +
-          `3. Note: Full backend connection will automatically refresh when active.`;
-        fallbackActions = [
-          'Dispatch technician to TXM-014 (P1 Urgent)',
-          'Check thermal levels on TXM-028 (SOP-MECH-04)'
-        ];
-      } else {
-        fallbackText += `Processed inquiry against local plant guidelines: "${query}".\n\n` +
-          `Nominal operating guidelines suggest verifying spindle bearing acoustic levels and drive belt tension across active factory bays.\n\n` +
-          `*(Backend notice: ${err.message || 'Connecting to localhost:8000'})*`;
-      }
+      const localResp = generateLocalRagResponse({
+        query,
+        selectedMachineId: drawerMachineId || undefined,
+        machines,
+      });
 
       const assistantMsg: ChatMessage = {
         id: String(Date.now() + 1),
         sender: 'assistant',
-        text: fallbackText,
+        text: localResp.response,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        suggestedActions: fallbackActions,
-        confidence: 0.90,
+        machineId: localResp.machine_id || drawerMachineId || undefined,
+        telemetryContext: localResp.machine_context,
+        sources: localResp.cited_documents,
+        suggestedActions: localResp.suggested_actions,
+        confidence: localResp.confidence,
       };
       setMessages((prev) => [...prev, assistantMsg]);
     } finally {

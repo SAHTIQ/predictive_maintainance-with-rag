@@ -12,3 +12,5 @@ pytest
 httpx
 python-multipart
 huggingface-hub
+google-genai
+python-dotenv
